@@ -115,29 +115,15 @@ problem-timer-extension/
 
 ---
 
-## 🌐 Adding to Your GitHub Profile
+## 🌐 Live Repository & Profile Showcase
 
-To push this repository to your GitHub profile:
+This repository is published and active at:
+👉 **[https://github.com/raisulalam014-hue/AlgoTimer](https://github.com/raisulalam014-hue/AlgoTimer)**
 
-1. Create a new repository on GitHub:
-   - Go to [https://github.com/new](https://github.com/new)
-   - Repository name: `problem-timer-extension` (or `algotimer`)
-   - Description: `Precision stopwatch & target countdown Chrome extension for competitive programming and LeetCode.`
-   - Set to **Public** and leave "Initialize with README" **unchecked** (we already created one!).
-   - Click **Create repository**.
-
-2. Link your local repository and push:
-   ```bash
-   cd c:\Users\ACER\.antigravity-ide\problem-timer-extension
-
-   git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/problem-timer-extension.git
-   git push -u origin main
-   ```
-
-3. To feature it prominently on your GitHub profile:
-   - Go to your GitHub profile (`https://github.com/<YOUR_GITHUB_USERNAME>`)
-   - Click **Customize your pins**
-   - Select **problem-timer-extension** to showcase it at the top of your profile!
+### To feature it prominently on your GitHub profile:
+1. Go to your GitHub profile: [github.com/raisulalam014-hue](https://github.com/raisulalam014-hue)
+2. Scroll to the **Pinned** section and click **Customize your pins** (or **Pin a repository**).
+3. Select **AlgoTimer** and click **Save pins**!
 
 ---
 
