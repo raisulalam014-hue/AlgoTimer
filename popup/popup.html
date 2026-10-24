@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoTimer - Problem Solving Stopwatch</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="13" r="8"></circle>
+            <path d="M12 9v4l2.5 2.5"></path>
+            <path d="M10 2h4"></path>
+          </svg>
+        </div>
+        <span class="brand-name">AlgoTimer</span>
+      </div>
+      <div class="header-badges">
+        <span class="version-tag">v1.0</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
+      <button class="nav-tab" data-tab="laps">🚩 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
+      <button class="nav-tab" data-tab="history">📊 History</button>
+      <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+    </nav>
+
+    <!-- TAB 1: TIMER / STOPWATCH -->
+    <main class="tab-content active" id="tab-timer">
+      <!-- Mode Segmented Switcher -->
+      <div class="mode-switcher">
+        <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
+          <span>⏱️</span> Stopwatch
+        </button>
+        <button class="mode-btn" id="btn-mode-timer" data-mode="timer">
+          <span>⏳</span> Target Timer
+        </button>
+      </div>
+
+      <!-- Target Presets (Visible only in Timer Mode) -->
+      <div class="presets-container" id="presets-container" style="display: none;">
+        <span class="presets-label">Select Target:</span>
+        <div class="preset-chips">
+          <button class="preset-chip" data-mins="5">5m</button>
+          <button class="preset-chip" data-mins="15">15m <small>Easy</small></button>
+          <button class="preset-chip active" data-mins="30">30m <small>Med</small></button>
+          <button class="preset-chip" data-mins="45">45m <small>Hard</small></button>
+          <button class="preset-chip" data-mins="60">60m <small>Mock</small></button>
+          <button class="preset-chip" id="btn-custom-time">Custom...</button>
+        </div>
+
+        <!-- Custom Target Input Modal / Drawer -->
+        <div class="custom-time-box" id="custom-time-box" style="display: none;">
+          <div class="time-inputs">
+            <div class="time-input-group">
+              <input type="number" id="custom-hours" min="0" max="23" value="0">
+              <label>hr</label>
+            </div>
+            <span class="colon">:</span>
+            <div class="time-input-group">
+              <input type="number" id="custom-minutes" min="0" max="59" value="25">
+              <label>min</label>
+            </div>
+            <span class="colon">:</span>
+            <div class="time-input-group">
+              <input type="number" id="custom-seconds" min="0" max="59" value="0">
+              <label>sec</label>
+            </div>
+          </div>
+          <button class="btn-sm btn-primary" id="btn-apply-custom">Set Target</button>
+        </div>
+      </div>
+
+      <!-- Main Stopwatch Dial & Progress Ring -->
+      <div class="dial-wrapper">
+        <svg class="dial-svg" viewBox="0 0 200 200">
+          <circle class="dial-track" cx="100" cy="100" r="86"></circle>
+          <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="86"></circle>
+        </svg>
+
+        <div class="dial-center-content">
+          <div class="dial-status-label" id="dial-status-label">STOPWATCH</div>
+          <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
+          <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="controls-row">
+        <button class="btn btn-secondary" id="btn-reset" title="Reset (R)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          <span>Reset</span>
+        </button>
+
+        <button class="btn btn-primary-hero" id="btn-toggle-run" title="Space to toggle">
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="btn-toggle-text">Start</span>
+        </button>
+
+        <button class="btn btn-secondary" id="btn-lap" title="Split Lap (L)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+            <line x1="4" y1="22" x2="4" y2="15"></line>
+          </svg>
+          <span>Lap</span>
+        </button>
+      </div>
+
+      <!-- Problem Logging Quick Bar -->
+      <div class="problem-log-bar">
+        <div class="problem-meta">
+          <input type="text" id="active-problem-title" placeholder="Problem name (e.g. 3Sum, Two Sum)" spellcheck="false">
+          <div class="meta-tags">
+            <select id="active-platform" class="mini-select">
+              <option value="LeetCode">LeetCode</option>
+              <option value="Codeforces">Codeforces</option>
+              <option value="HackerRank">HackerRank</option>
+              <option value="NeetCode">NeetCode</option>
+              <option value="CodeChef">CodeChef</option>
+              <option value="Other">Other</option>
+            </select>
+            <select id="active-difficulty" class="mini-select">
+              <option value="Easy">Easy</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
+          💾 Log Result
+        </button>
+      </div>
+    </main>
+
+    <!-- TAB 2: LAPS & MILESTONES -->
+    <section class="tab-content" id="tab-laps">
+      <div class="laps-header">
+        <h3>Problem Solving Checkpoints</h3>
+        <p class="subtitle">Track phases: Reading ➔ Algorithm ➔ Code ➔ Debug</p>
+      </div>
+      <div class="laps-quick-add">
+        <button class="lap-phase-btn" data-phase="Read & Understand">🧠 Understand</button>
+        <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
+        <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
+        <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
+      </div>
+      <div class="laps-list-container" id="laps-list">
+        <div class="empty-state">
+          <p>No laps recorded yet.</p>
+          <small>Click <strong>Lap</strong> while solving or select a phase above.</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: HISTORY & SESSIONS -->
+    <section class="tab-content" id="tab-history">
+      <div class="history-top-summary">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-solved-count">0</div>
+          <div class="stat-label">Problems Logged</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total-time">0m</div>
+          <div class="stat-label">Total Time</div>
+        </div>
+      </div>
+      <div class="history-actions-bar">
+        <button class="btn-xs" id="btn-export-csv">📥 Export CSV</button>
+        <button class="btn-xs btn-danger" id="btn-clear-history">Clear</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">
+          <p>No solved problem sessions yet.</p>
+          <small>Log your completed problems to track your speed and consistency!</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SETTINGS -->
+    <section class="tab-content" id="tab-settings">
+      <div class="settings-group">
+        <h4>General Options</h4>
+        <label class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Sound Alerts</span>
+            <span class="setting-desc">Pleasant audio chimes on completion, warnings, and lap splits</span>
+          </div>
+          <input type="checkbox" id="setting-sound" checked>
+        </label>
+        <label class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title">Floating Overlay Widget</span>
+            <span class="setting-desc">Show on LeetCode, Codeforces & HackerRank problem pages</span>
+          </div>
+          <input type="checkbox" id="setting-floating" checked>
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h4>Keyboard Shortcuts</h4>
+        <div class="shortcut-list">
+          <div class="shortcut-item">
+            <span>Start / Pause</span>
+            <kbd>Space</kbd>
+          </div>
+          <div class="shortcut-item">
+            <span>Record Lap / Split</span>
+            <kbd>L</kbd>
+          </div>
+          <div class="shortcut-item">
+            <span>Reset Stopwatch</span>
+            <kbd>R</kbd>
+          </div>
+          <div class="shortcut-item">
+            <span>Toggle Mode</span>
+            <kbd>M</kbd>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-footer">
+        <a href="https://github.com" target="_blank" class="github-link" id="ext-github-link">
+          ⭐ Star on GitHub & View Repository
+        </a>
+      </div>
+    </section>
+
+    <!-- LOG PROBLEM MODAL -->
+    <div class="modal-overlay" id="modal-log" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Log Problem Session</h3>
+          <button class="modal-close" id="btn-modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Problem Title</label>
+            <input type="text" id="modal-title" placeholder="e.g. 42. Trapping Rain Water">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Platform</label>
+              <select id="modal-platform">
+                <option value="LeetCode">LeetCode</option>
+                <option value="Codeforces">Codeforces</option>
+                <option value="HackerRank">HackerRank</option>
+                <option value="NeetCode">NeetCode</option>
+                <option value="CodeChef">CodeChef</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Difficulty</label>
+              <select id="modal-difficulty">
+                <option value="Easy">Easy</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Verdict / Outcome</label>
+            <div class="verdict-options">
+              <label class="verdict-chip solved">
+                <input type="radio" name="verdict" value="Solved" checked>
+                <span>✅ Solved</span>
+              </label>
+              <label class="verdict-chip upsolved">
+                <input type="radio" name="verdict" value="Upsolved">
+                <span>💡 Upsolved</span>
+              </label>
+              <label class="verdict-chip attempted">
+                <input type="radio" name="verdict" value="Attempted">
+                <span>⏳ Need Review</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Time Taken</label>
+            <div class="modal-time-display" id="modal-time-display">00:00:00</div>
+          </div>
+          <div class="form-group">
+            <label>Key Takeaway / Notes</label>
+            <textarea id="modal-notes" rows="2" placeholder="e.g. Used two-pointer approach O(N), watch out for edge cases with empty arrays."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+          <button class="btn btn-primary" id="btn-modal-save">Save Session</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

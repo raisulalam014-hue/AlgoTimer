@@ -1,0 +1,16 @@
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Node / Editor
+node_modules/
+.vscode/
+.idea/
+*.log
+
+# Packaging artifacts
+*.zip
+*.crx

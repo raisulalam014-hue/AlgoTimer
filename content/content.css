@@ -1,0 +1,236 @@
+/* AlgoTimer Floating In-Page Stopwatch Widget */
+
+#algotimer-floating-root {
+  position: fixed;
+  top: 75px;
+  right: 25px;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+#algotimer-floating-root * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.algotimer-widget {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(14, 165, 233, 0.15);
+  border-radius: 14px;
+  color: #f8fafc;
+  width: 260px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.algotimer-widget.minimized {
+  width: auto;
+  border-radius: 30px;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.algotimer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+}
+
+.algotimer-header:active {
+  cursor: grabbing;
+}
+
+.algotimer-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.algotimer-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  display: inline-block;
+}
+
+.algotimer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.algotimer-btn-icon {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.algotimer-btn-icon:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.algotimer-body {
+  padding: 12px;
+  text-align: center;
+}
+
+.algotimer-widget.minimized .algotimer-body,
+.algotimer-widget.minimized .algotimer-footer {
+  display: none;
+}
+
+.algotimer-problem-tag {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.algotimer-clock {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+
+.algotimer-clock.warning {
+  color: #f43f5e;
+  text-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+  animation: algotimer-pulse 1s infinite alternate;
+}
+
+.algotimer-clock.paused {
+  color: #fbbf24;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+}
+
+@keyframes algotimer-pulse {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+.algotimer-mode-badge {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+
+.algotimer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.algotimer-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.algotimer-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+.algotimer-btn:active {
+  transform: translateY(0);
+}
+
+.algotimer-btn-primary {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: none;
+  color: #ffffff;
+  padding: 6px 16px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.algotimer-btn-primary:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.5);
+}
+
+/* Minimized Mode View */
+.algotimer-mini-content {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: grab;
+}
+
+.algotimer-widget.minimized .algotimer-header {
+  display: none;
+}
+
+.algotimer-widget.minimized .algotimer-mini-content {
+  display: flex;
+}
+
+.algotimer-mini-clock {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.algotimer-mini-btn {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.algotimer-mini-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
