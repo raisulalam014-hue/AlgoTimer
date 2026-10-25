@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoTimer - Floating Screen (Always-on-Top over Other Apps)</title>
+  <link rel="stylesheet" href="content/content.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #090d16;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Fill window */
+    #float-widget {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 60%, #090d16 100%) !important;
+      display: flex;
+      flex-direction: column;
+      box-shadow: none !important;
+    }
+
+    .float-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: rgba(30, 41, 59, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 6px;
+      -webkit-app-region: drag; /* Allows dragging window in Electron/PWA */
+    }
+
+    .float-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .float-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      flex-shrink: 0;
+    }
+
+    .float-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      -webkit-app-region: no-drag;
+    }
+
+    .float-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1.2;
+      transition: all 0.15s ease;
+    }
+
+    .float-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #ffffff;
+    }
+
+    .float-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
+    .float-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      gap: 5px;
+      text-align: center;
+    }
+
+    .float-tag {
+      font-size: 10px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 10px;
+      max-width: 90%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .float-mode-badge {
+      font-size: 9px;
+      color: #38bdf8;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .float-clock {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(22px, 9vw, 36px);
+      font-weight: 700;
+      color: #38bdf8;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+      line-height: 1.1;
+    }
+
+    .float-clock.warning {
+      color: #f43f5e;
+      text-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+    }
+
+    .float-clock.paused {
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+    }
+
+    /* Dual Clocks (Both active) */
+    .float-dual-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 5px 8px;
+    }
+
+    .float-dual-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .float-dual-label {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .float-dual-digits {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: clamp(14px, 6vw, 20px);
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .float-dual-digits.warning {
+      color: #f43f5e;
+    }
+
+    .float-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 2px;
+    }
+
+    .float-ctrl-btn {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .float-ctrl-btn:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .float-ctrl-primary {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: none;
+      color: #ffffff;
+      padding: 4px 14px;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+    }
+
+    .float-ctrl-primary:hover {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    }
+
+    /* Always on top tip banner */
+    .float-ontop-banner {
+      background: rgba(56, 189, 248, 0.12);
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #bae6fd;
+    }
+
+    .float-ontop-banner button {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* SIZES */
+    body[data-size="compact"] .float-tag,
+    body[data-size="compact"] .float-mode-badge {
+      display: none;
+    }
+
+    body[data-size="compact"] .float-body {
+      padding: 4px 8px;
+      gap: 3px;
+    }
+
+    body[data-size="mini"] .float-tag,
+    body[data-size="mini"] .float-mode-badge,
+    body[data-size="mini"] .float-ontop-banner {
+      display: none;
+    }
+
+    body[data-size="mini"] .float-header {
+      padding: 3px 6px;
+    }
+
+    body[data-size="mini"] .float-title span:last-child {
+      display: none;
+    }
+
+    body[data-size="mini"] .float-body {
+      padding: 2px 6px;
+      gap: 2px;
+    }
+
+    body[data-size="mini"] .float-clock {
+      font-size: 18px;
+    }
+
+    body[data-size="mini"] .float-ctrl-btn {
+      padding: 2px 6px;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body data-size="normal">
+  <div id="float-widget">
+    <!-- Header -->
+    <div class="float-header">
+      <div class="float-title">
+        <span class="float-icon"></span>
+        <span>AlgoTimer</span>
+      </div>
+      <div class="float-actions">
+        <!-- Always on Top PiP -->
+        <button class="float-btn" id="btn-pip-always-ontop" title="Pin Always-On-Top over VS Code & other apps">
+          📌 <span id="btn-pip-text">Always on Top</span>
+        </button>
+
+        <!-- Corner cycler -->
+        <button class="float-btn" id="btn-corner-cycle" title="Dock window to screen corners (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
+          <span id="corner-label">↗ TR</span>
+        </button>
+
+        <!-- Size toggle -->
+        <button class="float-btn" id="btn-size-cycle" title="Resize window smaller (Normal -> Compact -> Mini)">
+          🗜️ <span id="size-label">Size</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="float-body">
+      <div class="float-tag" id="float-problem-title">Problem Solving Session</div>
+      <div class="float-mode-badge" id="float-mode-badge">STOPWATCH MODE</div>
+
+      <!-- Single clock view -->
+      <div class="float-clock" id="float-clock-single">00:00</div>
+
+      <!-- Dual clocks view -->
+      <div class="float-dual-box" id="float-clock-dual" style="display: none;">
+        <div class="float-dual-row">
+          <span class="float-dual-label">⏱️ Elapsed</span>
+          <span class="float-dual-digits" id="float-dual-sw">00:00</span>
+        </div>
+        <div class="float-dual-row">
+          <span class="float-dual-label">⏳ Target</span>
+          <span class="float-dual-digits" id="float-dual-timer">30:00</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="float-controls">
+        <button class="float-ctrl-btn float-ctrl-primary" id="btn-play">▶ Start</button>
+        <button class="float-ctrl-btn" id="btn-lap">Lap</button>
+        <button class="float-ctrl-btn" id="btn-reset">↺</button>
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="float-ontop-banner" id="banner-pip-tip">
+      <span>Float over VS Code, Discord, & all apps</span>
+      <button id="btn-banner-pip">📌 Pop Over Apps</button>
+    </div>
+  </div>
+
+  <script src="popup/audio.js"></script>
+  <script src="float.js"></script>
+</body>
+</html>

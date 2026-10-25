@@ -430,13 +430,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
+        case 'OPEN_FLOAT_WINDOW':
         case 'OPEN_POPUP_WINDOW': {
           if (chrome.windows && chrome.windows.create) {
             chrome.windows.create({
-              url: chrome.runtime.getURL('popup/popup.html?popout=true'),
+              url: chrome.runtime.getURL('float.html'),
               type: 'popup',
-              width: 380,
-              height: 620,
+              width: 280,
+              height: 180,
+              top: 40,
+              left: 100,
               focused: true
             });
           }

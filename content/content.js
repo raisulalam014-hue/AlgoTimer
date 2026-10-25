@@ -471,31 +471,9 @@
     root.style.display = 'none';
   });
 
-  // Pop Up Screen (Document PiP or window popup)
-  pipBtn.addEventListener('click', async () => {
-    if ('documentPictureInPicture' in window) {
-      try {
-        const pipWindow = await window.documentPictureInPicture.requestWindow({
-          width: 280,
-          height: 180
-        });
-
-        // Copy styles
-        [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
-          pipWindow.document.head.appendChild(el.cloneNode(true));
-        });
-
-        pipWindow.document.body.appendChild(widget);
-        pipWindow.addEventListener('pagehide', () => {
-          root.appendChild(widget);
-        });
-        return;
-      } catch (err) {
-        console.warn('PiP from widget failed:', err);
-      }
-    }
-    // Fallback: request standalone popup window via background
-    safeSendMessage({ type: 'OPEN_POPUP_WINDOW' });
+  // Pop Up Screen (Opens dedicated Always-on-Top Floating window outside browser over other apps)
+  pipBtn.addEventListener('click', () => {
+    safeSendMessage({ type: 'OPEN_FLOAT_WINDOW' });
   });
 
   // Calculate elapsed
