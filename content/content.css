@@ -24,7 +24,7 @@
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(14, 165, 233, 0.15);
   border-radius: 14px;
   color: #f8fafc;
-  width: 260px;
+  width: 270px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -91,6 +91,11 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.algotimer-btn-icon.pip-btn:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+}
+
 .algotimer-body {
   padding: 12px;
   text-align: center;
@@ -103,7 +108,7 @@
 
 .algotimer-problem-tag {
   display: inline-block;
-  max-width: 220px;
+  max-width: 230px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -148,6 +153,45 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 10px;
+}
+
+/* Dual mode in floating widget */
+.algotimer-dual-clocks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.algotimer-dual-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.algotimer-subtag {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.algotimer-dual-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.algotimer-dual-time.warning {
+  color: #f43f5e;
+  text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
 }
 
 .algotimer-controls {
@@ -215,7 +259,7 @@
 
 .algotimer-mini-clock {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #38bdf8;
 }

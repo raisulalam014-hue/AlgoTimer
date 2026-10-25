@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer - Live Interactive Demo</title>
+  <title>AlgoTimer - Live Interactive Demo & Testing Studio</title>
   <link rel="stylesheet" href="popup/popup.css">
   <link rel="stylesheet" href="content/content.css">
   <style>
@@ -62,11 +62,13 @@
     }
 
     .demo-title-group h1 {
-      font-size: 20px;
-      font-weight: 800;
-      color: white;
+      font-size: 18px;
+      font-weight: 700;
       margin: 0;
-      letter-spacing: -0.3px;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .demo-title-group p {
@@ -75,80 +77,95 @@
       margin: 2px 0 0;
     }
 
-    .demo-badges {
+    .demo-topbar-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .badge-pill {
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      color: #38bdf8;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
+    .demo-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
     }
 
-    .badge-pill.green {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.3);
-      color: #34d399;
+    .demo-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
     }
 
-    /* Dual Interactive Workspace Layout */
-    .demo-grid {
-      display: grid;
-      grid-template-columns: 390px 1fr;
-      gap: 28px;
+    .demo-btn-primary {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      border: none;
+      color: white;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+    }
+
+    .demo-btn-primary:hover {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.45);
+    }
+
+    .demo-split-view {
       max-width: 1240px;
       margin: 0 auto;
       width: 100%;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 28px;
       align-items: start;
     }
 
-    @media (max-width: 950px) {
-      .demo-grid {
+    @media (max-width: 960px) {
+      .demo-split-view {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Panel A: Extension Popup Simulator */
     .panel-container {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
 
     .panel-caption {
       font-size: 12px;
       font-weight: 700;
+      color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      color: #38bdf8;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
     }
 
     .browser-frame {
-      width: 100%;
       background: #090d16;
-      border-radius: 16px;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.08);
       overflow: hidden;
-      position: relative;
     }
 
     .browser-toolbar {
-      background: #111827;
+      background: rgba(15, 23, 42, 0.95);
       padding: 10px 14px;
       display: flex;
       align-items: center;
       gap: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .browser-dot {
@@ -156,160 +173,158 @@
       height: 10px;
       border-radius: 50%;
     }
+
     .dot-red { background: #ef4444; }
     .dot-yellow { background: #f59e0b; }
     .dot-green { background: #10b981; }
 
     .browser-url-bar {
+      margin-left: 10px;
       flex: 1;
       background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 6px;
       padding: 4px 10px;
-      color: #94a3b8;
       font-size: 11px;
-      font-family: ui-monospace, monospace;
+      color: #94a3b8;
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Panel B: Mock Problem Solving Page */
-    .mock-webpage-card {
-      background: #181818;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7);
+    /* Mock Coding Webpage Container */
+    .mock-webpage {
+      background: #1a1a1a;
+      min-height: 590px;
+      position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      position: relative;
-      min-height: 640px;
     }
 
     .mock-leetcode-nav {
-      background: #282828;
+      background: #262626;
+      border-bottom: 1px solid #333333;
       padding: 10px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #333;
     }
 
-    .mock-logo {
+    .mock-brand {
       display: flex;
       align-items: center;
       gap: 8px;
       font-weight: 700;
+      font-size: 13px;
       color: #ffa116;
-      font-size: 14px;
     }
 
-    .mock-nav-links {
+    .mock-tabs {
       display: flex;
-      gap: 14px;
-      font-size: 12px;
-      color: #999;
-    }
-
-    .mock-content {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
       gap: 16px;
-      color: #eff1f6;
+      font-size: 12px;
+      color: #8c8c8c;
     }
 
-    .mock-prob-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .mock-prob-header h2 {
-      font-size: 22px;
-      font-weight: 700;
+    .mock-tabs span.active {
       color: #ffffff;
-      margin: 0;
-    }
-
-    .mock-diff-badge {
-      background: rgba(255, 193, 7, 0.15);
-      color: #ffc01e;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 11px;
       font-weight: 600;
     }
 
-    .mock-description {
-      font-size: 13.5px;
+    .mock-content-body {
+      padding: 24px;
+      flex: 1;
+      position: relative;
+      font-size: 14px;
       line-height: 1.6;
-      color: #d1d5db;
+      color: #d4d4d4;
+    }
+
+    .mock-problem-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .mock-difficulty-badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mock-text {
+      color: #a3a3a3;
+      margin-bottom: 14px;
     }
 
     .mock-code-box {
       background: #0f0f0f;
-      border: 1px solid #2a2a2a;
+      border: 1px solid #2d2d2d;
       border-radius: 8px;
-      padding: 14px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12.5px;
-      color: #38bdf8;
-      white-space: pre-wrap;
+      padding: 12px 16px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      color: #93c5fd;
+      margin-bottom: 16px;
     }
 
-    /* Embedded floating widget position inside mock page */
-    .mock-webpage-card #algotimer-floating-root {
+    /* Position the simulated in-page floating widget inside the mock page */
+    .mock-webpage #algotimer-floating-root {
       position: absolute;
-      top: 60px;
+      top: 55px;
       right: 20px;
-      z-index: 20;
     }
 
-    /* Quick Action Tips */
+    /* Demo Tips Footer */
     .demo-tips {
-      margin-top: 24px;
       max-width: 1240px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 30px auto 0;
       width: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      border-radius: 12px;
-      padding: 16px 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
     }
 
     .tip-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px 16px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: flex-start;
     }
 
     .tip-icon {
-      font-size: 18px;
-      line-height: 1;
+      font-size: 20px;
     }
 
     .tip-text h4 {
+      margin: 0 0 4px;
       font-size: 13px;
       font-weight: 700;
       color: #ffffff;
-      margin: 0 0 3px;
     }
 
     .tip-text p {
-      font-size: 11.5px;
-      color: #94a3b8;
       margin: 0;
+      font-size: 12px;
+      color: #94a3b8;
       line-height: 1.4;
     }
   </style>
 </head>
 <body>
-
   <!-- Top Demo Bar -->
   <header class="demo-topbar">
     <div class="demo-brand">
@@ -321,23 +336,29 @@
         </svg>
       </div>
       <div class="demo-title-group">
-        <h1>AlgoTimer - Live Interactive Demo</h1>
-        <p>Interactive demonstration of both the <strong>Popup Interface</strong> and the <strong>In-Page Coding Overlay</strong></p>
+        <h1>AlgoTimer - Problem Solving Stopwatch & Timer</h1>
+        <p>Interactive Demo: Dual Concurrent Timers & Always-On-Top Pop-Up Screen System</p>
       </div>
     </div>
-    <div class="demo-badges">
-      <span class="badge-pill green">🟢 Live Preview Active</span>
-      <span class="badge-pill">Manifest V3</span>
-      <span class="badge-pill">Hotkeys: Space, L, R, M</span>
+    <div class="demo-topbar-actions">
+      <button class="demo-btn demo-btn-primary" id="btn-topbar-pip">
+        🗗 Pop Up Float Screen
+      </button>
+      <button class="demo-btn" id="btn-topbar-window">
+        ⤢ Standalone Window
+      </button>
+      <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="demo-btn">
+        ⭐ GitHub Repo
+      </a>
     </div>
   </header>
 
-  <!-- Interactive Dual Grid -->
-  <div class="demo-grid">
+  <!-- Interactive Dual Preview Layout -->
+  <div class="demo-split-view">
     <!-- Left Column: Extension Popup Interface -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>⏱️ Chrome Extension Popup UI</span>
+        <span>⏱️ Chrome Extension Popup (Interactive Preview)</span>
       </div>
 
       <div class="browser-frame">
@@ -365,21 +386,37 @@
               <span class="brand-name">AlgoTimer</span>
             </div>
             <div class="header-badges">
-              <span class="version-tag">v1.0</span>
+              <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over other apps">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
+                  <polyline points="15 11 18 11 18 14"></polyline>
+                  <line x1="14" y1="15" x2="18" y2="11"></line>
+                </svg>
+                <span class="btn-text">Pop Up</span>
+              </button>
+              <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Window">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+              <span class="version-tag">v1.1</span>
             </div>
           </header>
 
           <!-- Navigation Tabs -->
           <nav class="nav-tabs">
             <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
-            <button class="nav-tab" data-tab="laps">🚩 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
+            <button class="nav-tab" data-tab="laps">🏁 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
             <button class="nav-tab" data-tab="history">📊 History</button>
             <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
           </nav>
 
           <!-- TAB 1: TIMER / STOPWATCH -->
           <main class="tab-content active" id="tab-timer">
-            <!-- Mode Switcher -->
+            <!-- Mode Segmented Switcher -->
             <div class="mode-switcher">
               <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
                 <span>⏱️</span> Stopwatch
@@ -387,89 +424,188 @@
               <button class="mode-btn" id="btn-mode-timer" data-mode="timer">
                 <span>⏳</span> Target Timer
               </button>
+              <button class="mode-btn" id="btn-mode-dual" data-mode="dual">
+                <span>⚡</span> Dual (Both)
+              </button>
             </div>
 
-            <!-- Presets Container (Timer Mode) -->
-            <div class="presets-container" id="presets-container" style="display: none;">
-              <span class="presets-label">Select Target Time:</span>
-              <div class="preset-chips">
-                <button class="preset-chip" data-mins="5">5m</button>
-                <button class="preset-chip" data-mins="15">15m <small>Easy</small></button>
-                <button class="preset-chip active" data-mins="30">30m <small>Med</small></button>
-                <button class="preset-chip" data-mins="45">45m <small>Hard</small></button>
-                <button class="preset-chip" data-mins="60">60m <small>Mock</small></button>
-                <button class="preset-chip" id="btn-custom-time">Custom...</button>
+            <!-- Concurrent Background Indicator Banners -->
+            <div class="concurrent-banner" id="concurrent-target-banner" style="display: none;">
+              <div class="concurrent-info">
+                <span class="pulse-indicator pulse-rose"></span>
+                <span class="concurrent-label">Target Timer:</span>
+                <strong class="concurrent-digits" id="concurrent-target-time">24:15</strong>
+              </div>
+              <div class="concurrent-actions">
+                <button class="concurrent-btn" id="btn-concurrent-target-pause">Pause</button>
+                <button class="concurrent-btn primary" id="btn-concurrent-target-switch">View</button>
+              </div>
+            </div>
+
+            <div class="concurrent-banner" id="concurrent-stopwatch-banner" style="display: none;">
+              <div class="concurrent-info">
+                <span class="pulse-indicator pulse-blue"></span>
+                <span class="concurrent-label">Stopwatch:</span>
+                <strong class="concurrent-digits" id="concurrent-stopwatch-time">08:42</strong>
+              </div>
+              <div class="concurrent-actions">
+                <button class="concurrent-btn" id="btn-concurrent-stopwatch-pause">Pause</button>
+                <button class="concurrent-btn primary" id="btn-concurrent-stopwatch-switch">View</button>
+              </div>
+            </div>
+
+            <!-- Single Mode View -->
+            <div id="single-mode-view">
+              <!-- Target Presets (Visible only in Timer Mode) -->
+              <div class="presets-container" id="presets-container" style="display: none;">
+                <span class="presets-label">Select Target:</span>
+                <div class="preset-chips">
+                  <button class="preset-chip" data-mins="5">5m</button>
+                  <button class="preset-chip" data-mins="15">15m <small>Easy</small></button>
+                  <button class="preset-chip active" data-mins="30">30m <small>Med</small></button>
+                  <button class="preset-chip" data-mins="45">45m <small>Hard</small></button>
+                  <button class="preset-chip" data-mins="60">60m <small>Mock</small></button>
+                  <button class="preset-chip" id="btn-custom-time">Custom...</button>
+                </div>
+
+                <div class="custom-time-box" id="custom-time-box" style="display: none;">
+                  <div class="time-inputs">
+                    <div class="time-input-group">
+                      <input type="number" id="custom-hours" min="0" max="23" value="0">
+                      <label>hr</label>
+                    </div>
+                    <span class="colon">:</span>
+                    <div class="time-input-group">
+                      <input type="number" id="custom-minutes" min="0" max="59" value="25">
+                      <label>min</label>
+                    </div>
+                    <span class="colon">:</span>
+                    <div class="time-input-group">
+                      <input type="number" id="custom-seconds" min="0" max="59" value="0">
+                      <label>sec</label>
+                    </div>
+                  </div>
+                  <button class="btn-sm btn-primary" id="btn-apply-custom">Set Target</button>
+                </div>
               </div>
 
-              <!-- Custom Target Time Drawer -->
-              <div class="custom-time-box" id="custom-time-box" style="display: none;">
-                <div class="time-inputs">
-                  <div class="time-input-group">
-                    <input type="number" id="custom-hours" min="0" max="23" value="0">
-                    <label>hr</label>
+              <!-- Main Dial & Progress Ring -->
+              <div class="dial-wrapper">
+                <svg class="dial-svg" viewBox="0 0 200 200">
+                  <circle class="dial-track" cx="100" cy="100" r="86"></circle>
+                  <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="86"></circle>
+                </svg>
+
+                <div class="dial-center-content">
+                  <div class="dial-status-label" id="dial-status-label">STOPWATCH</div>
+                  <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
+                  <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
+                </div>
+              </div>
+
+              <!-- Quick Action Controls -->
+              <div class="controls-row">
+                <button class="btn btn-secondary" id="btn-reset" title="Reset (R)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  <span>Reset</span>
+                </button>
+
+                <button class="btn btn-primary-hero" id="btn-toggle-run" title="Space to toggle">
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span id="btn-toggle-text">Start</span>
+                </button>
+
+                <button class="btn btn-secondary" id="btn-lap" title="Split Lap (L)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                    <line x1="4" y1="22" x2="4" y2="15"></line>
+                  </svg>
+                  <span>Lap</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dual Mode View (Both Active) -->
+            <div id="dual-mode-view" style="display: none;">
+              <!-- Card 1: Stopwatch -->
+              <div class="dual-card" id="dual-stopwatch-card">
+                <div class="dual-card-header">
+                  <div class="dual-card-title">
+                    <span class="dual-card-icon">⏱️</span>
+                    <span>Stopwatch (Elapsed)</span>
                   </div>
-                  <span class="colon">:</span>
-                  <div class="time-input-group">
-                    <input type="number" id="custom-minutes" min="0" max="59" value="25">
-                    <label>min</label>
-                  </div>
-                  <span class="colon">:</span>
-                  <div class="time-input-group">
-                    <input type="number" id="custom-seconds" min="0" max="59" value="0">
-                    <label>sec</label>
+                  <span class="dual-badge" id="dual-sw-badge">STOPPED</span>
+                </div>
+                <div class="dual-digits-row">
+                  <div class="dual-clock-digits" id="dual-sw-digits">
+                    00:00:00<small id="dual-sw-millis">.0</small>
                   </div>
                 </div>
-                <button class="btn-sm btn-primary" id="btn-apply-custom" style="background:#0284c7;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;">Set Target</button>
+                <div class="dual-card-actions">
+                  <button class="dual-btn dual-btn-primary" id="btn-dual-sw-toggle">
+                    <span id="btn-dual-sw-text">Start</span>
+                  </button>
+                  <button class="dual-btn" id="btn-dual-sw-lap">Lap</button>
+                  <button class="dual-btn" id="btn-dual-sw-reset">Reset</button>
+                </div>
+              </div>
+
+              <!-- Card 2: Target Countdown -->
+              <div class="dual-card" id="dual-timer-card">
+                <div class="dual-card-header">
+                  <div class="dual-card-title">
+                    <span class="dual-card-icon">⏳</span>
+                    <span>Target Countdown</span>
+                  </div>
+                  <span class="dual-badge" id="dual-timer-badge">30m Target</span>
+                </div>
+                <div class="dual-progress-track">
+                  <div class="dual-progress-fill" id="dual-timer-progress"></div>
+                </div>
+                <div class="dual-digits-row">
+                  <div class="dual-clock-digits" id="dual-timer-digits">
+                    30:00<small id="dual-timer-millis">.0</small>
+                  </div>
+                </div>
+                <div class="dual-preset-row">
+                  <button class="dual-chip" data-mins="5">5m</button>
+                  <button class="dual-chip" data-mins="15">15m</button>
+                  <button class="dual-chip active" data-mins="30">30m</button>
+                  <button class="dual-chip" data-mins="45">45m</button>
+                  <button class="dual-chip" data-mins="60">60m</button>
+                </div>
+                <div class="dual-card-actions">
+                  <button class="dual-btn dual-btn-primary" id="btn-dual-timer-toggle">
+                    <span id="btn-dual-timer-text">Start</span>
+                  </button>
+                  <button class="dual-btn" id="btn-dual-timer-reset">Reset</button>
+                </div>
+              </div>
+
+              <!-- Master Synchronization Control Bar -->
+              <div class="dual-master-bar">
+                <button class="btn btn-primary-hero dual-master-btn" id="btn-dual-master-toggle">
+                  <span id="dual-master-icon">⚡</span>
+                  <span id="dual-master-text">Start Both Together</span>
+                </button>
+                <button class="btn btn-secondary" id="btn-dual-master-reset" title="Reset both timers">
+                  <span>Reset Both</span>
+                </button>
               </div>
             </div>
 
-            <!-- Dial & Ring -->
-            <div class="dial-wrapper">
-              <svg class="dial-svg" viewBox="0 0 200 200">
-                <circle class="dial-track" cx="100" cy="100" r="86"></circle>
-                <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="86"></circle>
-              </svg>
-
-              <div class="dial-center-content">
-                <div class="dial-status-label" id="dial-status-label">STOPWATCH</div>
-                <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
-                <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
-              </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="controls-row">
-              <button class="btn btn-secondary" id="btn-reset" title="Reset (R)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-                <span>Reset</span>
-              </button>
-
-              <button class="btn btn-primary-hero" id="btn-toggle-run" title="Space to toggle">
-                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <span id="btn-toggle-text">Start</span>
-              </button>
-
-              <button class="btn btn-secondary" id="btn-lap" title="Split Lap (L)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                  <line x1="4" y1="22" x2="4" y2="15"></line>
-                </svg>
-                <span>Lap</span>
-              </button>
-            </div>
-
-            <!-- Problem Logging Bar -->
+            <!-- Problem Logging Quick Bar -->
             <div class="problem-log-bar">
               <div class="problem-meta">
-                <input type="text" id="active-problem-title" placeholder="Problem: 15. 3Sum" value="15. 3Sum" spellcheck="false">
+                <input type="text" id="active-problem-title" placeholder="Problem name (e.g. 15. 3Sum)" spellcheck="false">
                 <div class="meta-tags">
                   <select id="active-platform" class="mini-select">
-                    <option value="LeetCode" selected>LeetCode</option>
+                    <option value="LeetCode">LeetCode</option>
                     <option value="Codeforces">Codeforces</option>
                     <option value="HackerRank">HackerRank</option>
                     <option value="NeetCode">NeetCode</option>
@@ -492,10 +628,10 @@
           <section class="tab-content" id="tab-laps">
             <div class="laps-header">
               <h3>Problem Solving Checkpoints</h3>
-              <p class="subtitle">Track phases: Reading ➔ Algorithm ➔ Code ➔ Debug</p>
+              <p class="subtitle">Track phases: Reading → Algorithm → Code → Debug</p>
             </div>
             <div class="laps-quick-add">
-              <button class="lap-phase-btn" data-phase="Read & Understand">🧠 Understand</button>
+              <button class="lap-phase-btn" data-phase="Read & Understand">📖 Understand</button>
               <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
               <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
               <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
@@ -538,8 +674,15 @@
               <h4>General Options</h4>
               <label class="setting-row">
                 <div class="setting-info">
+                  <span class="setting-title">Dual Active Mode</span>
+                  <span class="setting-desc">Allow Stopwatch & Target Timer both active simultaneously</span>
+                </div>
+                <input type="checkbox" id="setting-dual-active" checked>
+              </label>
+              <label class="setting-row">
+                <div class="setting-info">
                   <span class="setting-title">Sound Alerts</span>
-                  <span class="setting-desc">Pleasant audio chimes on completion, warnings, and lap splits</span>
+                  <span class="setting-desc">Pleasant audio chimes on completion, warnings, and laps</span>
                 </div>
                 <input type="checkbox" id="setting-sound" checked>
               </label>
@@ -550,6 +693,19 @@
                 </div>
                 <input type="checkbox" id="setting-floating" checked>
               </label>
+            </div>
+
+            <div class="settings-group">
+              <h4>Pop Up Screen Options</h4>
+              <div class="setting-action-card">
+                <div class="setting-info">
+                  <span class="setting-title">Always-On-Top Floating Screen</span>
+                  <span class="setting-desc">Pops out the timer into an OS-level Picture-in-Picture window that floats on top of VS Code, Terminal, Discord, and any desktop app!</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
+                  🗗 Launch Pop Up Float
+                </button>
+              </div>
             </div>
 
             <div class="settings-group">
@@ -612,7 +768,7 @@
                   <div class="verdict-options">
                     <label class="verdict-chip solved">
                       <input type="radio" name="verdict" value="Solved" checked>
-                      <span>✅ Solved</span>
+                      <span>✓ Solved</span>
                     </label>
                     <label class="verdict-chip upsolved">
                       <input type="radio" name="verdict" value="Upsolved">
@@ -649,45 +805,45 @@
         <span>💻 In-Page Floating Widget Demo (e.g. LeetCode / Codeforces)</span>
       </div>
 
-      <div class="mock-webpage-card" id="mock-page-container">
-        <!-- Mock LeetCode Navbar -->
+      <div class="browser-frame mock-webpage" id="mock-page-container">
+        <!-- Mock LeetCode Top Navigation -->
         <div class="mock-leetcode-nav">
-          <div class="mock-logo">
+          <div class="mock-brand">
             <span>⚡</span>
             <span>LeetCode</span>
           </div>
-          <div class="mock-nav-links">
-            <span>Problems</span>
-            <span>Contests</span>
-            <span>Discuss</span>
-            <span>Interview</span>
+          <div class="mock-tabs">
+            <span class="active">Description</span>
+            <span>Editorial</span>
+            <span>Solutions</span>
+            <span>Submissions</span>
           </div>
         </div>
 
-        <!-- Problem Description -->
-        <div class="mock-content">
-          <div class="mock-prob-header">
-            <h2>15. 3Sum</h2>
-            <span class="mock-diff-badge">Medium</span>
+        <!-- Problem Description Content -->
+        <div class="mock-content-body">
+          <div class="mock-problem-title">15. 3Sum</div>
+          <span class="mock-difficulty-badge">Medium</span>
+
+          <p class="mock-text">
+            Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code>
+            such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.
+          </p>
+
+          <p class="mock-text">Notice that the solution set must not contain duplicate triplets.</p>
+
+          <div class="mock-code-box">
+            <strong>Example 1:</strong><br>
+            <strong>Input:</strong> nums = [-1,0,1,2,-1,-4]<br>
+            <strong>Output:</strong> [[-1,-1,2],[-1,0,1]]<br>
+            <strong>Explanation:</strong><br>
+            nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.<br>
+            nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.<br>
+            The distinct triplets are [-1,0,1] and [-1,-1,2].
           </div>
 
-          <p class="mock-description">
-            Given an integer array <code>nums</code>, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.
-          </p>
-          <p class="mock-description">
-            Notice that the solution set must not contain duplicate triplets.
-          </p>
-
-          <div style="font-size: 13px; font-weight: 700; color: #cbd5e1; margin-top: 4px;">Example 1:</div>
-          <div class="mock-code-box"><strong>Input:</strong> nums = [-1,0,1,2,-1,-4]
-<strong>Output:</strong> [[-1,-1,2],[-1,0,1]]
-<strong>Explanation:</strong> 
-nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
-nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
-nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
-
-          <div style="font-size: 13px; font-weight: 700; color: #cbd5e1; margin-top: 4px;">Constraints:</div>
-          <ul style="font-size: 13px; color: #94a3b8; margin: 0; padding-left: 20px; line-height: 1.6;">
+          <p class="mock-text"><strong>Constraints:</strong></p>
+          <ul>
             <li><code>3 &lt;= nums.length &lt;= 3000</code></li>
             <li><code>-10<sup>5</sup> &lt;= nums[i] &lt;= 10<sup>5</sup></code></li>
           </ul>
@@ -703,6 +859,7 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
                 <span>AlgoTimer Overlay</span>
               </div>
               <div class="algotimer-header-actions">
+                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Pop Up Screen: Float Always-On-Top over other apps">🗗</button>
                 <button class="algotimer-btn-icon" id="algotimer-btn-min" title="Minimize">−</button>
                 <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">✕</button>
               </div>
@@ -713,7 +870,7 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
               <span class="algotimer-icon"></span>
               <span class="algotimer-mini-clock" id="algotimer-mini-time">00:00</span>
               <button class="algotimer-mini-btn" id="algotimer-mini-toggle" title="Start/Pause">▶</button>
-              <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⛶</button>
+              <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⤢</button>
             </div>
 
             <!-- Body -->
@@ -727,12 +884,25 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
               <div class="algotimer-clock" id="algotimer-clock-display">
                 00:00
               </div>
+
+              <!-- Dual clocks view in widget -->
+              <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
+                <div class="algotimer-dual-row">
+                  <span class="algotimer-subtag">⏱️ Elapsed</span>
+                  <span class="algotimer-dual-time" id="algotimer-dual-sw-time">00:00</span>
+                </div>
+                <div class="algotimer-dual-row">
+                  <span class="algotimer-subtag">⏳ Target</span>
+                  <span class="algotimer-dual-time" id="algotimer-dual-timer-time">30:00</span>
+                </div>
+              </div>
+
               <div class="algotimer-controls">
                 <button class="algotimer-btn algotimer-btn-primary" id="algotimer-btn-play">
                   ▶ Start
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
-                  🚩 Lap
+                  🏁 Lap
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
                   ↺
@@ -748,28 +918,28 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
   <!-- Helpful Demo Tips -->
   <footer class="demo-tips">
     <div class="tip-item">
-      <div class="tip-icon">🎯</div>
+      <div class="tip-icon">🗗</div>
       <div class="tip-text">
-        <h4>Target Presets</h4>
-        <p>Click <strong>Target Timer</strong> and try 15m, 30m, 45m or <strong>Custom...</strong></p>
+        <h4>Pop Up Screen System</h4>
+        <p>Click <strong>Pop Up</strong> or <strong>Float Screen</strong> to pop the timer into an OS-level Always-On-Top window that floats over VS Code, Discord, and any desktop app!</p>
+      </div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon">⚡</div>
+      <div class="tip-text">
+        <h4>Dual Concurrent Timers</h4>
+        <p>Run both Stopwatch (count-up) and Target Countdown at the same time! Start both together or control each individually.</p>
       </div>
     </div>
     <div class="tip-item">
       <div class="tip-icon">🔄</div>
       <div class="tip-text">
-        <h4>Real-Time Sync</h4>
-        <p>Starting either the popup or the in-page widget syncs both clocks instantly.</p>
+        <h4>Concurrent Indicator</h4>
+        <p>When switching modes, background timers keep running with live interactive status banners.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">🖱️</div>
-      <div class="tip-text">
-        <h4>Draggable & Minimizable</h4>
-        <p>Drag the overlay widget across the coding page or collapse it with <strong>−</strong>.</p>
-      </div>
-    </div>
-    <div class="tip-item">
-      <div class="tip-icon">💾</div>
+      <div class="tip-icon">📊</div>
       <div class="tip-text">
         <h4>Practice History</h4>
         <p>Save completed problems and download them in 1-click via <strong>Export CSV</strong>.</p>
@@ -785,6 +955,9 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
       const widget = document.getElementById('floating-widget-el');
       const root = document.getElementById('algotimer-floating-root');
       const clockDisplay = document.getElementById('algotimer-clock-display');
+      const dualClocksDisplay = document.getElementById('algotimer-dual-clocks-display');
+      const dualSwTime = document.getElementById('algotimer-dual-sw-time');
+      const dualTimerTime = document.getElementById('algotimer-dual-timer-time');
       const miniTime = document.getElementById('algotimer-mini-time');
       const playBtn = document.getElementById('algotimer-btn-play');
       const miniToggle = document.getElementById('algotimer-mini-toggle');
@@ -795,6 +968,14 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
       const expandBtn = document.getElementById('algotimer-btn-expand');
       const closeBtn = document.getElementById('algotimer-btn-close');
       const container = document.getElementById('mock-page-container');
+
+      // Topbar buttons
+      document.getElementById('btn-topbar-pip')?.addEventListener('click', () => {
+        document.getElementById('btn-popout-pip')?.click();
+      });
+      document.getElementById('btn-topbar-window')?.addEventListener('click', () => {
+        document.getElementById('btn-popout-window')?.click();
+      });
 
       // Minimize / Expand
       minBtn.addEventListener('click', () => widget.classList.add('minimized'));
@@ -848,28 +1029,66 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.</div>
       makeDraggable(document.getElementById('algotimer-mini-drag'));
 
       // Forward widget button clicks to the main popup controls
-      playBtn.addEventListener('click', () => document.getElementById('btn-toggle-run').click());
-      miniToggle.addEventListener('click', () => document.getElementById('btn-toggle-run').click());
+      playBtn.addEventListener('click', () => {
+        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
+        if (isDual) document.getElementById('btn-dual-master-toggle').click();
+        else document.getElementById('btn-toggle-run').click();
+      });
+
+      miniToggle.addEventListener('click', () => playBtn.click());
       lapBtn.addEventListener('click', () => document.getElementById('btn-lap').click());
-      resetBtn.addEventListener('click', () => document.getElementById('btn-reset').click());
+      resetBtn.addEventListener('click', () => {
+        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
+        if (isDual) document.getElementById('btn-dual-master-reset').click();
+        else document.getElementById('btn-reset').click();
+      });
 
       // Animation frame sync
       function syncLoop() {
-        const digits = document.getElementById('dial-digits').textContent.split('.')[0];
-        clockDisplay.textContent = digits;
-        miniTime.textContent = digits;
-
-        const isRunning = document.getElementById('btn-toggle-run').classList.contains('running');
-        if (isRunning) {
-          playBtn.textContent = '⏸ Pause';
-          miniToggle.textContent = '⏸';
-        } else {
-          playBtn.textContent = '▶ Start';
-          miniToggle.textContent = '▶';
-        }
-
+        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
         const isTimer = document.getElementById('btn-mode-timer').classList.contains('active');
-        modeTag.textContent = isTimer ? 'TARGET TIMER' : 'STOPWATCH MODE';
+
+        if (isDual) {
+          modeTag.textContent = '⚡ DUAL MODE (BOTH)';
+          clockDisplay.style.display = 'none';
+          dualClocksDisplay.style.display = 'flex';
+
+          const sw = document.getElementById('dual-sw-digits').textContent.split('.')[0];
+          const tgt = document.getElementById('dual-timer-digits').textContent.split('.')[0];
+          dualSwTime.textContent = sw;
+          dualTimerTime.textContent = tgt;
+          miniTime.textContent = `${sw} | ${tgt}`;
+
+          const isRunning = document.getElementById('btn-dual-master-toggle').classList.contains('running');
+          playBtn.textContent = isRunning ? '⏸ Pause Both' : '⚡ Start Both';
+          miniToggle.textContent = isRunning ? '⏸' : '▶';
+
+        } else if (isTimer) {
+          modeTag.textContent = 'TARGET TIMER';
+          clockDisplay.style.display = 'block';
+          dualClocksDisplay.style.display = 'none';
+
+          const digits = document.getElementById('dial-digits').textContent.split('.')[0];
+          clockDisplay.textContent = digits;
+          miniTime.textContent = digits;
+
+          const isRunning = document.getElementById('btn-toggle-run').classList.contains('running');
+          playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
+          miniToggle.textContent = isRunning ? '⏸' : '▶';
+
+        } else {
+          modeTag.textContent = 'STOPWATCH MODE';
+          clockDisplay.style.display = 'block';
+          dualClocksDisplay.style.display = 'none';
+
+          const digits = document.getElementById('dial-digits').textContent.split('.')[0];
+          clockDisplay.textContent = digits;
+          miniTime.textContent = digits;
+
+          const isRunning = document.getElementById('btn-toggle-run').classList.contains('running');
+          playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
+          miniToggle.textContent = isRunning ? '⏸' : '▶';
+        }
 
         requestAnimationFrame(syncLoop);
       }

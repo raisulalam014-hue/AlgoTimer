@@ -1,4 +1,5 @@
 // AlgoTimer - In-Page Problem Solving Floating Widget Content Script
+// Supports: Draggable overlay, Dual Timer concurrent displays, Pop Out Picture-in-Picture floating screen
 
 (function () {
   if (window.__algotimer_injected) return;
@@ -6,6 +7,18 @@
 
   let state = {
     mode: 'stopwatch',
+    allowDualActive: true,
+    stopwatch: {
+      status: 'stopped',
+      startTime: null,
+      elapsedBeforePause: 0
+    },
+    targetTimer: {
+      status: 'stopped',
+      startTime: null,
+      elapsedBeforePause: 0,
+      targetDurationMs: 30 * 60 * 1000
+    },
     status: 'stopped',
     startTime: null,
     elapsedBeforePause: 0,
@@ -74,7 +87,28 @@
     return showTenths ? `${base}.${tenths}` : base;
   }
 
-  // Create and inject the floating widget element
+  // Normalize state helper
+  function normalizeState(raw) {
+    const s = Object.assign({}, state, raw || {});
+    if (!s.stopwatch) {
+      s.stopwatch = {
+        status: s.mode === 'stopwatch' ? (s.status || 'stopped') : 'stopped',
+        startTime: s.mode === 'stopwatch' ? s.startTime : null,
+        elapsedBeforePause: s.mode === 'stopwatch' ? (s.elapsedBeforePause || 0) : 0
+      };
+    }
+    if (!s.targetTimer) {
+      s.targetTimer = {
+        status: s.mode === 'timer' ? (s.status || 'stopped') : 'stopped',
+        startTime: s.mode === 'timer' ? s.startTime : null,
+        elapsedBeforePause: s.mode === 'timer' ? (s.elapsedBeforePause || 0) : 0,
+        targetDurationMs: s.targetDurationMs || (30 * 60 * 1000)
+      };
+    }
+    return s;
+  }
+
+  // Create and inject floating widget
   const root = document.createElement('div');
   root.id = 'algotimer-floating-root';
 
@@ -91,8 +125,9 @@
         <span>AlgoTimer</span>
       </div>
       <div class="algotimer-header-actions">
+        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Pop Up Screen: Float Always-on-Top over other apps">🗗</button>
         <button class="algotimer-btn-icon" id="algotimer-btn-min" title="Minimize">−</button>
-        <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide (Reopen from extension)">✕</button>
+        <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">✕</button>
       </div>
     </div>
 
@@ -101,7 +136,7 @@
       <span class="algotimer-icon"></span>
       <span class="algotimer-mini-clock" id="algotimer-mini-time">00:00</span>
       <button class="algotimer-mini-btn" id="algotimer-mini-toggle" title="Start/Pause">▶</button>
-      <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⛶</button>
+      <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⤢</button>
     </div>
 
     <!-- Body -->
@@ -112,15 +147,30 @@
       <div class="algotimer-mode-badge" id="algotimer-mode-tag">
         STOPWATCH MODE
       </div>
+
+      <!-- Single clock view -->
       <div class="algotimer-clock" id="algotimer-clock-display">
         00:00
       </div>
+
+      <!-- Dual clocks view -->
+      <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
+        <div class="algotimer-dual-row">
+          <span class="algotimer-subtag">⏱️ Elapsed</span>
+          <span class="algotimer-dual-time" id="algotimer-dual-sw-time">00:00</span>
+        </div>
+        <div class="algotimer-dual-row">
+          <span class="algotimer-subtag">⏳ Target</span>
+          <span class="algotimer-dual-time" id="algotimer-dual-timer-time">30:00</span>
+        </div>
+      </div>
+
       <div class="algotimer-controls">
         <button class="algotimer-btn algotimer-btn-primary" id="algotimer-btn-play">
           ▶ Start
         </button>
         <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
-          🚩 Lap
+          🏁 Lap
         </button>
         <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
           ↺
@@ -134,6 +184,9 @@
 
   // References
   const clockDisplay = document.getElementById('algotimer-clock-display');
+  const dualClocksDisplay = document.getElementById('algotimer-dual-clocks-display');
+  const dualSwTime = document.getElementById('algotimer-dual-sw-time');
+  const dualTimerTime = document.getElementById('algotimer-dual-timer-time');
   const miniTime = document.getElementById('algotimer-mini-time');
   const playBtn = document.getElementById('algotimer-btn-play');
   const miniToggle = document.getElementById('algotimer-mini-toggle');
@@ -143,8 +196,9 @@
   const minBtn = document.getElementById('algotimer-btn-min');
   const expandBtn = document.getElementById('algotimer-btn-expand');
   const closeBtn = document.getElementById('algotimer-btn-close');
+  const pipBtn = document.getElementById('algotimer-btn-pip');
 
-  // Dragging logic
+  // Draggable logic
   function setupDraggable(handle) {
     let isDragging = false;
     let startX, startY, origX, origY;
@@ -186,7 +240,7 @@
   setupDraggable(document.getElementById('algotimer-drag-handle'));
   setupDraggable(document.getElementById('algotimer-mini-drag'));
 
-  // Minimizing logic
+  // Minimize / Expand / Close
   minBtn.addEventListener('click', () => {
     isMinimized = true;
     widget.classList.add('minimized');
@@ -201,77 +255,150 @@
     root.style.display = 'none';
   });
 
-  // Calculate current elapsed ms
-  function getElapsed() {
-    if (state.status === 'running') {
-      return Date.now() - state.startTime + state.elapsedBeforePause;
+  // Pop Up Screen (Document PiP or window popup)
+  pipBtn.addEventListener('click', async () => {
+    if ('documentPictureInPicture' in window) {
+      try {
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+          width: 300,
+          height: 250
+        });
+
+        // Copy styles
+        [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
+          pipWindow.document.head.appendChild(el.cloneNode(true));
+        });
+
+        pipWindow.document.body.appendChild(widget);
+        pipWindow.addEventListener('pagehide', () => {
+          root.appendChild(widget);
+        });
+        return;
+      } catch (err) {
+        console.warn('PiP from widget failed:', err);
+      }
     }
-    return state.elapsedBeforePause;
+    // Fallback: request popup via background
+    chrome.runtime.sendMessage({ type: 'OPEN_POPUP_WINDOW' });
+  });
+
+  // Calculate elapsed
+  function getStopwatchElapsed() {
+    if (state.stopwatch.status === 'running') {
+      return Date.now() - state.stopwatch.startTime + state.stopwatch.elapsedBeforePause;
+    }
+    return state.stopwatch.elapsedBeforePause;
+  }
+
+  function getTargetElapsed() {
+    if (state.targetTimer.status === 'running') {
+      return Date.now() - state.targetTimer.startTime + state.targetTimer.elapsedBeforePause;
+    }
+    return state.targetTimer.elapsedBeforePause;
+  }
+
+  function getTargetRemaining() {
+    const elapsed = getTargetElapsed();
+    return Math.max(0, state.targetTimer.targetDurationMs - elapsed);
   }
 
   // Animation frame clock ticker
   function tick() {
-    const elapsed = getElapsed();
+    const swElapsed = getStopwatchElapsed();
+    const targetRemaining = getTargetRemaining();
 
-    if (state.mode === 'timer') {
+    if (state.mode === 'dual') {
+      modeTag.textContent = '⚡ DUAL MODE (BOTH)';
+      clockDisplay.style.display = 'none';
+      dualClocksDisplay.style.display = 'flex';
+
+      const swFormatted = formatTime(swElapsed);
+      const timerFormatted = formatTime(targetRemaining);
+
+      dualSwTime.textContent = swFormatted;
+      dualTimerTime.textContent = timerFormatted;
+      miniTime.textContent = `${swFormatted} | ${timerFormatted}`;
+
+      if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
+        dualTimerTime.classList.add('warning');
+      } else {
+        dualTimerTime.classList.remove('warning');
+      }
+
+      const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
+      if (bothRunning) {
+        playBtn.textContent = '⏸ Pause Both';
+        miniToggle.textContent = '⏸';
+      } else {
+        playBtn.textContent = '⚡ Start Both';
+        miniToggle.textContent = '▶';
+      }
+
+    } else if (state.mode === 'timer') {
       modeTag.textContent = 'TARGET TIMER';
-      const remaining = Math.max(0, state.targetDurationMs - elapsed);
-      const formatted = formatTime(remaining);
+      clockDisplay.style.display = 'block';
+      dualClocksDisplay.style.display = 'none';
+
+      const formatted = formatTime(targetRemaining);
       clockDisplay.textContent = formatted;
       miniTime.textContent = formatted;
 
-      if (remaining <= 300000 && remaining > 0 && state.status === 'running') {
+      if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
         clockDisplay.classList.add('warning');
       } else {
         clockDisplay.classList.remove('warning');
       }
+
+      if (state.targetTimer.status === 'running') {
+        playBtn.textContent = '⏸ Pause';
+        miniToggle.textContent = '⏸';
+      } else {
+        playBtn.textContent = '▶ Start';
+        miniToggle.textContent = '▶';
+      }
+
     } else {
+      // Stopwatch mode
       modeTag.textContent = 'STOPWATCH MODE';
+      clockDisplay.style.display = 'block';
+      dualClocksDisplay.style.display = 'none';
       clockDisplay.classList.remove('warning');
-      const formatted = formatTime(elapsed);
+
+      const formatted = formatTime(swElapsed);
       clockDisplay.textContent = formatted;
       miniTime.textContent = formatted;
-    }
 
-    // Status classes
-    if (state.status === 'paused') {
-      clockDisplay.classList.add('paused');
-    } else {
-      clockDisplay.classList.remove('paused');
-    }
-
-    // Play/Pause button updates
-    if (state.status === 'running') {
-      playBtn.textContent = '⏸ Pause';
-      playBtn.classList.add('algotimer-btn-primary');
-      miniToggle.textContent = '⏸';
-    } else {
-      playBtn.textContent = '▶ Start';
-      playBtn.classList.add('algotimer-btn-primary');
-      miniToggle.textContent = '▶';
+      if (state.stopwatch.status === 'running') {
+        playBtn.textContent = '⏸ Pause';
+        miniToggle.textContent = '⏸';
+      } else {
+        playBtn.textContent = '▶ Start';
+        miniToggle.textContent = '▶';
+      }
     }
 
     animFrameId = requestAnimationFrame(tick);
   }
 
-  // Start ticker
   tick();
 
   // Button actions
   playBtn.addEventListener('click', () => {
-    if (state.status === 'running') {
-      chrome.runtime.sendMessage({ type: 'PAUSE' });
+    if (state.mode === 'dual') {
+      const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
+      if (bothRunning) chrome.runtime.sendMessage({ type: 'PAUSE', target: 'both' });
+      else chrome.runtime.sendMessage({ type: 'START', target: 'both' });
+    } else if (state.mode === 'timer') {
+      if (state.targetTimer.status === 'running') chrome.runtime.sendMessage({ type: 'PAUSE', target: 'timer' });
+      else chrome.runtime.sendMessage({ type: 'START', target: 'timer' });
     } else {
-      chrome.runtime.sendMessage({ type: 'START' });
+      if (state.stopwatch.status === 'running') chrome.runtime.sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+      else chrome.runtime.sendMessage({ type: 'START', target: 'stopwatch' });
     }
   });
 
   miniToggle.addEventListener('click', () => {
-    if (state.status === 'running') {
-      chrome.runtime.sendMessage({ type: 'PAUSE' });
-    } else {
-      chrome.runtime.sendMessage({ type: 'START' });
-    }
+    playBtn.click();
   });
 
   lapBtn.addEventListener('click', () => {
@@ -279,13 +406,14 @@
   });
 
   resetBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'RESET' });
+    const target = state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch');
+    chrome.runtime.sendMessage({ type: 'RESET', target });
   });
 
   // Sync state from background
   function syncState(newState) {
     if (!newState) return;
-    state = newState;
+    state = normalizeState(newState);
     if (state.floatingWidgetEnabled === false) {
       root.style.display = 'none';
     } else if (root.style.display === 'none') {
@@ -293,7 +421,7 @@
     }
   }
 
-  // Initial state fetch
+  // Initial fetch
   chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
     if (response && response.state) {
       syncState(response.state);

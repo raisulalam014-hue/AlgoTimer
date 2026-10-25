@@ -9,40 +9,55 @@
 
 ---
 
-## 🌟 Key Highlights
+## 🚀 Key Highlights & New Features
 
-- **Dual Operational Modes**:
-  - **Stopwatch (Count-Up)**: Track total time spent with millisecond precision and lap milestones.
-  - **Target Timer (Countdown)**: Practice under real interview / contest pressure with countdown alerts.
-- **Problem-Solving Presets**:
-  - `5m` — Rapid-fire logic & sanity checks
-  - `15m Easy` — LeetCode Easy targets
-  - `30m Medium` — Standard technical interview difficulty
-  - `45m Hard` — Full-round complex algorithmic challenges
-  - `60m Mock` — Contest & multi-problem simulation
-  - `Custom...` — Set exact Hours, Minutes, and Seconds
-- **Floating In-Page Overlay**:
-  - Injects a sleek, draggable, minimizable floating stopwatch directly onto coding platforms:
-    - **LeetCode** (`leetcode.com`)
-    - **Codeforces** (`codeforces.com`)
-    - **HackerRank** (`hackerrank.com`)
-    - **NeetCode** (`neetcode.io`)
-    - **GeeksforGeeks** (`geeksforgeeks.org`)
-    - **CodeChef** (`codechef.com`)
-    - **AtCoder** (`atcoder.jp`)
-- **Interview Phase Milestones (Laps)**:
-  - 🧠 **Understand**: Problem comprehension & reading edge cases
-  - 💡 **Approach**: Algorithm formulation & complexity analysis
-  - 💻 **Code**: Writing clean, robust implementation
-  - 🧪 **Debug**: Testing sample & custom test cases
-- **Zero-Drift Background Engine**:
-  - Calculates elapsed time from system timestamps rather than throttled intervals, ensuring exact accuracy even when switching tabs or locking your screen.
-  - Live elapsed time displayed directly on your Chrome extension toolbar icon badge!
-- **Session Logger & CSV Exporter**:
-  - Record problem name, platform, difficulty, and outcome (Solved / Upsolved / Need Review).
-  - Export all practice logs to **CSV** in 1 click for Notion or Google Sheets progress tracking.
-- **Procedural Audio Alerts**:
-  - Pleasant chimes for start, lap splits, 5-minute warnings, and target completion (synthesized using Web Audio API—100% offline, zero external dependencies).
+### 1. 🗗 Always-On-Top Pop-Up Screen System (PiP & Detachable Window)
+- **Float Over Any Desktop App**: Pop out the timer from your browser into a floating mini window using native **Document Picture-in-Picture** (`window.documentPictureInPicture`).
+- **Never Loses Focus**: Stays pinned **Always-On-Top** directly over your code editor (**VS Code**, Neovim, IntelliJ), terminal, Discord, or desktop notes!
+- **Standalone Window Fallback**: 1-click fallback to a dedicated, resizable standalone popup window that won't auto-dismiss when clicking outside.
+- **In-Page Widget Integration**: Direct Pop-Out button embedded inside the LeetCode/Codeforces overlay widget.
+
+### 2. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
+- **Stopwatch & Target Timer Run Together**: Solve problems with a target countdown deadline while simultaneously measuring total elapsed solve time and milestone splits.
+- **No More Auto-Stop**: Starting or switching between Target Timer and Stopwatch never pauses or resets the other timer. Both engines run concurrently in the background!
+- **Master Synchronization**: One-click **⚡ Start Both Together**, **⏸ Pause Both**, and **↺ Reset Both** controls.
+- **Real-Time Concurrent Banners**: When viewing one mode, an interactive glassmorphic banner displays the background timer's live status with instant **Pause** and **View/Switch** actions.
+- **Dedicated Dual View**: Side-by-side / stacked HUD showing both stopwatch count-up (with milliseconds) and target countdown (with animated progress bar and warning chimes).
+
+### 3. 🎯 Problem-Solving Presets & Custom Duration
+- `5m` — Rapid-fire sanity checks & logic verification
+- `15m Easy` — LeetCode Easy targets
+- `30m Medium` — Standard technical interview difficulty
+- `45m Hard` — Complex algorithmic challenges & contest rounds
+- `60m Mock` — Full interview simulation
+- `Custom...` — Custom hours, minutes, and seconds
+
+### 4. 💻 Floating In-Page Overlay
+- Sleek, draggable, minimizable floating stopwatch directly injected onto coding platforms:
+  - **LeetCode** (`leetcode.com`)
+  - **Codeforces** (`codeforces.com`)
+  - **HackerRank** (`hackerrank.com`)
+  - **NeetCode** (`neetcode.io`)
+  - **GeeksforGeeks** (`geeksforgeeks.org`)
+  - **CodeChef** (`codechef.com`)
+  - **AtCoder** (`atcoder.jp`)
+
+### 5. 🏁 Interview Phase Milestones (Laps)
+- 📖 **Understand**: Problem comprehension & reading edge cases
+- 💡 **Approach**: Algorithm formulation & complexity analysis
+- 💻 **Code**: Writing clean, robust implementation
+- 🧪 **Debug**: Testing sample & custom test cases
+
+### 6. ⏱️ Zero-Drift Background Engine
+- Calculates elapsed time from system timestamps rather than throttled intervals, ensuring exact accuracy even when switching tabs or locking your screen.
+- Live elapsed time / countdown displayed directly on your Chrome extension toolbar icon badge!
+
+### 7. 📊 Session Logger & CSV Exporter
+- Record problem name, platform, difficulty, and outcome (Solved / Upsolved / Need Review).
+- Export all practice logs to **CSV** in 1 click for Notion or Google Sheets progress tracking.
+
+### 8. 🔔 Procedural Audio Alerts
+- Pleasant chimes for start, lap splits, 5-minute warnings, and target completion (synthesized using Web Audio API — 100% offline, zero external dependencies).
 
 ---
 
@@ -50,18 +65,18 @@
 
 | Shortcut | Action |
 | :--- | :--- |
-| <kbd>Space</kbd> | Start / Pause timer |
+| <kbd>Space</kbd> | Start / Pause timer (or both in Dual Mode) |
 | <kbd>L</kbd> | Record Lap / Stage Split |
-| <kbd>R</kbd> | Reset Stopwatch |
-| <kbd>M</kbd> | Toggle between Stopwatch & Target Timer |
+| <kbd>R</kbd> | Reset Stopwatch (or both in Dual Mode) |
+| <kbd>M</kbd> | Toggle between Stopwatch, Target Timer & Dual Mode |
 
 ---
 
-## 🚀 How to Install in Google Chrome
+## 📦 How to Install in Google Chrome
 
 1. Clone or download this repository to your computer:
    ```bash
-   git clone https://github.com/<YOUR_USERNAME>/problem-timer-extension.git
+   git clone https://github.com/raisulalam014-hue/AlgoTimer.git
    ```
 2. Open Google Chrome and navigate to:
    ```text
@@ -69,45 +84,44 @@
    ```
 3. Enable **Developer mode** using the toggle switch in the top-right corner.
 4. Click the **Load unpacked** button in the top-left corner.
-5. Select the `problem-timer-extension` directory.
+5. Select the `AlgoTimer` directory.
 6. **Done!** Pin the ⏱️ **AlgoTimer** icon to your Chrome toolbar for instant access.
 
 ---
 
-## 💻 Live Standalone Preview
+## 🌐 Live Standalone Preview
 
-Want to test the UI and timer without installing the extension?
-1. Open `preview.html` directly in your browser:
-   - Double-click `preview.html` or run:
-     ```bash
-     node server.js
-     ```
-   - Visit `http://127.0.0.1:3456/` in any browser!
+Want to test the UI, dual timers, and pop-up float without installing the extension?
+1. Run the local preview server:
+   ```bash
+   node server.js
+   ```
+2. Visit `http://127.0.0.1:3456/` in any browser!
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-problem-timer-extension/
-├── manifest.json              # Chrome Manifest V3 configuration
+AlgoTimer/
+├── manifest.json              # Chrome Manifest V3 configuration (v1.1.0)
 ├── popup/
-│   ├── popup.html             # Extension popup interface
-│   ├── popup.css              # Dark glassmorphic styling
-│   ├── popup.js               # Stopwatch, presets, laps & history logic
+│   ├── popup.html             # Extension popup interface with Dual Mode & Pop-Up PiP
+│   ├── popup.css              # Dark glassmorphic styling & responsive PiP adaptations
+│   ├── popup.js               # Dual independent timer engines, PiP popout & laps logic
 │   └── audio.js               # Web Audio API procedural sound engine
 ├── background/
-│   └── service-worker.js      # Background timer engine, alarms & badge updater
+│   └── service-worker.js      # Zero-drift background engine, alarms & badge updater
 ├── content/
-│   ├── content.js             # Draggable in-page floating widget script
-│   └── content.css            # Floating widget styles
+│   ├── content.js             # Draggable in-page floating widget script with PiP
+│   └── content.css            # Floating widget styles & dual timer HUD
 ├── icons/
 │   ├── icon16.png
 │   ├── icon32.png
 │   ├── icon48.png
 │   ├── icon128.png
 │   └── icon.svg               # Vector brand logo
-├── preview.html               # Standalone browser preview page
+├── preview.html               # Standalone browser preview & testing studio
 ├── server.js                  # Local preview server
 ├── LICENSE                    # MIT License
 └── README.md                  # Documentation
@@ -115,10 +129,10 @@ problem-timer-extension/
 
 ---
 
-## 🌐 Live Repository & Profile Showcase
+## 🌟 Live Repository & Profile Showcase
 
 This repository is published and active at:
-👉 **[https://github.com/raisulalam014-hue/AlgoTimer](https://github.com/raisulalam014-hue/AlgoTimer)**
+🔗 **[https://github.com/raisulalam014-hue/AlgoTimer](https://github.com/raisulalam014-hue/AlgoTimer)**
 
 ### To feature it prominently on your GitHub profile:
 1. Go to your GitHub profile: [github.com/raisulalam014-hue](https://github.com/raisulalam014-hue)

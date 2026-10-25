@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AlgoTimer - Problem Solving Stopwatch & Timer",
-  "version": "1.0.0",
-  "description": "Precision stopwatch and target countdown timer for LeetCode, Codeforces, competitive programming, and interview prep.",
+  "version": "1.1.0",
+  "description": "Precision stopwatch, concurrent dual countdown timer, and always-on-top pop-up screen for LeetCode, Codeforces, and interview prep.",
   "permissions": [
     "storage",
     "alarms",
@@ -10,7 +10,7 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "AlgoTimer - Problem Solving Stopwatch",
+    "default_title": "AlgoTimer - Problem Solving Stopwatch & Timer",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

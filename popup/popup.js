@@ -1,11 +1,50 @@
-// AlgoTimer - Popup Script
+// AlgoTimer - Problem Solving Stopwatch & Timer UI Logic
+// Supports: Document Picture-in-Picture Pop-Up Screen, Concurrent Dual Timers, Milestones, History & Sound Alerts
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Elements
+  // DOM Elements - Navigation & Header
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const lapBadge = document.getElementById('lap-badge');
+
+  // Pop Up Screen Elements
+  const btnPopoutPip = document.getElementById('btn-popout-pip');
+  const btnPopoutWindow = document.getElementById('btn-popout-window');
+  const settingBtnLaunchPip = document.getElementById('setting-btn-launch-pip');
+
+  // Mode buttons
   const btnModeStopwatch = document.getElementById('btn-mode-stopwatch');
   const btnModeTimer = document.getElementById('btn-mode-timer');
+  const btnModeDual = document.getElementById('btn-mode-dual');
+
+  // Views
+  const singleModeView = document.getElementById('single-mode-view');
+  const dualModeView = document.getElementById('dual-mode-view');
+
+  // Concurrent Banners
+  const concurrentTargetBanner = document.getElementById('concurrent-target-banner');
+  const concurrentTargetTime = document.getElementById('concurrent-target-time');
+  const btnConcurrentTargetPause = document.getElementById('btn-concurrent-target-pause');
+  const btnConcurrentTargetSwitch = document.getElementById('btn-concurrent-target-switch');
+
+  const concurrentStopwatchBanner = document.getElementById('concurrent-stopwatch-banner');
+  const concurrentStopwatchTime = document.getElementById('concurrent-stopwatch-time');
+  const btnConcurrentStopwatchPause = document.getElementById('btn-concurrent-stopwatch-pause');
+  const btnConcurrentStopwatchSwitch = document.getElementById('btn-concurrent-stopwatch-switch');
+
+  // Single Mode Elements
+  const dialDigits = document.getElementById('dial-digits');
+  const dialProgress = document.getElementById('dial-progress');
+  const dialStatusLabel = document.getElementById('dial-status-label');
+  const dialTargetLabel = document.getElementById('dial-target-label');
+  const btnToggleRun = document.getElementById('btn-toggle-run');
+  const btnToggleText = document.getElementById('btn-toggle-text');
+  const btnReset = document.getElementById('btn-reset');
+  const btnLap = document.getElementById('btn-lap');
+
+  // Presets & Custom Target
   const presetsContainer = document.getElementById('presets-container');
-  const presetChips = document.querySelectorAll('.preset-chip[data-mins]');
+  const presetChips = document.querySelectorAll('.preset-chip');
   const btnCustomTime = document.getElementById('btn-custom-time');
   const customTimeBox = document.getElementById('custom-time-box');
   const btnApplyCustom = document.getElementById('btn-apply-custom');
@@ -13,33 +52,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customMinutes = document.getElementById('custom-minutes');
   const customSeconds = document.getElementById('custom-seconds');
 
-  const dialDigits = document.getElementById('dial-digits');
-  const dialMillis = document.getElementById('dial-millis');
-  const dialProgress = document.getElementById('dial-progress');
-  const dialStatusLabel = document.getElementById('dial-status-label');
-  const dialTargetLabel = document.getElementById('dial-target-label');
+  // Dual Mode View Elements
+  const dualSwDigits = document.getElementById('dual-sw-digits');
+  const dualSwBadge = document.getElementById('dual-sw-badge');
+  const btnDualSwToggle = document.getElementById('btn-dual-sw-toggle');
+  const btnDualSwText = document.getElementById('btn-dual-sw-text');
+  const btnDualSwLap = document.getElementById('btn-dual-sw-lap');
+  const btnDualSwReset = document.getElementById('btn-dual-sw-reset');
 
-  const btnToggleRun = document.getElementById('btn-toggle-run');
-  const btnToggleText = document.getElementById('btn-toggle-text');
-  const btnReset = document.getElementById('btn-reset');
-  const btnLap = document.getElementById('btn-lap');
-  const lapBadge = document.getElementById('lap-badge');
+  const dualTimerDigits = document.getElementById('dual-timer-digits');
+  const dualTimerBadge = document.getElementById('dual-timer-badge');
+  const dualTimerProgress = document.getElementById('dual-timer-progress');
+  const dualChips = document.querySelectorAll('.dual-chip');
+  const btnDualTimerToggle = document.getElementById('btn-dual-timer-toggle');
+  const btnDualTimerText = document.getElementById('btn-dual-timer-text');
+  const btnDualTimerReset = document.getElementById('btn-dual-timer-reset');
 
-  const navTabs = document.querySelectorAll('.nav-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
+  const btnDualMasterToggle = document.getElementById('btn-dual-master-toggle');
+  const dualMasterIcon = document.getElementById('dual-master-icon');
+  const dualMasterText = document.getElementById('dual-master-text');
+  const btnDualMasterReset = document.getElementById('btn-dual-master-reset');
 
-  const lapsList = document.getElementById('laps-list');
+  // Laps & History
   const lapPhaseBtns = document.querySelectorAll('.lap-phase-btn');
-
+  const lapsList = document.getElementById('laps-list');
   const historyList = document.getElementById('history-list');
   const statSolvedCount = document.getElementById('stat-solved-count');
   const statTotalTime = document.getElementById('stat-total-time');
   const btnExportCsv = document.getElementById('btn-export-csv');
   const btnClearHistory = document.getElementById('btn-clear-history');
 
+  // Settings
+  const settingDualActive = document.getElementById('setting-dual-active');
   const settingSound = document.getElementById('setting-sound');
   const settingFloating = document.getElementById('setting-floating');
 
+  // Problem Logging
   const activeProblemTitle = document.getElementById('active-problem-title');
   const activePlatform = document.getElementById('active-platform');
   const activeDifficulty = document.getElementById('active-difficulty');
@@ -56,12 +104,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalTimeDisplay = document.getElementById('modal-time-display');
   const modalNotes = document.getElementById('modal-notes');
 
-  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 86; // r = 86 => ~540.35
-  dialProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
+  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 86;
+  if (dialProgress) dialProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
 
   // Local state cache
   let state = {
     mode: 'stopwatch',
+    allowDualActive: true,
+    stopwatch: {
+      status: 'stopped',
+      startTime: null,
+      elapsedBeforePause: 0
+    },
+    targetTimer: {
+      status: 'stopped',
+      startTime: null,
+      elapsedBeforePause: 0,
+      targetDurationMs: 30 * 60 * 1000
+    },
     status: 'stopped',
     startTime: null,
     elapsedBeforePause: 0,
@@ -76,7 +136,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   let warned5min = false;
   let warned1min = false;
 
-  // Safe Chrome message wrapper (handles standalone preview browser vs extension)
+  // Detect popout query param
+  if (new URLSearchParams(window.location.search).has('popout')) {
+    document.body.classList.add('is-popout');
+  }
+
+  // Normalize state helper
+  function normalizeState(raw) {
+    const s = Object.assign({}, state, raw || {});
+    if (!s.stopwatch) {
+      s.stopwatch = {
+        status: s.mode === 'stopwatch' ? (s.status || 'stopped') : 'stopped',
+        startTime: s.mode === 'stopwatch' ? s.startTime : null,
+        elapsedBeforePause: s.mode === 'stopwatch' ? (s.elapsedBeforePause || 0) : 0
+      };
+    }
+    if (!s.targetTimer) {
+      s.targetTimer = {
+        status: s.mode === 'timer' ? (s.status || 'stopped') : 'stopped',
+        startTime: s.mode === 'timer' ? s.startTime : null,
+        elapsedBeforePause: s.mode === 'timer' ? (s.elapsedBeforePause || 0) : 0,
+        targetDurationMs: s.targetDurationMs || (30 * 60 * 1000)
+      };
+    }
+    if (s.allowDualActive === undefined) s.allowDualActive = true;
+    return s;
+  }
+
+  // Safe Chrome message wrapper
   const isExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage;
 
   function sendMessage(msg) {
@@ -90,51 +177,111 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       } else {
-        // Mock fallback for browser preview
         resolve(handleMockMessage(msg));
       }
     });
   }
 
-  // Mock message handler for local preview
+  // Mock message handler for browser preview / local testing
   function handleMockMessage(msg) {
     switch (msg.type) {
-      case 'GET_STATE': return { state };
-      case 'START':
-        state.status = 'running';
-        state.startTime = Date.now();
+      case 'GET_STATE':
+        return { state };
+
+      case 'START': {
+        const target = msg.target || (state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch'));
+
+        if (target === 'both' || target === 'stopwatch') {
+          if (state.stopwatch.status !== 'running') {
+            state.stopwatch.status = 'running';
+            state.stopwatch.startTime = Date.now();
+          }
+          if (!state.allowDualActive && target === 'stopwatch' && state.targetTimer.status === 'running') {
+            state.targetTimer.status = 'paused';
+            state.targetTimer.elapsedBeforePause += Date.now() - state.targetTimer.startTime;
+            state.targetTimer.startTime = null;
+          }
+        }
+
+        if (target === 'both' || target === 'timer') {
+          if (state.targetTimer.status !== 'running') {
+            if (state.targetTimer.status === 'finished') {
+              state.targetTimer.elapsedBeforePause = 0;
+            }
+            state.targetTimer.status = 'running';
+            state.targetTimer.startTime = Date.now();
+          }
+          if (!state.allowDualActive && target === 'timer' && state.stopwatch.status === 'running') {
+            state.stopwatch.status = 'paused';
+            state.stopwatch.elapsedBeforePause += Date.now() - state.stopwatch.startTime;
+            state.stopwatch.startTime = null;
+          }
+        }
         return { success: true, state };
-      case 'PAUSE':
-        state.status = 'paused';
-        state.elapsedBeforePause += Date.now() - state.startTime;
-        state.startTime = null;
+      }
+
+      case 'PAUSE': {
+        const target = msg.target || (state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch'));
+
+        if (target === 'both' || target === 'stopwatch') {
+          if (state.stopwatch.status === 'running') {
+            state.stopwatch.status = 'paused';
+            state.stopwatch.elapsedBeforePause += Date.now() - state.stopwatch.startTime;
+            state.stopwatch.startTime = null;
+          }
+        }
+
+        if (target === 'both' || target === 'timer') {
+          if (state.targetTimer.status === 'running') {
+            state.targetTimer.status = 'paused';
+            state.targetTimer.elapsedBeforePause += Date.now() - state.targetTimer.startTime;
+            state.targetTimer.startTime = null;
+          }
+        }
         return { success: true, state };
-      case 'RESET':
-        state.status = 'stopped';
-        state.startTime = null;
-        state.elapsedBeforePause = 0;
-        state.laps = [];
+      }
+
+      case 'RESET': {
+        const target = msg.target || (state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch'));
+
+        if (target === 'both' || target === 'stopwatch') {
+          state.stopwatch.status = 'stopped';
+          state.stopwatch.startTime = null;
+          state.stopwatch.elapsedBeforePause = 0;
+          state.laps = [];
+        }
+
+        if (target === 'both' || target === 'timer') {
+          state.targetTimer.status = 'stopped';
+          state.targetTimer.startTime = null;
+          state.targetTimer.elapsedBeforePause = 0;
+        }
         return { success: true, state };
-      case 'SET_MODE':
+      }
+
+      case 'SET_MODE': {
         state.mode = msg.mode;
-        state.status = 'stopped';
-        state.startTime = null;
-        state.elapsedBeforePause = 0;
-        state.laps = [];
         return { success: true, state };
-      case 'SET_TARGET':
+      }
+
+      case 'SET_TARGET': {
+        state.targetTimer.targetDurationMs = msg.targetDurationMs;
         state.targetDurationMs = msg.targetDurationMs;
-        if (state.mode === 'timer') state.elapsedBeforePause = 0;
+        if (state.targetTimer.status !== 'running') {
+          state.targetTimer.elapsedBeforePause = 0;
+          state.targetTimer.status = 'stopped';
+          state.targetTimer.startTime = null;
+        }
         return { success: true, state };
+      }
+
       case 'ADD_LAP': {
-        const elapsed = state.status === 'running' 
-          ? Date.now() - state.startTime + state.elapsedBeforePause 
-          : state.elapsedBeforePause;
+        const elapsed = getStopwatchElapsed();
         const prevLapTime = state.laps.length > 0 ? state.laps[0].totalMs : 0;
         const splitMs = Math.max(0, elapsed - prevLapTime);
         const lap = {
           id: state.laps.length + 1,
-          label: msg.label || `Phase ${state.laps.length + 1}`,
+          label: msg.label || ('Phase ' + (state.laps.length + 1)),
           totalMs: elapsed,
           splitMs: splitMs,
           timestamp: Date.now()
@@ -142,6 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.laps.unshift(lap);
         return { success: true, state, lap };
       }
+
       case 'LOG_PROBLEM': {
         const item = {
           id: Date.now().toString(),
@@ -157,10 +305,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.history.unshift(item);
         return { success: true, state, session: item };
       }
+
       case 'CLEAR_HISTORY':
         state.history = [];
         return { success: true, state };
-      default: return { success: true, state };
+
+      case 'UPDATE_SETTINGS':
+        if (msg.soundEnabled !== undefined) state.soundEnabled = msg.soundEnabled;
+        if (msg.floatingWidgetEnabled !== undefined) state.floatingWidgetEnabled = msg.floatingWidgetEnabled;
+        if (msg.allowDualActive !== undefined) state.allowDualActive = msg.allowDualActive;
+        return { success: true, state };
+
+      default:
+        return { success: true, state };
     }
   }
 
@@ -189,251 +346,494 @@ document.addEventListener('DOMContentLoaded', async () => {
     return `${h}h ${m}m`;
   }
 
-  // Get current elapsed
-  function getElapsed() {
-    if (state.status === 'running') {
-      return Date.now() - state.startTime + state.elapsedBeforePause;
+  // Time calculations for independent engines
+  function getStopwatchElapsed() {
+    if (state.stopwatch.status === 'running') {
+      return Date.now() - state.stopwatch.startTime + state.stopwatch.elapsedBeforePause;
     }
-    return state.elapsedBeforePause;
+    return state.stopwatch.elapsedBeforePause;
   }
 
-  // Main UI render loop
-  function updateUI() {
-    const elapsed = getElapsed();
+  function getTargetElapsed() {
+    if (state.targetTimer.status === 'running') {
+      return Date.now() - state.targetTimer.startTime + state.targetTimer.elapsedBeforePause;
+    }
+    return state.targetTimer.elapsedBeforePause;
+  }
 
-    // Mode specific displays
-    if (state.mode === 'timer') {
-      const remaining = Math.max(0, state.targetDurationMs - elapsed);
-      const parts = formatTimeParts(remaining);
-      dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
-      dialStatusLabel.textContent = state.status === 'finished' ? 'FINISHED' : 'TARGET COUNTDOWN';
-      dialTargetLabel.style.display = 'block';
-      dialTargetLabel.textContent = `Target: ${formatTimeParts(state.targetDurationMs).base}`;
+  function getTargetRemaining() {
+    const elapsed = getTargetElapsed();
+    return Math.max(0, state.targetTimer.targetDurationMs - elapsed);
+  }
 
-      // Progress bar offset
-      const progressRatio = Math.min(1, elapsed / state.targetDurationMs);
-      const dashoffset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
-      dialProgress.style.strokeDashoffset = dashoffset;
-
-      // Warnings
-      if (remaining <= 300000 && remaining > 60000 && state.status === 'running') {
-        dialDigits.classList.add('warning');
-        dialProgress.classList.add('warning');
-        if (!warned5min && window.soundFX) {
-          window.soundFX.warning();
-          warned5min = true;
+  // ================= POP UP SCREEN SYSTEM =================
+  async function triggerPopoutPiP() {
+    if ('documentPictureInPicture' in window) {
+      try {
+        if (window._pipWindow) {
+          window._pipWindow.close();
+          return;
         }
-      } else if (remaining <= 60000 && remaining > 0 && state.status === 'running') {
-        dialDigits.classList.add('warning');
-        dialProgress.classList.add('warning');
-        if (!warned1min && window.soundFX) {
+
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+          width: 380,
+          height: 620
+        });
+        window._pipWindow = pipWindow;
+
+        // Copy all CSS stylesheets & styles
+        [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
+          pipWindow.document.head.appendChild(el.cloneNode(true));
+        });
+
+        pipWindow.document.title = 'AlgoTimer - Always-on-Top Floating Screen';
+
+        const appContainer = document.querySelector('.app-container');
+        pipWindow.document.body.appendChild(appContainer);
+        pipWindow.document.body.classList.add('is-pip');
+        document.body.classList.add('is-pip');
+
+        pipWindow.addEventListener('pagehide', () => {
+          document.body.appendChild(appContainer);
+          document.body.classList.remove('is-pip');
+          window._pipWindow = null;
+        });
+
+        return;
+      } catch (err) {
+        console.warn('Document Picture-in-Picture failed, falling back to standalone window:', err);
+      }
+    }
+
+    // Fallback: standalone popup window
+    triggerPopoutWindow();
+  }
+
+  function triggerPopoutWindow() {
+    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.create) {
+      chrome.windows.create({
+        url: chrome.runtime.getURL('popup/popup.html?popout=true'),
+        type: 'popup',
+        width: 400,
+        height: 640,
+        focused: true
+      });
+    } else {
+      window.open('popup.html?popout=true', 'AlgoTimerPopout', 'width=400,height=640,resizable=yes');
+    }
+  }
+
+  if (btnPopoutPip) btnPopoutPip.addEventListener('click', triggerPopoutPiP);
+  if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener('click', triggerPopoutPiP);
+  if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
+
+  // ================= MAIN RENDER LOOP =================
+  function updateUI() {
+    const swElapsed = getStopwatchElapsed();
+    const targetRemaining = getTargetRemaining();
+    const targetElapsed = getTargetElapsed();
+
+    // 1. Dual Mode Rendering
+    if (state.mode === 'dual') {
+      singleModeView.style.display = 'none';
+      dualModeView.style.display = 'flex';
+      concurrentTargetBanner.style.display = 'none';
+      concurrentStopwatchBanner.style.display = 'none';
+
+      // Stopwatch Card
+      const swParts = formatTimeParts(swElapsed);
+      dualSwDigits.innerHTML = `${swParts.base}<small id="dual-sw-millis">.${swParts.tenths}</small>`;
+      dualSwBadge.textContent = state.stopwatch.status.toUpperCase();
+      dualSwBadge.className = `dual-badge ${state.stopwatch.status}`;
+      btnDualSwText.textContent = state.stopwatch.status === 'running' ? 'Pause' : 'Start';
+
+      const swCard = document.getElementById('dual-stopwatch-card');
+      if (state.stopwatch.status === 'running') swCard.classList.add('active-running');
+      else swCard.classList.remove('active-running');
+
+      // Target Timer Card
+      const timerParts = formatTimeParts(targetRemaining);
+      dualTimerDigits.innerHTML = `${timerParts.base}<small id="dual-timer-millis">.${timerParts.tenths}</small>`;
+      
+      const timerProgressRatio = Math.min(1, targetElapsed / state.targetTimer.targetDurationMs);
+      dualTimerProgress.style.width = `${timerProgressRatio * 100}%`;
+
+      const timerCard = document.getElementById('dual-timer-card');
+      if (state.targetTimer.status === 'finished') {
+        dualTimerBadge.textContent = 'FINISHED';
+        dualTimerBadge.className = 'dual-badge warning';
+        dualTimerDigits.classList.add('warning');
+        dualTimerProgress.classList.add('warning');
+        timerCard.classList.add('warning-running');
+        btnDualTimerText.textContent = 'Restart';
+      } else if (state.targetTimer.status === 'running') {
+        dualTimerBadge.textContent = `${formatMinutesShort(state.targetTimer.targetDurationMs)} TARGET`;
+        dualTimerBadge.className = 'dual-badge running';
+        btnDualTimerText.textContent = 'Pause';
+        timerCard.classList.add('active-running');
+
+        if (targetRemaining <= 300000) {
+          dualTimerDigits.classList.add('warning');
+          dualTimerProgress.classList.add('warning');
+          timerCard.classList.add('warning-running');
+          if (!warned5min && window.soundFX) {
+            window.soundFX.warning();
+            warned5min = true;
+          }
+        } else {
+          dualTimerDigits.classList.remove('warning');
+          dualTimerProgress.classList.remove('warning');
+          timerCard.classList.remove('warning-running');
+        }
+
+        if (targetRemaining <= 60000 && !warned1min && window.soundFX) {
           window.soundFX.warning();
           warned1min = true;
         }
-      } else if (remaining === 0 && state.status === 'running') {
-        // Completed!
-        state.status = 'finished';
-        if (window.soundFX) window.soundFX.finish();
+
+        if (targetRemaining === 0) {
+          state.targetTimer.status = 'finished';
+          if (window.soundFX) window.soundFX.finish();
+        }
       } else {
+        dualTimerBadge.textContent = state.targetTimer.status === 'paused' ? 'PAUSED' : `${formatMinutesShort(state.targetTimer.targetDurationMs)} TARGET`;
+        dualTimerBadge.className = `dual-badge ${state.targetTimer.status}`;
+        btnDualTimerText.textContent = 'Start';
+        timerCard.classList.remove('active-running');
+        timerCard.classList.remove('warning-running');
+      }
+
+      // Master Synchronization Button
+      const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
+      if (bothRunning) {
+        dualMasterIcon.textContent = '⏸';
+        dualMasterText.textContent = 'Pause Both';
+        btnDualMasterToggle.classList.add('running');
+      } else {
+        dualMasterIcon.textContent = '⚡';
+        dualMasterText.textContent = 'Start Both Together';
+        btnDualMasterToggle.classList.remove('running');
+      }
+
+    } else {
+      // 2. Single Mode Rendering (Stopwatch or Target Timer)
+      singleModeView.style.display = 'block';
+      dualModeView.style.display = 'none';
+
+      if (state.mode === 'timer') {
+        // Target Countdown Mode
+        const parts = formatTimeParts(targetRemaining);
+        dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
+        dialStatusLabel.textContent = state.targetTimer.status === 'finished' ? 'FINISHED' : 'TARGET COUNTDOWN';
+        dialTargetLabel.style.display = 'block';
+        dialTargetLabel.textContent = `Target: ${formatTimeParts(state.targetTimer.targetDurationMs).base}`;
+
+        const progressRatio = Math.min(1, targetElapsed / state.targetTimer.targetDurationMs);
+        const dashoffset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
+        dialProgress.style.strokeDashoffset = dashoffset;
+
+        // Warnings & Finished
+        if (targetRemaining <= 300000 && targetRemaining > 60000 && state.targetTimer.status === 'running') {
+          dialDigits.classList.add('warning');
+          dialProgress.classList.add('warning');
+          if (!warned5min && window.soundFX) {
+            window.soundFX.warning();
+            warned5min = true;
+          }
+        } else if (targetRemaining <= 60000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
+          dialDigits.classList.add('warning');
+          dialProgress.classList.add('warning');
+          if (!warned1min && window.soundFX) {
+            window.soundFX.warning();
+            warned1min = true;
+          }
+        } else if (targetRemaining === 0 && state.targetTimer.status === 'running') {
+          state.targetTimer.status = 'finished';
+          if (window.soundFX) window.soundFX.finish();
+        } else {
+          dialDigits.classList.remove('warning');
+          dialProgress.classList.remove('warning');
+        }
+
+        // Toggle run button text for target timer
+        if (state.targetTimer.status === 'running') {
+          btnToggleRun.classList.add('running');
+          btnToggleText.textContent = 'Pause';
+        } else {
+          btnToggleRun.classList.remove('running');
+          btnToggleText.textContent = state.targetTimer.status === 'finished' ? 'Restart' : 'Start';
+        }
+
+        // Background Concurrent Stopwatch Banner
+        if (state.stopwatch.status === 'running') {
+          concurrentStopwatchBanner.style.display = 'flex';
+          concurrentStopwatchTime.textContent = formatTimeParts(swElapsed).base;
+        } else {
+          concurrentStopwatchBanner.style.display = 'none';
+        }
+        concurrentTargetBanner.style.display = 'none';
+
+      } else {
+        // Stopwatch Mode
+        const parts = formatTimeParts(swElapsed);
+        dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
+        dialStatusLabel.textContent = 'STOPWATCH';
+        dialTargetLabel.style.display = 'none';
         dialDigits.classList.remove('warning');
         dialProgress.classList.remove('warning');
+
+        // Continuous 60s rotating ring
+        const secRatio = (swElapsed % 60000) / 60000;
+        dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
+
+        // Toggle run button text for stopwatch
+        if (state.stopwatch.status === 'running') {
+          btnToggleRun.classList.add('running');
+          btnToggleText.textContent = 'Pause';
+        } else {
+          btnToggleRun.classList.remove('running');
+          btnToggleText.textContent = 'Start';
+        }
+
+        // Background Concurrent Target Timer Banner
+        if (state.targetTimer.status === 'running') {
+          concurrentTargetBanner.style.display = 'flex';
+          concurrentTargetTime.textContent = formatTimeParts(targetRemaining).base;
+        } else {
+          concurrentTargetBanner.style.display = 'none';
+        }
+        concurrentStopwatchBanner.style.display = 'none';
       }
-    } else {
-      // Stopwatch Mode
-      const parts = formatTimeParts(elapsed);
-      dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
-      dialStatusLabel.textContent = 'STOPWATCH';
-      dialTargetLabel.style.display = 'none';
-      dialDigits.classList.remove('warning');
-      dialProgress.classList.remove('warning');
-
-      // Continuous 60s rotating ring
-      const cycleMs = 60000;
-      const cycleProgress = (elapsed % cycleMs) / cycleMs;
-      dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - cycleProgress);
-    }
-
-    // Toggle button state
-    if (state.status === 'running') {
-      btnToggleRun.classList.add('running');
-      btnToggleText.textContent = 'Pause';
-      btnToggleRun.querySelector('svg').innerHTML = `
-        <rect x="6" y="4" width="4" height="16"></rect>
-        <rect x="14" y="4" width="4" height="16"></rect>
-      `;
-      dialDigits.classList.remove('paused');
-    } else if (state.status === 'paused') {
-      btnToggleRun.classList.remove('running');
-      btnToggleText.textContent = 'Resume';
-      btnToggleRun.querySelector('svg').innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-      dialDigits.classList.add('paused');
-    } else {
-      btnToggleRun.classList.remove('running');
-      btnToggleText.textContent = 'Start';
-      btnToggleRun.querySelector('svg').innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-      dialDigits.classList.remove('paused');
     }
 
     animationFrameId = requestAnimationFrame(updateUI);
   }
 
-  // Load and apply state
-  async function refreshState() {
-    const res = await sendMessage({ type: 'GET_STATE' });
-    if (res && res.state) {
-      state = res.state;
-      applyStateToControls();
-      renderLaps();
-      renderHistory();
-    }
-  }
-
+  // ================= CONTROL SYNC =================
   function applyStateToControls() {
-    if (state.mode === 'timer') {
+    // Mode switcher buttons
+    [btnModeStopwatch, btnModeTimer, btnModeDual].forEach(b => b.classList.remove('active'));
+    if (state.mode === 'dual') {
+      btnModeDual.classList.add('active');
+      presetsContainer.style.display = 'none';
+    } else if (state.mode === 'timer') {
       btnModeTimer.classList.add('active');
-      btnModeStopwatch.classList.remove('active');
       presetsContainer.style.display = 'block';
-
-      // Highlight active preset chip
-      const targetMins = Math.round(state.targetDurationMs / 60000);
-      let matched = false;
-      presetChips.forEach(chip => {
-        if (parseInt(chip.dataset.mins) === targetMins) {
-          chip.classList.add('active');
-          matched = true;
-        } else {
-          chip.classList.remove('active');
-        }
-      });
-      if (!matched) {
-        btnCustomTime.classList.add('active');
-      } else {
-        btnCustomTime.classList.remove('active');
-      }
     } else {
       btnModeStopwatch.classList.add('active');
-      btnModeTimer.classList.remove('active');
       presetsContainer.style.display = 'none';
-      customTimeBox.style.display = 'none';
     }
 
-    if (state.soundEnabled !== undefined) {
-      settingSound.checked = state.soundEnabled;
-      if (window.soundFX) window.soundFX.enabled = state.soundEnabled;
-    }
-    if (state.floatingWidgetEnabled !== undefined) {
-      settingFloating.checked = state.floatingWidgetEnabled;
+    // Preset active highlight
+    const mins = Math.round(state.targetTimer.targetDurationMs / 60000);
+    presetChips.forEach(chip => {
+      chip.classList.toggle('active', parseInt(chip.dataset.mins) === mins);
+    });
+    dualChips.forEach(chip => {
+      chip.classList.toggle('active', parseInt(chip.dataset.mins) === mins);
+    });
+
+    // Settings
+    settingDualActive.checked = state.allowDualActive !== false;
+    settingSound.checked = state.soundEnabled !== false;
+    settingFloating.checked = state.floatingWidgetEnabled !== false;
+    if (window.soundFX) window.soundFX.enabled = settingSound.checked;
+  }
+
+  // Switch mode without stopping running timers!
+  async function switchMode(newMode) {
+    if (state.mode === newMode) return;
+    if (window.soundFX) window.soundFX.tick();
+    const res = await sendMessage({ type: 'SET_MODE', mode: newMode });
+    if (res && res.state) {
+      state = normalizeState(res.state);
+      applyStateToControls();
     }
   }
 
-  // Navigation Tabs
-  navTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      navTabs.forEach(t => t.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      const target = document.getElementById(`tab-${tab.dataset.tab}`);
-      if (target) target.classList.add('active');
-    });
+  btnModeStopwatch.addEventListener('click', () => switchMode('stopwatch'));
+  btnModeTimer.addEventListener('click', () => switchMode('timer'));
+  btnModeDual.addEventListener('click', () => switchMode('dual'));
+
+  // ================= SINGLE MODE CONTROLS =================
+  btnToggleRun.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.start();
+
+    if (state.mode === 'timer') {
+      if (state.targetTimer.status === 'running') {
+        const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+        if (res && res.state) state = normalizeState(res.state);
+      } else {
+        const res = await sendMessage({ type: 'START', target: 'timer' });
+        if (res && res.state) state = normalizeState(res.state);
+      }
+    } else {
+      if (state.stopwatch.status === 'running') {
+        const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+        if (res && res.state) state = normalizeState(res.state);
+      } else {
+        const res = await sendMessage({ type: 'START', target: 'stopwatch' });
+        if (res && res.state) state = normalizeState(res.state);
+      }
+    }
   });
 
-  // Mode Switchers
-  btnModeStopwatch.addEventListener('click', async () => {
-    if (state.mode === 'stopwatch') return;
+  btnReset.addEventListener('click', async () => {
     if (window.soundFX) window.soundFX.tick();
-    const res = await sendMessage({ type: 'SET_MODE', mode: 'stopwatch' });
-    if (res && res.state) state = res.state;
-    applyStateToControls();
+    warned5min = false;
+    warned1min = false;
+    const target = state.mode === 'timer' ? 'timer' : 'stopwatch';
+    const res = await sendMessage({ type: 'RESET', target });
+    if (res && res.state) state = normalizeState(res.state);
     renderLaps();
   });
 
-  btnModeTimer.addEventListener('click', async () => {
-    if (state.mode === 'timer') return;
+  btnLap.addEventListener('click', () => recordLap());
+
+  // ================= DUAL MODE CONTROLS =================
+  // Master Sync Start / Pause Both
+  btnDualMasterToggle.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.start();
+    const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
+
+    if (bothRunning) {
+      const res = await sendMessage({ type: 'PAUSE', target: 'both' });
+      if (res && res.state) state = normalizeState(res.state);
+    } else {
+      const res = await sendMessage({ type: 'START', target: 'both' });
+      if (res && res.state) state = normalizeState(res.state);
+    }
+  });
+
+  btnDualMasterReset.addEventListener('click', async () => {
     if (window.soundFX) window.soundFX.tick();
-    const res = await sendMessage({ type: 'SET_MODE', mode: 'timer' });
-    if (res && res.state) state = res.state;
-    applyStateToControls();
+    warned5min = false;
+    warned1min = false;
+    const res = await sendMessage({ type: 'RESET', target: 'both' });
+    if (res && res.state) state = normalizeState(res.state);
     renderLaps();
   });
 
-  // Preset Chips
-  presetChips.forEach(chip => {
-    chip.addEventListener('click', async () => {
-      const mins = parseInt(chip.dataset.mins);
-      if (window.soundFX) window.soundFX.tick();
-      warned5min = false;
-      warned1min = false;
-      const res = await sendMessage({
-        type: 'SET_TARGET',
-        targetDurationMs: mins * 60 * 1000
-      });
-      if (res && res.state) state = res.state;
+  // Stopwatch Card Controls
+  btnDualSwToggle.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.start();
+    if (state.stopwatch.status === 'running') {
+      const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+      if (res && res.state) state = normalizeState(res.state);
+    } else {
+      const res = await sendMessage({ type: 'START', target: 'stopwatch' });
+      if (res && res.state) state = normalizeState(res.state);
+    }
+  });
+
+  btnDualSwLap.addEventListener('click', () => recordLap());
+
+  btnDualSwReset.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.tick();
+    const res = await sendMessage({ type: 'RESET', target: 'stopwatch' });
+    if (res && res.state) state = normalizeState(res.state);
+    renderLaps();
+  });
+
+  // Target Timer Card Controls
+  btnDualTimerToggle.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.start();
+    if (state.targetTimer.status === 'running') {
+      const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+      if (res && res.state) state = normalizeState(res.state);
+    } else {
+      const res = await sendMessage({ type: 'START', target: 'timer' });
+      if (res && res.state) state = normalizeState(res.state);
+    }
+  });
+
+  btnDualTimerReset.addEventListener('click', async () => {
+    if (window.soundFX) window.soundFX.tick();
+    warned5min = false;
+    warned1min = false;
+    const res = await sendMessage({ type: 'RESET', target: 'timer' });
+    if (res && res.state) state = normalizeState(res.state);
+  });
+
+  // Target Presets
+  async function applyPresetMins(mins) {
+    if (window.soundFX) window.soundFX.tick();
+    warned5min = false;
+    warned1min = false;
+    const targetDurationMs = mins * 60 * 1000;
+    const res = await sendMessage({ type: 'SET_TARGET', targetDurationMs });
+    if (res && res.state) {
+      state = normalizeState(res.state);
       applyStateToControls();
-    });
+    }
+  }
+
+  presetChips.forEach(chip => {
+    if (chip.id === 'btn-custom-time') return;
+    chip.addEventListener('click', () => applyPresetMins(parseInt(chip.dataset.mins)));
   });
 
-  // Custom Time Toggle & Apply
+  dualChips.forEach(chip => {
+    chip.addEventListener('click', () => applyPresetMins(parseInt(chip.dataset.mins)));
+  });
+
   btnCustomTime.addEventListener('click', () => {
     customTimeBox.style.display = customTimeBox.style.display === 'none' ? 'flex' : 'none';
   });
 
   btnApplyCustom.addEventListener('click', async () => {
-    const h = parseInt(customHours.value) || 0;
-    const m = parseInt(customMinutes.value) || 0;
-    const s = parseInt(customSeconds.value) || 0;
-    const totalMs = (h * 3600 + m * 60 + s) * 1000;
+    const hrs = parseInt(customHours.value) || 0;
+    const mins = parseInt(customMinutes.value) || 0;
+    const secs = parseInt(customSeconds.value) || 0;
+    const totalMs = (hrs * 3600 + mins * 60 + secs) * 1000;
 
-    if (totalMs <= 0) return;
-    if (window.soundFX) window.soundFX.tick();
+    if (totalMs < 10000) {
+      alert('Target duration must be at least 10 seconds.');
+      return;
+    }
 
-    warned5min = false;
-    warned1min = false;
-    const res = await sendMessage({ type: 'SET_TARGET', targetDurationMs: totalMs });
-    if (res && res.state) state = res.state;
     customTimeBox.style.display = 'none';
-    applyStateToControls();
-  });
-
-  // Play / Pause Toggle
-  btnToggleRun.addEventListener('click', async () => {
     if (window.soundFX) window.soundFX.tick();
-    if (state.status === 'running') {
-      const res = await sendMessage({ type: 'PAUSE' });
-      if (res && res.state) state = res.state;
-    } else {
-      const res = await sendMessage({ type: 'START' });
-      if (res && res.state) state = res.state;
+    const res = await sendMessage({ type: 'SET_TARGET', targetDurationMs: totalMs });
+    if (res && res.state) {
+      state = normalizeState(res.state);
+      applyStateToControls();
     }
   });
 
-  // Reset Button
-  btnReset.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.tick();
-    warned5min = false;
-    warned1min = false;
-    const res = await sendMessage({ type: 'RESET' });
-    if (res && res.state) state = res.state;
-    renderLaps();
+  // ================= CONCURRENT BANNER ACTIONS =================
+  btnConcurrentTargetPause.addEventListener('click', async () => {
+    const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+    if (res && res.state) state = normalizeState(res.state);
   });
 
-  // Lap Split Button
+  btnConcurrentTargetSwitch.addEventListener('click', () => {
+    switchMode('timer');
+  });
+
+  btnConcurrentStopwatchPause.addEventListener('click', async () => {
+    const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+    if (res && res.state) state = normalizeState(res.state);
+  });
+
+  btnConcurrentStopwatchSwitch.addEventListener('click', () => {
+    switchMode('stopwatch');
+  });
+
+  // ================= LAPS & CHECKPOINTS =================
   async function recordLap(customLabel = null) {
-    if (state.status !== 'running' && state.elapsedBeforePause === 0) return;
+    const elapsed = getStopwatchElapsed();
+    if (state.stopwatch.status !== 'running' && elapsed === 0) return;
     if (window.soundFX) window.soundFX.lap();
     const res = await sendMessage({ type: 'ADD_LAP', label: customLabel });
     if (res && res.state) {
-      state = res.state;
+      state = normalizeState(res.state);
       renderLaps();
     }
   }
 
-  btnLap.addEventListener('click', () => recordLap());
-
-  // Phase Buttons (Laps tab)
   lapPhaseBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      recordLap(btn.dataset.phase);
-    });
+    btn.addEventListener('click', () => recordLap(btn.dataset.phase));
   });
 
   function renderLaps() {
@@ -469,7 +869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
-  // History & Session Logging
+  // ================= SESSIONS & HISTORY =================
   function renderHistory() {
     const history = state.history || [];
     statSolvedCount.textContent = history.length;
@@ -509,10 +909,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // Open Problem Log Modal
+  // Log Modal Open
   btnLogModalOpen.addEventListener('click', () => {
-    const elapsed = getElapsed();
-    const parts = formatTimeParts(elapsed);
+    const swElapsed = getStopwatchElapsed();
+    const duration = swElapsed > 0 ? swElapsed : getTargetElapsed();
+    const parts = formatTimeParts(duration);
     modalTimeDisplay.textContent = parts.fullText;
     modalTitle.value = activeProblemTitle.value.trim() || '';
     modalPlatform.value = activePlatform.value;
@@ -530,7 +931,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const difficulty = modalDifficulty.value;
     const verdict = document.querySelector('input[name="verdict"]:checked')?.value || 'Solved';
     const notes = modalNotes.value.trim();
-    const durationMs = getElapsed();
+    const swElapsed = getStopwatchElapsed();
+    const durationMs = swElapsed > 0 ? swElapsed : getTargetElapsed();
 
     const res = await sendMessage({
       type: 'LOG_PROBLEM',
@@ -543,14 +945,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (res && res.state) {
-      state = res.state;
+      state = normalizeState(res.state);
       renderHistory();
     }
 
     modalLog.style.display = 'none';
     if (window.soundFX) window.soundFX.lap();
 
-    // Auto-switch to history tab to see saved session
+    // Auto-switch to history tab
     navTabs.forEach(t => t.classList.remove('active'));
     tabContents.forEach(c => c.classList.remove('active'));
     document.querySelector('.nav-tab[data-tab="history"]').classList.add('active');
@@ -588,13 +990,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (confirm('Are you sure you want to clear your problem history?')) {
       const res = await sendMessage({ type: 'CLEAR_HISTORY' });
       if (res && res.state) {
-        state = res.state;
+        state = normalizeState(res.state);
         renderHistory();
       }
     }
   });
 
-  // Settings
+  // Settings Events
+  settingDualActive.addEventListener('change', async (e) => {
+    const enabled = e.target.checked;
+    state.allowDualActive = enabled;
+    await sendMessage({ type: 'UPDATE_SETTINGS', allowDualActive: enabled });
+  });
+
   settingSound.addEventListener('change', async (e) => {
     const enabled = e.target.checked;
     if (window.soundFX) window.soundFX.enabled = enabled;
@@ -606,6 +1014,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     await sendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: enabled });
   });
 
+  // Tab Navigation
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabId = tab.dataset.tab;
+      navTabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+
+      tab.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+
+      if (tabId === 'laps') renderLaps();
+      if (tabId === 'history') renderHistory();
+    });
+  });
+
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
     if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) {
@@ -614,22 +1037,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (e.code === 'Space') {
       e.preventDefault();
-      btnToggleRun.click();
+      if (state.mode === 'dual') btnDualMasterToggle.click();
+      else btnToggleRun.click();
     } else if (e.key === 'r' || e.key === 'R') {
-      btnReset.click();
+      if (state.mode === 'dual') btnDualMasterReset.click();
+      else btnReset.click();
     } else if (e.key === 'l' || e.key === 'L') {
       recordLap();
     } else if (e.key === 'm' || e.key === 'M') {
-      if (state.mode === 'stopwatch') btnModeTimer.click();
-      else btnModeStopwatch.click();
+      if (state.mode === 'stopwatch') switchMode('timer');
+      else if (state.mode === 'timer') switchMode('dual');
+      else switchMode('stopwatch');
     }
   });
 
-  // Listen for storage changes from background or other tabs
+  // Storage Change Sync
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'local' && changes.algoTimerState) {
-        state = changes.algoTimerState.newValue;
+        state = normalizeState(changes.algoTimerState.newValue);
         applyStateToControls();
         renderLaps();
         renderHistory();
@@ -638,6 +1064,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Initial Load
-  await refreshState();
+  const initRes = await sendMessage({ type: 'GET_STATE' });
+  if (initRes && initRes.state) {
+    state = normalizeState(initRes.state);
+  }
+  applyStateToControls();
+  renderLaps();
+  renderHistory();
   updateUI();
 });
