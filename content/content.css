@@ -1,13 +1,43 @@
-/* AlgoTimer Floating In-Page Stopwatch Widget */
+/* AlgoTimer - Floating In-Page Stopwatch & Countdown Widget CSS */
+/* Fully Resizable, 4-Corner Dockable, Multi-Size, Dual Display */
 
 #algotimer-floating-root {
   position: fixed;
-  top: 75px;
-  right: 25px;
   z-index: 2147483647;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   user-select: none;
+  -webkit-user-select: none;
   box-sizing: border-box;
+  pointer-events: none; /* root container is pass-through, widget is interactive */
+}
+
+/* Default corner: Top-Right */
+#algotimer-floating-root.corner-top-right {
+  top: 24px;
+  right: 24px;
+  bottom: auto;
+  left: auto;
+}
+
+#algotimer-floating-root.corner-top-left {
+  top: 24px;
+  left: 24px;
+  bottom: auto;
+  right: auto;
+}
+
+#algotimer-floating-root.corner-bottom-right {
+  bottom: 24px;
+  right: 24px;
+  top: auto;
+  left: auto;
+}
+
+#algotimer-floating-root.corner-bottom-left {
+  bottom: 24px;
+  left: 24px;
+  top: auto;
+  right: auto;
 }
 
 #algotimer-floating-root * {
@@ -16,33 +46,42 @@
   padding: 0;
 }
 
+/* Main Floating Widget Box */
 .algotimer-widget {
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(14, 165, 233, 0.15);
-  border-radius: 14px;
+  pointer-events: auto;
+  position: relative;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.65), 0 0 20px rgba(14, 165, 233, 0.18);
+  border-radius: 12px;
   color: #f8fafc;
-  width: 270px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 260px;
+  min-width: 140px;
+  max-width: 420px;
+  min-height: 54px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.algotimer-widget.minimized {
-  width: auto;
-  border-radius: 30px;
-  border-color: rgba(56, 189, 248, 0.4);
+.algotimer-widget:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 14px 40px -4px rgba(0, 0, 0, 0.75), 0 0 24px rgba(14, 165, 233, 0.28);
 }
 
+/* Drag Header */
 .algotimer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  background: rgba(30, 41, 59, 0.6);
+  padding: 6px 10px;
+  background: rgba(30, 41, 59, 0.65);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   cursor: grab;
+  gap: 6px;
 }
 
 .algotimer-header:active {
@@ -58,21 +97,25 @@
   letter-spacing: 0.5px;
   color: #38bdf8;
   text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .algotimer-icon {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #38bdf8;
   box-shadow: 0 0 8px #38bdf8;
-  display: inline-block;
+  flex-shrink: 0;
 }
 
 .algotimer-header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 .algotimer-btn-icon {
@@ -80,54 +123,65 @@
   border: none;
   color: #94a3b8;
   cursor: pointer;
-  padding: 3px 6px;
+  padding: 2px 5px;
   border-radius: 4px;
   font-size: 12px;
-  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .algotimer-btn-icon:hover {
   color: #f8fafc;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.algotimer-btn-icon.pip-btn:hover {
+.algotimer-btn-icon.active {
   color: #38bdf8;
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(56, 189, 248, 0.2);
 }
 
+/* Widget Body */
 .algotimer-body {
-  padding: 12px;
-  text-align: center;
-}
-
-.algotimer-widget.minimized .algotimer-body,
-.algotimer-widget.minimized .algotimer-footer {
-  display: none;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
 }
 
 .algotimer-problem-tag {
   display: inline-block;
-  max-width: 230px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 10px;
   color: #cbd5e1;
   background: rgba(255, 255, 255, 0.06);
-  padding: 3px 8px;
+  padding: 2px 8px;
   border-radius: 999px;
-  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.algotimer-mode-badge {
+  font-size: 9px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* Single Clock Display */
 .algotimer-clock {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 32px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 28px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #38bdf8;
-  text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
   line-height: 1.1;
 }
 
@@ -139,7 +193,7 @@
 
 .algotimer-clock.paused {
   color: #fbbf24;
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
 }
 
 @keyframes algotimer-pulse {
@@ -147,67 +201,64 @@
   to { opacity: 1; }
 }
 
-.algotimer-mode-badge {
-  font-size: 10px;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 10px;
-}
-
-/* Dual mode in floating widget */
+/* Dual Clocks (Stopwatch + Countdown Active) */
 .algotimer-dual-clocks {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.3);
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: 100%;
 }
 
 .algotimer-dual-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .algotimer-subtag {
-  font-size: 11px;
+  font-size: 10px;
   color: #94a3b8;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .algotimer-dual-time {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #ffffff;
+  letter-spacing: 0.3px;
 }
 
 .algotimer-dual-time.warning {
   color: #f43f5e;
-  text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+  text-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
 }
 
+/* Controls */
 .algotimer-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
+  width: 100%;
 }
 
 .algotimer-btn {
   background: rgba(30, 41, 59, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f1f5f9;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -215,6 +266,7 @@
   justify-content: center;
   gap: 4px;
   transition: all 0.15s ease;
+  line-height: 1;
 }
 
 .algotimer-btn:hover {
@@ -231,50 +283,143 @@
   background: linear-gradient(135deg, #0284c7, #0369a1);
   border: none;
   color: #ffffff;
-  padding: 6px 16px;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  padding: 5px 14px;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
 }
 
 .algotimer-btn-primary:hover {
   background: linear-gradient(135deg, #0ea5e9, #0284c7);
-  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.5);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.5);
 }
 
-/* Minimized Mode View */
-.algotimer-mini-content {
+/* ============================================================== */
+/* RESIZE HANDLE (Corner Grip for Drag-Resizing)                  */
+/* ============================================================== */
+.algotimer-resize-grip {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, rgba(56, 189, 248, 0.45) 50%);
+  border-bottom-right-radius: 12px;
+  z-index: 10;
+  transition: opacity 0.15s ease;
+}
+
+.algotimer-resize-grip:hover {
+  background: linear-gradient(135deg, transparent 40%, rgba(56, 189, 248, 0.85) 40%);
+}
+
+/* ============================================================== */
+/* ADAPTIVE SIZE MODES (Compact & Mini for small spaces)          */
+/* ============================================================== */
+
+/* COMPACT MODE (~190px - 210px) */
+.algotimer-widget[data-size="compact"] {
+  width: 200px;
+}
+
+.algotimer-widget[data-size="compact"] .algotimer-header {
+  padding: 4px 8px;
+}
+
+.algotimer-widget[data-size="compact"] .algotimer-body {
+  padding: 6px 8px;
+  gap: 4px;
+}
+
+.algotimer-widget[data-size="compact"] .algotimer-problem-tag,
+.algotimer-widget[data-size="compact"] .algotimer-mode-badge {
   display: none;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  cursor: grab;
 }
 
-.algotimer-widget.minimized .algotimer-header {
-  display: none;
+.algotimer-widget[data-size="compact"] .algotimer-clock {
+  font-size: 20px;
 }
 
-.algotimer-widget.minimized .algotimer-mini-content {
-  display: flex;
+.algotimer-widget[data-size="compact"] .algotimer-dual-clocks {
+  padding: 4px 6px;
+  gap: 3px;
 }
 
-.algotimer-mini-clock {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+.algotimer-widget[data-size="compact"] .algotimer-dual-time {
   font-size: 13px;
-  font-weight: 700;
-  color: #38bdf8;
 }
 
-.algotimer-mini-btn {
-  background: transparent;
+.algotimer-widget[data-size="compact"] .algotimer-dual-row {
+  font-size: 9px;
+}
+
+.algotimer-widget[data-size="compact"] .algotimer-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* MINI MODE (~140px - 175px) - Super small corner timer */
+.algotimer-widget[data-size="mini"] {
+  width: 160px;
+  border-radius: 10px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-header {
+  padding: 3px 6px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-title span:last-child {
+  display: none; /* Just show glowing icon in mini */
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-problem-tag,
+.algotimer-widget[data-size="mini"] .algotimer-mode-badge {
+  display: none;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-body {
+  padding: 4px 6px;
+  gap: 3px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-clock {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-dual-clocks {
+  padding: 3px 5px;
+  gap: 2px;
   border: none;
-  color: #cbd5e1;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-dual-row {
+  gap: 4px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-subtag {
+  font-size: 8px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-dual-time {
+  font-size: 11px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-controls {
+  gap: 4px;
+}
+
+.algotimer-widget[data-size="mini"] .algotimer-btn {
+  padding: 3px 6px;
+  font-size: 10px;
   border-radius: 4px;
 }
 
-.algotimer-mini-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
+/* Quick Corner Badge Indicator in Header */
+.algotimer-corner-badge {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #94a3b8;
 }

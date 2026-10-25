@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -21,8 +21,19 @@
         <span class="brand-name">AlgoTimer</span>
       </div>
       <div class="header-badges">
-        <!-- Pop Up Screen Buttons -->
-        <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over other apps (VS Code, Desktop, IDE)">
+        <!-- Compact Mini Mode Toggle -->
+        <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact Mode (Make window ultra-small and fit anywhere)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 14 10 14 10 20"></polyline>
+            <polyline points="20 10 14 10 14 4"></polyline>
+            <line x1="14" y1="10" x2="21" y2="3"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+          <span class="btn-text">Compact</span>
+        </button>
+
+        <!-- Pop Up Screen Buttons (Always-On-Top PiP & Resizable Standalone Window) -->
+        <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over VS Code, Discord, or any app on your display">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
             <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
@@ -31,7 +42,7 @@
           </svg>
           <span class="btn-text">Pop Up</span>
         </button>
-        <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Resizable Window">
+        <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Resizable Window (Move anywhere on screen)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
@@ -52,7 +63,7 @@
 
     <!-- TAB 1: TIMER / STOPWATCH -->
     <main class="tab-content active" id="tab-timer">
-      <!-- Mode Segmented Switcher (Now includes Dual Mode!) -->
+      <!-- Mode Segmented Switcher (Stopwatch, Target Timer, Dual Both) -->
       <div class="mode-switcher">
         <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
           <span>⏱️</span> Stopwatch
@@ -104,7 +115,6 @@
             <button class="preset-chip" id="btn-custom-time">Custom...</button>
           </div>
 
-          <!-- Custom Target Input Modal / Drawer -->
           <div class="custom-time-box" id="custom-time-box" style="display: none;">
             <div class="time-inputs">
               <div class="time-input-group">
@@ -209,7 +219,6 @@
               30:00<small id="dual-timer-millis">.0</small>
             </div>
           </div>
-          <!-- Presets for Target Timer inside Dual View -->
           <div class="dual-preset-row">
             <button class="dual-chip" data-mins="5">5m</button>
             <button class="dual-chip" data-mins="15">15m</button>
@@ -314,14 +323,14 @@
         <label class="setting-row">
           <div class="setting-info">
             <span class="setting-title">Dual Active Mode</span>
-            <span class="setting-desc">Allow Stopwatch & Target Timer to both run simultaneously without stopping each other</span>
+            <span class="setting-desc">Allow Stopwatch & Target Timer both active simultaneously</span>
           </div>
           <input type="checkbox" id="setting-dual-active" checked>
         </label>
         <label class="setting-row">
           <div class="setting-info">
             <span class="setting-title">Sound Alerts</span>
-            <span class="setting-desc">Pleasant audio chimes on completion, warnings, and lap splits</span>
+            <span class="setting-desc">Pleasant audio chimes on completion, warnings, and laps</span>
           </div>
           <input type="checkbox" id="setting-sound" checked>
         </label>
@@ -339,7 +348,7 @@
         <div class="setting-action-card">
           <div class="setting-info">
             <span class="setting-title">Always-On-Top Floating Screen</span>
-            <span class="setting-desc">Pops out the timer into an OS-level Picture-in-Picture window that stays floating on top of VS Code, Terminal, Discord, and any desktop app!</span>
+            <span class="setting-desc">Pops out the timer into an OS-level window that you can resize and put anywhere on any display over VS Code, Discord, or any desktop app!</span>
           </div>
           <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
             🗗 Launch Pop Up Float

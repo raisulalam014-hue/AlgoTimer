@@ -280,9 +280,35 @@
 
     /* Position the simulated in-page floating widget inside the mock page */
     .mock-webpage #algotimer-floating-root {
-      position: absolute;
+      position: absolute !important;
+    }
+
+    .mock-webpage #algotimer-floating-root.corner-top-right {
       top: 55px;
       right: 20px;
+      bottom: auto;
+      left: auto;
+    }
+
+    .mock-webpage #algotimer-floating-root.corner-top-left {
+      top: 55px;
+      left: 20px;
+      bottom: auto;
+      right: auto;
+    }
+
+    .mock-webpage #algotimer-floating-root.corner-bottom-right {
+      bottom: 20px;
+      right: 20px;
+      top: auto;
+      left: auto;
+    }
+
+    .mock-webpage #algotimer-floating-root.corner-bottom-left {
+      bottom: 20px;
+      left: 20px;
+      top: auto;
+      right: auto;
     }
 
     /* Demo Tips Footer */
@@ -337,18 +363,18 @@
       </div>
       <div class="demo-title-group">
         <h1>AlgoTimer - Problem Solving Stopwatch & Timer</h1>
-        <p>Interactive Demo: Dual Concurrent Timers & Always-On-Top Pop-Up Screen System</p>
+        <p>Interactive Demo: 4-Corner Dockable HUD, Free Resizing, Dual Concurrent Timers & Pop-Up Screen</p>
       </div>
     </div>
     <div class="demo-topbar-actions">
       <button class="demo-btn demo-btn-primary" id="btn-topbar-pip">
-        🗗 Pop Up Float Screen
+        ⤢ Pop Up Float Screen
       </button>
       <button class="demo-btn" id="btn-topbar-window">
-        ⤢ Standalone Window
+        ↗ Standalone Window
       </button>
       <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="demo-btn">
-        ⭐ GitHub Repo
+        ★ GitHub Repo
       </a>
     </div>
   </header>
@@ -358,16 +384,16 @@
     <!-- Left Column: Extension Popup Interface -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>⏱️ Chrome Extension Popup (Interactive Preview)</span>
+        <span>Extension Popup Interface</span>
+        <span style="color: #38bdf8;">Default Chrome Action</span>
       </div>
 
       <div class="browser-frame">
         <div class="browser-toolbar">
-          <div class="browser-dot dot-red"></div>
-          <div class="browser-dot dot-yellow"></div>
-          <div class="browser-dot dot-green"></div>
+          <span class="browser-dot dot-red"></span>
+          <span class="browser-dot dot-yellow"></span>
+          <span class="browser-dot dot-green"></span>
           <div class="browser-url-bar">
-            <span>🔒</span>
             <span>chrome-extension://algotimer/popup.html</span>
           </div>
         </div>
@@ -386,6 +412,15 @@
               <span class="brand-name">AlgoTimer</span>
             </div>
             <div class="header-badges">
+              <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact HUD Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="4 14 10 14 10 20"></polyline>
+                  <polyline points="20 10 14 10 14 4"></polyline>
+                  <line x1="14" y1="10" x2="21" y2="3"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                <span class="btn-text">Compact</span>
+              </button>
               <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over other apps">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -402,7 +437,7 @@
                   <line x1="10" y1="14" x2="21" y2="3"></line>
                 </svg>
               </button>
-              <span class="version-tag">v1.1</span>
+              <span class="version-tag">v1.2</span>
             </div>
           </header>
 
@@ -418,35 +453,37 @@
           <main class="tab-content active" id="tab-timer">
             <!-- Mode Segmented Switcher -->
             <div class="mode-switcher">
-              <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
-                <span>⏱️</span> Stopwatch
+              <button class="mode-tab active" id="btn-mode-stopwatch" data-mode="stopwatch">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l2 2"></path>
+                  <path d="M10 2h4"></path>
+                </svg>
+                <span>Stopwatch</span>
               </button>
-              <button class="mode-btn" id="btn-mode-timer" data-mode="timer">
-                <span>⏳</span> Target Timer
+              <button class="mode-tab" id="btn-mode-timer" data-mode="timer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 22h14"></path>
+                  <path d="M5 2h14"></path>
+                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                </svg>
+                <span>Target</span>
               </button>
-              <button class="mode-btn" id="btn-mode-dual" data-mode="dual">
-                <span>⚡</span> Dual (Both)
+              <button class="mode-tab" id="btn-mode-dual" data-mode="dual" title="Both Stopwatch and Countdown Active Concurrently">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                </svg>
+                <span>Dual Mode</span>
               </button>
             </div>
 
-            <!-- Concurrent Background Indicator Banners -->
-            <div class="concurrent-banner" id="concurrent-target-banner" style="display: none;">
-              <div class="concurrent-info">
-                <span class="pulse-indicator pulse-rose"></span>
-                <span class="concurrent-label">Target Timer:</span>
-                <strong class="concurrent-digits" id="concurrent-target-time">24:15</strong>
-              </div>
-              <div class="concurrent-actions">
-                <button class="concurrent-btn" id="btn-concurrent-target-pause">Pause</button>
-                <button class="concurrent-btn primary" id="btn-concurrent-target-switch">View</button>
-              </div>
-            </div>
-
-            <div class="concurrent-banner" id="concurrent-stopwatch-banner" style="display: none;">
-              <div class="concurrent-info">
-                <span class="pulse-indicator pulse-blue"></span>
-                <span class="concurrent-label">Stopwatch:</span>
-                <strong class="concurrent-digits" id="concurrent-stopwatch-time">08:42</strong>
+            <!-- Concurrent Status Banner (When timer running in background) -->
+            <div class="concurrent-banner" id="concurrent-banner" style="display: none;">
+              <div class="concurrent-indicator-pulse"></div>
+              <div class="concurrent-text">
+                <span class="concurrent-title" id="concurrent-title">Stopwatch Running</span>
+                <span class="concurrent-time" id="concurrent-time">00:00:00</span>
               </div>
               <div class="concurrent-actions">
                 <button class="concurrent-btn" id="btn-concurrent-stopwatch-pause">Pause</button>
@@ -569,57 +606,37 @@
                 </div>
                 <div class="dual-digits-row">
                   <div class="dual-clock-digits" id="dual-timer-digits">
-                    30:00<small id="dual-timer-millis">.0</small>
+                    30:00:00<small id="dual-timer-millis">.0</small>
                   </div>
-                </div>
-                <div class="dual-preset-row">
-                  <button class="dual-chip" data-mins="5">5m</button>
-                  <button class="dual-chip" data-mins="15">15m</button>
-                  <button class="dual-chip active" data-mins="30">30m</button>
-                  <button class="dual-chip" data-mins="45">45m</button>
-                  <button class="dual-chip" data-mins="60">60m</button>
                 </div>
                 <div class="dual-card-actions">
                   <button class="dual-btn dual-btn-primary" id="btn-dual-timer-toggle">
                     <span id="btn-dual-timer-text">Start</span>
                   </button>
+                  <button class="dual-btn" id="btn-dual-timer-preset-cycle">Preset</button>
                   <button class="dual-btn" id="btn-dual-timer-reset">Reset</button>
                 </div>
               </div>
 
-              <!-- Master Synchronization Control Bar -->
+              <!-- Master Controls for Both -->
               <div class="dual-master-bar">
-                <button class="btn btn-primary-hero dual-master-btn" id="btn-dual-master-toggle">
-                  <span id="dual-master-icon">⚡</span>
-                  <span id="dual-master-text">Start Both Together</span>
+                <button class="btn btn-primary-hero" id="btn-dual-master-toggle" style="width: 100%;">
+                  ⚡ Start Both (Stopwatch & Countdown)
                 </button>
-                <button class="btn btn-secondary" id="btn-dual-master-reset" title="Reset both timers">
-                  <span>Reset Both</span>
+                <button class="btn btn-secondary" id="btn-dual-master-reset" style="margin-top: 6px; width: 100%;">
+                  Reset Both
                 </button>
               </div>
             </div>
 
-            <!-- Problem Logging Quick Bar -->
-            <div class="problem-log-bar">
-              <div class="problem-meta">
-                <input type="text" id="active-problem-title" placeholder="Problem name (e.g. 15. 3Sum)" spellcheck="false">
-                <div class="meta-tags">
-                  <select id="active-platform" class="mini-select">
-                    <option value="LeetCode">LeetCode</option>
-                    <option value="Codeforces">Codeforces</option>
-                    <option value="HackerRank">HackerRank</option>
-                    <option value="NeetCode">NeetCode</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <select id="active-difficulty" class="mini-select">
-                    <option value="Easy">Easy</option>
-                    <option value="Medium" selected>Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
-                </div>
+            <!-- Problem Context & Log Bar -->
+            <div class="problem-context-card">
+              <div class="problem-info">
+                <div class="problem-platform-tag" id="current-platform-tag">LeetCode</div>
+                <div class="problem-title-display" id="current-problem-title">15. 3Sum</div>
               </div>
               <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
-                💾 Log Result
+                📝 Log Result
               </button>
             </div>
           </main>
@@ -689,7 +706,7 @@
               <label class="setting-row">
                 <div class="setting-info">
                   <span class="setting-title">Floating Overlay Widget</span>
-                  <span class="setting-desc">Show on LeetCode, Codeforces & HackerRank problem pages</span>
+                  <span class="setting-desc">Show on LeetCode, Codeforces, HackerRank & any tab</span>
                 </div>
                 <input type="checkbox" id="setting-floating" checked>
               </label>
@@ -703,106 +720,19 @@
                   <span class="setting-desc">Pops out the timer into an OS-level Picture-in-Picture window that floats on top of VS Code, Terminal, Discord, and any desktop app!</span>
                 </div>
                 <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-                  🗗 Launch Pop Up Float
+                  ⤢ Launch Pop Up Float
                 </button>
               </div>
             </div>
-
-            <div class="settings-group">
-              <h4>Keyboard Shortcuts</h4>
-              <div class="shortcut-list">
-                <div class="shortcut-item">
-                  <span>Start / Pause</span>
-                  <kbd>Space</kbd>
-                </div>
-                <div class="shortcut-item">
-                  <span>Record Lap / Split</span>
-                  <kbd>L</kbd>
-                </div>
-                <div class="shortcut-item">
-                  <span>Reset Stopwatch</span>
-                  <kbd>R</kbd>
-                </div>
-                <div class="shortcut-item">
-                  <span>Toggle Mode</span>
-                  <kbd>M</kbd>
-                </div>
-              </div>
-            </div>
           </section>
-
-          <!-- LOG MODAL -->
-          <div class="modal-overlay" id="modal-log" style="display: none;">
-            <div class="modal-card">
-              <div class="modal-header">
-                <h3>Log Problem Session</h3>
-                <button class="modal-close" id="btn-modal-close">✕</button>
-              </div>
-              <div class="modal-body">
-                <div class="form-group">
-                  <label>Problem Title</label>
-                  <input type="text" id="modal-title" placeholder="e.g. 15. 3Sum">
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Platform</label>
-                    <select id="modal-platform">
-                      <option value="LeetCode" selected>LeetCode</option>
-                      <option value="Codeforces">Codeforces</option>
-                      <option value="HackerRank">HackerRank</option>
-                      <option value="NeetCode">NeetCode</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>Difficulty</label>
-                    <select id="modal-difficulty">
-                      <option value="Easy">Easy</option>
-                      <option value="Medium" selected>Medium</option>
-                      <option value="Hard">Hard</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Verdict / Outcome</label>
-                  <div class="verdict-options">
-                    <label class="verdict-chip solved">
-                      <input type="radio" name="verdict" value="Solved" checked>
-                      <span>✓ Solved</span>
-                    </label>
-                    <label class="verdict-chip upsolved">
-                      <input type="radio" name="verdict" value="Upsolved">
-                      <span>💡 Upsolved</span>
-                    </label>
-                    <label class="verdict-chip attempted">
-                      <input type="radio" name="verdict" value="Attempted">
-                      <span>⏳ Need Review</span>
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Time Taken</label>
-                  <div class="modal-time-display" id="modal-time-display">00:00:00</div>
-                </div>
-                <div class="form-group">
-                  <label>Key Takeaway / Notes</label>
-                  <textarea id="modal-notes" rows="2" placeholder="e.g. Two-pointer approach after sorting O(N^2), avoided duplicates correctly."></textarea>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
-                <button class="btn btn-primary" id="btn-modal-save" style="background:#0284c7;color:white;padding:6px 14px;">Save Session</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Mock Coding Problem Page with Draggable Floating Widget -->
+    <!-- Right Column: Mock Coding Problem Page with Draggable & Resizable Floating Widget -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>💻 In-Page Floating Widget Demo (e.g. LeetCode / Codeforces)</span>
+        <span>💻 In-Page Floating Widget Demo (Dock to any corner, resize smaller-ly!)</span>
       </div>
 
       <div class="browser-frame mock-webpage" id="mock-page-container">
@@ -849,9 +779,9 @@
           </ul>
         </div>
 
-        <!-- Simulated In-Page Floating Stopwatch Overlay (Draggable!) -->
-        <div id="algotimer-floating-root">
-          <div class="algotimer-widget" id="floating-widget-el">
+        <!-- Simulated In-Page Floating Stopwatch Overlay (Draggable, 4-Corner Dockable & Resizable!) -->
+        <div id="algotimer-floating-root" class="corner-top-right">
+          <div class="algotimer-widget" id="floating-widget-el" data-size="normal">
             <!-- Header (Draggable) -->
             <div class="algotimer-header" id="algotimer-drag-handle">
               <div class="algotimer-title">
@@ -859,18 +789,23 @@
                 <span>AlgoTimer Overlay</span>
               </div>
               <div class="algotimer-header-actions">
-                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Pop Up Screen: Float Always-On-Top over other apps">🗗</button>
-                <button class="algotimer-btn-icon" id="algotimer-btn-min" title="Minimize">−</button>
-                <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">✕</button>
+                <!-- Corner Dock Cycler (↗, ↘, ↙, ↖) -->
+                <button class="algotimer-btn-icon" id="algotimer-btn-corner" title="Dock to next corner (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
+                  <span class="algotimer-corner-badge" id="algotimer-corner-indicator">↗ TR</span>
+                </button>
+                <!-- Size Toggle (Normal -> Compact -> Mini) -->
+                <button class="algotimer-btn-icon" id="algotimer-btn-size" title="Toggle Size (Normal, Compact, Mini)">
+                  🗜️
+                </button>
+                <!-- Pop Out Window / PiP -->
+                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-On-Top Pop Up Screen">
+                  ⤢
+                </button>
+                <!-- Hide / Close -->
+                <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">
+                  ✕
+                </button>
               </div>
-            </div>
-
-            <!-- Minimized pill view -->
-            <div class="algotimer-mini-content" id="algotimer-mini-drag">
-              <span class="algotimer-icon"></span>
-              <span class="algotimer-mini-clock" id="algotimer-mini-time">00:00</span>
-              <button class="algotimer-mini-btn" id="algotimer-mini-toggle" title="Start/Pause">▶</button>
-              <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⤢</button>
             </div>
 
             <!-- Body -->
@@ -885,7 +820,7 @@
                 00:00
               </div>
 
-              <!-- Dual clocks view in widget -->
+              <!-- Dual clocks view in widget (Stopwatch + Countdown Active) -->
               <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
                 <div class="algotimer-dual-row">
                   <span class="algotimer-subtag">⏱️ Elapsed</span>
@@ -902,13 +837,16 @@
                   ▶ Start
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
-                  🏁 Lap
+                  Lap
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
                   ↺
                 </button>
               </div>
             </div>
+
+            <!-- Resizing Corner Grip Handle -->
+            <div class="algotimer-resize-grip" id="algotimer-resize-grip" title="Drag corner to freely resize smaller or larger"></div>
           </div>
         </div>
       </div>
@@ -918,31 +856,31 @@
   <!-- Helpful Demo Tips -->
   <footer class="demo-tips">
     <div class="tip-item">
-      <div class="tip-icon">🗗</div>
+      <div class="tip-icon">⤢</div>
       <div class="tip-text">
-        <h4>Pop Up Screen System</h4>
-        <p>Click <strong>Pop Up</strong> or <strong>Float Screen</strong> to pop the timer into an OS-level Always-On-Top window that floats over VS Code, Discord, and any desktop app!</p>
+        <h4>4-Corner Dock & Resize Smaller-ly</h4>
+        <p>Click <strong>↗ TR</strong> to jump between all 4 corners of any tab! Use <strong>🗜️</strong> or drag the bottom-right corner grip to resize smaller-ly down to a sleek mini HUD.</p>
       </div>
     </div>
     <div class="tip-item">
       <div class="tip-icon">⚡</div>
       <div class="tip-text">
-        <h4>Dual Concurrent Timers</h4>
-        <p>Run both Stopwatch (count-up) and Target Countdown at the same time! Start both together or control each individually.</p>
+        <h4>Dual Timers (Both Active)</h4>
+        <p>Run both Stopwatch (count-up) and Target Countdown concurrently! When resized smaller, both times are clearly visible.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">🔄</div>
+      <div class="tip-icon">🗜️</div>
       <div class="tip-text">
-        <h4>Concurrent Indicator</h4>
-        <p>When switching modes, background timers keep running with live interactive status banners.</p>
+        <h4>Compact Floating Mode</h4>
+        <p>Switch between Normal, Compact, and Mini corner modes without losing access to Start, Pause, or Countdown.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">📊</div>
+      <div class="tip-icon">🪟</div>
       <div class="tip-text">
-        <h4>Practice History</h4>
-        <p>Save completed problems and download them in 1-click via <strong>Export CSV</strong>.</p>
+        <h4>Always-On-Top Pop Up</h4>
+        <p>Pops out an OS-level window that can be moved anywhere on any display and floats over VS Code and other desktop apps.</p>
       </div>
     </div>
   </footer>
@@ -958,16 +896,29 @@
       const dualClocksDisplay = document.getElementById('algotimer-dual-clocks-display');
       const dualSwTime = document.getElementById('algotimer-dual-sw-time');
       const dualTimerTime = document.getElementById('algotimer-dual-timer-time');
-      const miniTime = document.getElementById('algotimer-mini-time');
       const playBtn = document.getElementById('algotimer-btn-play');
-      const miniToggle = document.getElementById('algotimer-mini-toggle');
       const lapBtn = document.getElementById('algotimer-btn-lap');
       const resetBtn = document.getElementById('algotimer-btn-reset');
       const modeTag = document.getElementById('algotimer-mode-tag');
-      const minBtn = document.getElementById('algotimer-btn-min');
-      const expandBtn = document.getElementById('algotimer-btn-expand');
+      const cornerBtn = document.getElementById('algotimer-btn-corner');
+      const cornerIndicator = document.getElementById('algotimer-corner-indicator');
+      const sizeBtn = document.getElementById('algotimer-btn-size');
+      const pipBtn = document.getElementById('algotimer-btn-pip');
       const closeBtn = document.getElementById('algotimer-btn-close');
+      const resizeGrip = document.getElementById('algotimer-resize-grip');
       const container = document.getElementById('mock-page-container');
+
+      const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left'];
+      const SIZES = ['normal', 'compact', 'mini'];
+      let currentCorner = 'top-right';
+      let currentSize = 'normal';
+
+      const cornerLabels = {
+        'top-right': '↗ TR',
+        'bottom-right': '↘ BR',
+        'bottom-left': '↙ BL',
+        'top-left': '↖ TL'
+      };
 
       // Topbar buttons
       document.getElementById('btn-topbar-pip')?.addEventListener('click', () => {
@@ -977,21 +928,89 @@
         document.getElementById('btn-popout-window')?.click();
       });
 
-      // Minimize / Expand
-      minBtn.addEventListener('click', () => widget.classList.add('minimized'));
-      expandBtn.addEventListener('click', () => widget.classList.remove('minimized'));
-      closeBtn.addEventListener('click', () => {
+      // 4-Corner Dock Cycle
+      cornerBtn?.addEventListener('click', () => {
+        const idx = CORNERS.indexOf(currentCorner);
+        currentCorner = CORNERS[(idx + 1) % CORNERS.length];
+        CORNERS.forEach(c => root.classList.remove(`corner-${c}`));
+        root.classList.add(`corner-${currentCorner}`);
+        root.style.left = '';
+        root.style.top = '';
+        root.style.right = '';
+        root.style.bottom = '';
+        if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || '↗';
+      });
+
+      // Size Mode Toggle (Normal -> Compact -> Mini)
+      sizeBtn?.addEventListener('click', () => {
+        const idx = SIZES.indexOf(currentSize);
+        currentSize = SIZES[(idx + 1) % SIZES.length];
+        widget.setAttribute('data-size', currentSize);
+        widget.style.width = '';
+      });
+
+      // Interactive Corner Drag Resizing Handle inside Demo
+      (function setupDemoResizing() {
+        let isResizing = false;
+        let startX, startW;
+
+        resizeGrip?.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          isResizing = true;
+          startX = e.clientX;
+          startW = widget.offsetWidth;
+
+          const onMouseMove = (ev) => {
+            if (!isResizing) return;
+            const dx = ev.clientX - startX;
+            let newW = Math.max(140, Math.min(360, startW + dx));
+            widget.style.width = `${newW}px`;
+
+            if (newW < 180) {
+              widget.setAttribute('data-size', 'mini');
+              currentSize = 'mini';
+            } else if (newW < 230) {
+              widget.setAttribute('data-size', 'compact');
+              currentSize = 'compact';
+            } else {
+              widget.setAttribute('data-size', 'normal');
+              currentSize = 'normal';
+            }
+          };
+
+          const onMouseUp = () => {
+            if (isResizing) {
+              isResizing = false;
+              window.removeEventListener('mousemove', onMouseMove);
+              window.removeEventListener('mouseup', onMouseUp);
+            }
+          };
+
+          window.addEventListener('mousemove', onMouseMove);
+          window.addEventListener('mouseup', onMouseUp);
+        });
+      })();
+
+      // PiP / Standalone button
+      pipBtn?.addEventListener('click', () => {
+        document.getElementById('btn-popout-pip')?.click();
+      });
+
+      // Close button
+      closeBtn?.addEventListener('click', () => {
         root.style.display = 'none';
         setTimeout(() => { root.style.display = 'block'; }, 2000);
       });
 
-      // Draggable logic bounded within mock webpage card
-      function makeDraggable(handle) {
+      // Draggable logic bounded within mock webpage
+      (function makeDraggable() {
+        const handle = document.getElementById('algotimer-drag-handle');
         let isDragging = false;
         let startX, startY, origX, origY;
 
-        handle.addEventListener('mousedown', (e) => {
-          if (e.target.tagName.toLowerCase() === 'button') return;
+        handle?.addEventListener('mousedown', (e) => {
+          if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
           isDragging = true;
           startX = e.clientX;
           startY = e.clientY;
@@ -1001,97 +1020,118 @@
           origX = rect.left - contRect.left;
           origY = rect.top - contRect.top;
 
+          CORNERS.forEach(c => root.classList.remove(`corner-${c}`));
+
           const onMouseMove = (ev) => {
             if (!isDragging) return;
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
 
             let newX = Math.max(10, Math.min(container.offsetWidth - root.offsetWidth - 10, origX + dx));
-            let newY = Math.max(10, Math.min(container.offsetHeight - root.offsetHeight - 10, origY + dy));
+            let newY = Math.max(45, Math.min(container.offsetHeight - root.offsetHeight - 10, origY + dy));
 
             root.style.left = `${newX}px`;
             root.style.top = `${newY}px`;
             root.style.right = 'auto';
+            root.style.bottom = 'auto';
           };
 
           const onMouseUp = () => {
-            isDragging = false;
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
+            if (isDragging) {
+              isDragging = false;
+              window.removeEventListener('mousemove', onMouseMove);
+              window.removeEventListener('mouseup', onMouseUp);
+
+              // Check corner snap
+              const curLeft = parseInt(root.style.left, 10);
+              const curTop = parseInt(root.style.top, 10);
+              const maxRight = container.offsetWidth - root.offsetWidth;
+              const maxBottom = container.offsetHeight - root.offsetHeight;
+
+              if (curTop < 70 && curLeft > maxRight - 60) {
+                currentCorner = 'top-right';
+                root.style.left = ''; root.style.top = '';
+                root.classList.add('corner-top-right');
+              } else if (curTop < 70 && curLeft < 40) {
+                currentCorner = 'top-left';
+                root.style.left = ''; root.style.top = '';
+                root.classList.add('corner-top-left');
+              } else if (curTop > maxBottom - 60 && curLeft > maxRight - 60) {
+                currentCorner = 'bottom-right';
+                root.style.left = ''; root.style.top = '';
+                root.classList.add('corner-bottom-right');
+              } else if (curTop > maxBottom - 60 && curLeft < 40) {
+                currentCorner = 'bottom-left';
+                root.style.left = ''; root.style.top = '';
+                root.classList.add('corner-bottom-left');
+              }
+              if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || '↗';
+            }
           };
 
           window.addEventListener('mousemove', onMouseMove);
           window.addEventListener('mouseup', onMouseUp);
         });
-      }
-
-      makeDraggable(document.getElementById('algotimer-drag-handle'));
-      makeDraggable(document.getElementById('algotimer-mini-drag'));
+      })();
 
       // Forward widget button clicks to the main popup controls
-      playBtn.addEventListener('click', () => {
-        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
-        if (isDual) document.getElementById('btn-dual-master-toggle').click();
-        else document.getElementById('btn-toggle-run').click();
+      playBtn?.addEventListener('click', () => {
+        const isDual = document.getElementById('btn-mode-dual')?.classList.contains('active');
+        if (isDual) document.getElementById('btn-dual-master-toggle')?.click();
+        else document.getElementById('btn-toggle-run')?.click();
       });
 
-      miniToggle.addEventListener('click', () => playBtn.click());
-      lapBtn.addEventListener('click', () => document.getElementById('btn-lap').click());
-      resetBtn.addEventListener('click', () => {
-        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
-        if (isDual) document.getElementById('btn-dual-master-reset').click();
-        else document.getElementById('btn-reset').click();
+      lapBtn?.addEventListener('click', () => document.getElementById('btn-lap')?.click());
+      resetBtn?.addEventListener('click', () => {
+        const isDual = document.getElementById('btn-mode-dual')?.classList.contains('active');
+        if (isDual) document.getElementById('btn-dual-master-reset')?.click();
+        else document.getElementById('btn-reset')?.click();
       });
 
       // Animation frame sync
       function syncLoop() {
-        const isDual = document.getElementById('btn-mode-dual').classList.contains('active');
-        const isTimer = document.getElementById('btn-mode-timer').classList.contains('active');
+        const isDual = document.getElementById('btn-mode-dual')?.classList.contains('active');
+        const isTimer = document.getElementById('btn-mode-timer')?.classList.contains('active');
 
         if (isDual) {
-          modeTag.textContent = '⚡ DUAL MODE (BOTH)';
+          modeTag.textContent = '⚡ DUAL (BOTH ACTIVE)';
           clockDisplay.style.display = 'none';
           dualClocksDisplay.style.display = 'flex';
 
-          const sw = document.getElementById('dual-sw-digits').textContent.split('.')[0];
-          const tgt = document.getElementById('dual-timer-digits').textContent.split('.')[0];
+          const sw = document.getElementById('dual-sw-digits')?.textContent?.split('.')[0] || '00:00';
+          const tgt = document.getElementById('dual-timer-digits')?.textContent?.split('.')[0] || '30:00';
           dualSwTime.textContent = sw;
           dualTimerTime.textContent = tgt;
-          miniTime.textContent = `${sw} | ${tgt}`;
 
-          const isRunning = document.getElementById('btn-dual-master-toggle').classList.contains('running');
-          playBtn.textContent = isRunning ? '⏸ Pause Both' : '⚡ Start Both';
-          miniToggle.textContent = isRunning ? '⏸' : '▶';
+          const isRunning = document.getElementById('btn-dual-master-toggle')?.classList.contains('running');
+          playBtn.textContent = isRunning ? '⏸ Pause Both' : '▶ Start Both';
 
         } else if (isTimer) {
-          modeTag.textContent = 'TARGET TIMER';
+          modeTag.textContent = 'TARGET COUNTDOWN';
           clockDisplay.style.display = 'block';
           dualClocksDisplay.style.display = 'none';
 
-          const digits = document.getElementById('dial-digits').textContent.split('.')[0];
-          clockDisplay.textContent = digits;
-          miniTime.textContent = digits;
+          const timeText = document.getElementById('dial-digits')?.textContent?.split('.')[0] || '30:00';
+          clockDisplay.textContent = timeText;
 
-          const isRunning = document.getElementById('btn-toggle-run').classList.contains('running');
+          const isRunning = document.getElementById('btn-toggle-run')?.classList.contains('running');
           playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
-          miniToggle.textContent = isRunning ? '⏸' : '▶';
 
         } else {
           modeTag.textContent = 'STOPWATCH MODE';
           clockDisplay.style.display = 'block';
           dualClocksDisplay.style.display = 'none';
 
-          const digits = document.getElementById('dial-digits').textContent.split('.')[0];
-          clockDisplay.textContent = digits;
-          miniTime.textContent = digits;
+          const timeText = document.getElementById('dial-digits')?.textContent?.split('.')[0] || '00:00';
+          clockDisplay.textContent = timeText;
 
-          const isRunning = document.getElementById('btn-toggle-run').classList.contains('running');
+          const isRunning = document.getElementById('btn-toggle-run')?.classList.contains('running');
           playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
-          miniToggle.textContent = isRunning ? '⏸' : '▶';
         }
 
         requestAnimationFrame(syncLoop);
       }
+
       syncLoop();
     })();
   </script>

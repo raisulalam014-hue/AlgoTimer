@@ -1,5 +1,5 @@
 // AlgoTimer - Problem Solving Stopwatch & Timer UI Logic
-// Supports: Document Picture-in-Picture Pop-Up Screen, Concurrent Dual Timers, Milestones, History & Sound Alerts
+// Supports: Resizable Anywhere Pop-Up Screen, Compact Mode, Concurrent Dual Timers, Milestones & Safe Audio
 
 document.addEventListener('DOMContentLoaded', async () => {
   // DOM Elements - Navigation & Header
@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabContents = document.querySelectorAll('.tab-content');
   const lapBadge = document.getElementById('lap-badge');
 
-  // Pop Up Screen Elements
+  // Pop Up Screen & Compact Mode Elements
+  const btnToggleCompact = document.getElementById('btn-toggle-compact');
   const btnPopoutPip = document.getElementById('btn-popout-pip');
   const btnPopoutWindow = document.getElementById('btn-popout-window');
   const settingBtnLaunchPip = document.getElementById('setting-btn-launch-pip');
@@ -141,24 +142,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.classList.add('is-popout');
   }
 
-  // Normalize state helper
+  // Safe sound player - CANNOT throw errors
+  function safeSound(fnName) {
+    try {
+      if (window.soundFX && typeof window.soundFX[fnName] === 'function') {
+        window.soundFX[fnName]();
+      }
+    } catch (e) {
+      console.warn('Audio call error suppressed:', e);
+    }
+  }
+
+  // Safe normalize state helper
   function normalizeState(raw) {
     const s = Object.assign({}, state, raw || {});
-    if (!s.stopwatch) {
+    if (!s.stopwatch || typeof s.stopwatch !== 'object') {
       s.stopwatch = {
         status: s.mode === 'stopwatch' ? (s.status || 'stopped') : 'stopped',
         startTime: s.mode === 'stopwatch' ? s.startTime : null,
-        elapsedBeforePause: s.mode === 'stopwatch' ? (s.elapsedBeforePause || 0) : 0
+        elapsedBeforePause: Number(s.elapsedBeforePause) || 0
       };
+    } else {
+      s.stopwatch.status = s.stopwatch.status || 'stopped';
+      s.stopwatch.elapsedBeforePause = Number(s.stopwatch.elapsedBeforePause) || 0;
     }
-    if (!s.targetTimer) {
+
+    if (!s.targetTimer || typeof s.targetTimer !== 'object') {
       s.targetTimer = {
         status: s.mode === 'timer' ? (s.status || 'stopped') : 'stopped',
         startTime: s.mode === 'timer' ? s.startTime : null,
-        elapsedBeforePause: s.mode === 'timer' ? (s.elapsedBeforePause || 0) : 0,
-        targetDurationMs: s.targetDurationMs || (30 * 60 * 1000)
+        elapsedBeforePause: Number(s.elapsedBeforePause) || 0,
+        targetDurationMs: Number(s.targetDurationMs) || (30 * 60 * 1000)
       };
+    } else {
+      s.targetTimer.status = s.targetTimer.status || 'stopped';
+      s.targetTimer.elapsedBeforePause = Number(s.targetTimer.elapsedBeforePause) || 0;
+      s.targetTimer.targetDurationMs = Number(s.targetTimer.targetDurationMs) || (30 * 60 * 1000);
     }
+
     if (s.allowDualActive === undefined) s.allowDualActive = true;
     return s;
   }
@@ -186,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function handleMockMessage(msg) {
     switch (msg.type) {
       case 'GET_STATE':
-        return { state };
+        return { success: true, state };
 
       case 'START': {
         const target = msg.target || (state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch'));
@@ -265,8 +286,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       case 'SET_TARGET': {
-        state.targetTimer.targetDurationMs = msg.targetDurationMs;
-        state.targetDurationMs = msg.targetDurationMs;
+        state.targetTimer.targetDurationMs = Number(msg.targetDurationMs) || (30 * 60 * 1000);
+        state.targetDurationMs = state.targetTimer.targetDurationMs;
         if (state.targetTimer.status !== 'running') {
           state.targetTimer.elapsedBeforePause = 0;
           state.targetTimer.status = 'stopped';
@@ -327,7 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function formatTimeParts(ms) {
-    if (ms < 0) ms = 0;
+    if (!ms || isNaN(ms) || ms < 0) ms = 0;
     const totalSec = Math.floor(ms / 1000);
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
@@ -339,34 +360,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function formatMinutesShort(ms) {
-    const mins = Math.round(ms / 60000);
+    const mins = Math.round((Number(ms) || 0) / 60000);
     if (mins < 60) return `${mins}m`;
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     return `${h}h ${m}m`;
   }
 
-  // Time calculations for independent engines
+  // Safe time calculations
   function getStopwatchElapsed() {
-    if (state.stopwatch.status === 'running') {
-      return Date.now() - state.stopwatch.startTime + state.stopwatch.elapsedBeforePause;
+    if (!state.stopwatch) return 0;
+    const elapsedBefore = Number(state.stopwatch.elapsedBeforePause) || 0;
+    if (state.stopwatch.status === 'running' && state.stopwatch.startTime) {
+      return Date.now() - state.stopwatch.startTime + elapsedBefore;
     }
-    return state.stopwatch.elapsedBeforePause;
+    return elapsedBefore;
   }
 
   function getTargetElapsed() {
-    if (state.targetTimer.status === 'running') {
-      return Date.now() - state.targetTimer.startTime + state.targetTimer.elapsedBeforePause;
+    if (!state.targetTimer) return 0;
+    const elapsedBefore = Number(state.targetTimer.elapsedBeforePause) || 0;
+    if (state.targetTimer.status === 'running' && state.targetTimer.startTime) {
+      return Date.now() - state.targetTimer.startTime + elapsedBefore;
     }
-    return state.targetTimer.elapsedBeforePause;
+    return elapsedBefore;
   }
 
   function getTargetRemaining() {
+    if (!state.targetTimer) return 0;
+    const targetMs = Number(state.targetTimer.targetDurationMs) || (30 * 60 * 1000);
     const elapsed = getTargetElapsed();
-    return Math.max(0, state.targetTimer.targetDurationMs - elapsed);
+    return Math.max(0, targetMs - elapsed);
   }
 
-  // ================= POP UP SCREEN SYSTEM =================
+  // ================= COMPACT MINI-MODE TOGGLE =================
+  if (btnToggleCompact) {
+    btnToggleCompact.addEventListener('click', () => {
+      document.body.classList.toggle('is-compact');
+      const isCompact = document.body.classList.contains('is-compact');
+      btnToggleCompact.classList.toggle('active', isCompact);
+      const textSpan = btnToggleCompact.querySelector('.btn-text');
+      if (textSpan) textSpan.textContent = isCompact ? 'Full' : 'Compact';
+      safeSound('tick');
+    });
+  }
+
+  // ================= POP UP SCREEN SYSTEM (PiP & RESIZABLE WINDOW) =================
   async function triggerPopoutPiP() {
     if ('documentPictureInPicture' in window) {
       try {
@@ -375,13 +414,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
 
+        // Request native OS Always-On-Top window
         const pipWindow = await window.documentPictureInPicture.requestWindow({
-          width: 380,
-          height: 620
+          width: 360,
+          height: 580
         });
         window._pipWindow = pipWindow;
 
-        // Copy all CSS stylesheets & styles
+        // Copy styles
         [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
           pipWindow.document.head.appendChild(el.cloneNode(true));
         });
@@ -405,7 +445,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Fallback: standalone popup window
+    // Fallback: standalone resizable window
     triggerPopoutWindow();
   }
 
@@ -414,12 +454,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.windows.create({
         url: chrome.runtime.getURL('popup/popup.html?popout=true'),
         type: 'popup',
-        width: 400,
-        height: 640,
+        width: 380,
+        height: 620,
         focused: true
       });
     } else {
-      window.open('popup.html?popout=true', 'AlgoTimerPopout', 'width=400,height=640,resizable=yes');
+      window.open('popup.html?popout=true', 'AlgoTimerPopout', 'width=380,height=620,resizable=yes');
     }
   }
 
@@ -435,197 +475,219 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Dual Mode Rendering
     if (state.mode === 'dual') {
-      singleModeView.style.display = 'none';
-      dualModeView.style.display = 'flex';
-      concurrentTargetBanner.style.display = 'none';
-      concurrentStopwatchBanner.style.display = 'none';
+      if (singleModeView) singleModeView.style.display = 'none';
+      if (dualModeView) dualModeView.style.display = 'flex';
+      if (concurrentTargetBanner) concurrentTargetBanner.style.display = 'none';
+      if (concurrentStopwatchBanner) concurrentStopwatchBanner.style.display = 'none';
 
       // Stopwatch Card
       const swParts = formatTimeParts(swElapsed);
-      dualSwDigits.innerHTML = `${swParts.base}<small id="dual-sw-millis">.${swParts.tenths}</small>`;
-      dualSwBadge.textContent = state.stopwatch.status.toUpperCase();
-      dualSwBadge.className = `dual-badge ${state.stopwatch.status}`;
-      btnDualSwText.textContent = state.stopwatch.status === 'running' ? 'Pause' : 'Start';
+      if (dualSwDigits) dualSwDigits.innerHTML = `${swParts.base}<small id="dual-sw-millis">.${swParts.tenths}</small>`;
+      if (dualSwBadge) {
+        dualSwBadge.textContent = (state.stopwatch.status || 'stopped').toUpperCase();
+        dualSwBadge.className = `dual-badge ${state.stopwatch.status}`;
+      }
+      if (btnDualSwText) {
+        btnDualSwText.textContent = state.stopwatch.status === 'running' ? 'Pause' : 'Start';
+      }
 
       const swCard = document.getElementById('dual-stopwatch-card');
-      if (state.stopwatch.status === 'running') swCard.classList.add('active-running');
-      else swCard.classList.remove('active-running');
+      if (swCard) {
+        if (state.stopwatch.status === 'running') swCard.classList.add('active-running');
+        else swCard.classList.remove('active-running');
+      }
 
       // Target Timer Card
       const timerParts = formatTimeParts(targetRemaining);
-      dualTimerDigits.innerHTML = `${timerParts.base}<small id="dual-timer-millis">.${timerParts.tenths}</small>`;
+      if (dualTimerDigits) dualTimerDigits.innerHTML = `${timerParts.base}<small id="dual-timer-millis">.${timerParts.tenths}</small>`;
       
-      const timerProgressRatio = Math.min(1, targetElapsed / state.targetTimer.targetDurationMs);
-      dualTimerProgress.style.width = `${timerProgressRatio * 100}%`;
+      const targetDuration = Number(state.targetTimer.targetDurationMs) || (30 * 60 * 1000);
+      const timerProgressRatio = Math.min(1, targetElapsed / targetDuration);
+      if (dualTimerProgress) dualTimerProgress.style.width = `${timerProgressRatio * 100}%`;
 
       const timerCard = document.getElementById('dual-timer-card');
       if (state.targetTimer.status === 'finished') {
-        dualTimerBadge.textContent = 'FINISHED';
-        dualTimerBadge.className = 'dual-badge warning';
-        dualTimerDigits.classList.add('warning');
-        dualTimerProgress.classList.add('warning');
-        timerCard.classList.add('warning-running');
-        btnDualTimerText.textContent = 'Restart';
+        if (dualTimerBadge) {
+          dualTimerBadge.textContent = 'FINISHED';
+          dualTimerBadge.className = 'dual-badge warning';
+        }
+        if (dualTimerDigits) dualTimerDigits.classList.add('warning');
+        if (dualTimerProgress) dualTimerProgress.classList.add('warning');
+        if (timerCard) timerCard.classList.add('warning-running');
+        if (btnDualTimerText) btnDualTimerText.textContent = 'Restart';
       } else if (state.targetTimer.status === 'running') {
-        dualTimerBadge.textContent = `${formatMinutesShort(state.targetTimer.targetDurationMs)} TARGET`;
-        dualTimerBadge.className = 'dual-badge running';
-        btnDualTimerText.textContent = 'Pause';
-        timerCard.classList.add('active-running');
+        if (dualTimerBadge) {
+          dualTimerBadge.textContent = `${formatMinutesShort(targetDuration)} TARGET`;
+          dualTimerBadge.className = 'dual-badge running';
+        }
+        if (btnDualTimerText) btnDualTimerText.textContent = 'Pause';
+        if (timerCard) timerCard.classList.add('active-running');
 
         if (targetRemaining <= 300000) {
-          dualTimerDigits.classList.add('warning');
-          dualTimerProgress.classList.add('warning');
-          timerCard.classList.add('warning-running');
-          if (!warned5min && window.soundFX) {
-            window.soundFX.warning();
+          if (dualTimerDigits) dualTimerDigits.classList.add('warning');
+          if (dualTimerProgress) dualTimerProgress.classList.add('warning');
+          if (timerCard) timerCard.classList.add('warning-running');
+          if (!warned5min) {
+            safeSound('warning');
             warned5min = true;
           }
         } else {
-          dualTimerDigits.classList.remove('warning');
-          dualTimerProgress.classList.remove('warning');
-          timerCard.classList.remove('warning-running');
+          if (dualTimerDigits) dualTimerDigits.classList.remove('warning');
+          if (dualTimerProgress) dualTimerProgress.classList.remove('warning');
+          if (timerCard) timerCard.classList.remove('warning-running');
         }
 
-        if (targetRemaining <= 60000 && !warned1min && window.soundFX) {
-          window.soundFX.warning();
+        if (targetRemaining <= 60000 && !warned1min) {
+          safeSound('warning');
           warned1min = true;
         }
 
         if (targetRemaining === 0) {
           state.targetTimer.status = 'finished';
-          if (window.soundFX) window.soundFX.finish();
+          safeSound('finish');
         }
       } else {
-        dualTimerBadge.textContent = state.targetTimer.status === 'paused' ? 'PAUSED' : `${formatMinutesShort(state.targetTimer.targetDurationMs)} TARGET`;
-        dualTimerBadge.className = `dual-badge ${state.targetTimer.status}`;
-        btnDualTimerText.textContent = 'Start';
-        timerCard.classList.remove('active-running');
-        timerCard.classList.remove('warning-running');
+        if (dualTimerBadge) {
+          dualTimerBadge.textContent = state.targetTimer.status === 'paused' ? 'PAUSED' : `${formatMinutesShort(targetDuration)} TARGET`;
+          dualTimerBadge.className = `dual-badge ${state.targetTimer.status}`;
+        }
+        if (btnDualTimerText) btnDualTimerText.textContent = 'Start';
+        if (timerCard) {
+          timerCard.classList.remove('active-running');
+          timerCard.classList.remove('warning-running');
+        }
       }
 
       // Master Synchronization Button
       const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
       if (bothRunning) {
-        dualMasterIcon.textContent = '⏸';
-        dualMasterText.textContent = 'Pause Both';
-        btnDualMasterToggle.classList.add('running');
+        if (dualMasterIcon) dualMasterIcon.textContent = '⏸';
+        if (dualMasterText) dualMasterText.textContent = 'Pause Both';
+        if (btnDualMasterToggle) btnDualMasterToggle.classList.add('running');
       } else {
-        dualMasterIcon.textContent = '⚡';
-        dualMasterText.textContent = 'Start Both Together';
-        btnDualMasterToggle.classList.remove('running');
+        if (dualMasterIcon) dualMasterIcon.textContent = '⚡';
+        if (dualMasterText) dualMasterText.textContent = 'Start Both Together';
+        if (btnDualMasterToggle) btnDualMasterToggle.classList.remove('running');
       }
 
     } else {
       // 2. Single Mode Rendering (Stopwatch or Target Timer)
-      singleModeView.style.display = 'block';
-      dualModeView.style.display = 'none';
+      if (singleModeView) singleModeView.style.display = 'block';
+      if (dualModeView) dualModeView.style.display = 'none';
 
       if (state.mode === 'timer') {
         // Target Countdown Mode
         const parts = formatTimeParts(targetRemaining);
-        dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
-        dialStatusLabel.textContent = state.targetTimer.status === 'finished' ? 'FINISHED' : 'TARGET COUNTDOWN';
-        dialTargetLabel.style.display = 'block';
-        dialTargetLabel.textContent = `Target: ${formatTimeParts(state.targetTimer.targetDurationMs).base}`;
+        const targetDuration = Number(state.targetTimer.targetDurationMs) || (30 * 60 * 1000);
+        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
+        if (dialStatusLabel) dialStatusLabel.textContent = state.targetTimer.status === 'finished' ? 'FINISHED' : 'TARGET COUNTDOWN';
+        if (dialTargetLabel) {
+          dialTargetLabel.style.display = 'block';
+          dialTargetLabel.textContent = `Target: ${formatTimeParts(targetDuration).base}`;
+        }
 
-        const progressRatio = Math.min(1, targetElapsed / state.targetTimer.targetDurationMs);
+        const progressRatio = Math.min(1, targetElapsed / targetDuration);
         const dashoffset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
-        dialProgress.style.strokeDashoffset = dashoffset;
+        if (dialProgress) dialProgress.style.strokeDashoffset = dashoffset;
 
         // Warnings & Finished
         if (targetRemaining <= 300000 && targetRemaining > 60000 && state.targetTimer.status === 'running') {
-          dialDigits.classList.add('warning');
-          dialProgress.classList.add('warning');
-          if (!warned5min && window.soundFX) {
-            window.soundFX.warning();
+          if (dialDigits) dialDigits.classList.add('warning');
+          if (dialProgress) dialProgress.classList.add('warning');
+          if (!warned5min) {
+            safeSound('warning');
             warned5min = true;
           }
         } else if (targetRemaining <= 60000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
-          dialDigits.classList.add('warning');
-          dialProgress.classList.add('warning');
-          if (!warned1min && window.soundFX) {
-            window.soundFX.warning();
+          if (dialDigits) dialDigits.classList.add('warning');
+          if (dialProgress) dialProgress.classList.add('warning');
+          if (!warned1min) {
+            safeSound('warning');
             warned1min = true;
           }
         } else if (targetRemaining === 0 && state.targetTimer.status === 'running') {
           state.targetTimer.status = 'finished';
-          if (window.soundFX) window.soundFX.finish();
+          safeSound('finish');
         } else {
-          dialDigits.classList.remove('warning');
-          dialProgress.classList.remove('warning');
+          if (dialDigits) dialDigits.classList.remove('warning');
+          if (dialProgress) dialProgress.classList.remove('warning');
         }
 
-        // Toggle run button text for target timer
+        // Toggle run button text
         if (state.targetTimer.status === 'running') {
-          btnToggleRun.classList.add('running');
-          btnToggleText.textContent = 'Pause';
+          if (btnToggleRun) btnToggleRun.classList.add('running');
+          if (btnToggleText) btnToggleText.textContent = 'Pause';
         } else {
-          btnToggleRun.classList.remove('running');
-          btnToggleText.textContent = state.targetTimer.status === 'finished' ? 'Restart' : 'Start';
+          if (btnToggleRun) btnToggleRun.classList.remove('running');
+          if (btnToggleText) btnToggleText.textContent = state.targetTimer.status === 'finished' ? 'Restart' : 'Start';
         }
 
         // Background Concurrent Stopwatch Banner
         if (state.stopwatch.status === 'running') {
-          concurrentStopwatchBanner.style.display = 'flex';
-          concurrentStopwatchTime.textContent = formatTimeParts(swElapsed).base;
+          if (concurrentStopwatchBanner) concurrentStopwatchBanner.style.display = 'flex';
+          if (concurrentStopwatchTime) concurrentStopwatchTime.textContent = formatTimeParts(swElapsed).base;
         } else {
-          concurrentStopwatchBanner.style.display = 'none';
+          if (concurrentStopwatchBanner) concurrentStopwatchBanner.style.display = 'none';
         }
-        concurrentTargetBanner.style.display = 'none';
+        if (concurrentTargetBanner) concurrentTargetBanner.style.display = 'none';
 
       } else {
         // Stopwatch Mode
         const parts = formatTimeParts(swElapsed);
-        dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
-        dialStatusLabel.textContent = 'STOPWATCH';
-        dialTargetLabel.style.display = 'none';
-        dialDigits.classList.remove('warning');
-        dialProgress.classList.remove('warning');
+        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
+        if (dialStatusLabel) dialStatusLabel.textContent = 'STOPWATCH';
+        if (dialTargetLabel) dialTargetLabel.style.display = 'none';
+        if (dialDigits) dialDigits.classList.remove('warning');
+        if (dialProgress) dialProgress.classList.remove('warning');
 
         // Continuous 60s rotating ring
         const secRatio = (swElapsed % 60000) / 60000;
-        dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
+        if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
 
-        // Toggle run button text for stopwatch
+        // Toggle run button text
         if (state.stopwatch.status === 'running') {
-          btnToggleRun.classList.add('running');
-          btnToggleText.textContent = 'Pause';
+          if (btnToggleRun) btnToggleRun.classList.add('running');
+          if (btnToggleText) btnToggleText.textContent = 'Pause';
         } else {
-          btnToggleRun.classList.remove('running');
-          btnToggleText.textContent = 'Start';
+          if (btnToggleRun) btnToggleRun.classList.remove('running');
+          if (btnToggleText) btnToggleText.textContent = 'Start';
         }
 
         // Background Concurrent Target Timer Banner
         if (state.targetTimer.status === 'running') {
-          concurrentTargetBanner.style.display = 'flex';
-          concurrentTargetTime.textContent = formatTimeParts(targetRemaining).base;
+          if (concurrentTargetBanner) concurrentTargetBanner.style.display = 'flex';
+          if (concurrentTargetTime) concurrentTargetTime.textContent = formatTimeParts(targetRemaining).base;
         } else {
-          concurrentTargetBanner.style.display = 'none';
+          if (concurrentTargetBanner) concurrentTargetBanner.style.display = 'none';
         }
-        concurrentStopwatchBanner.style.display = 'none';
+        if (concurrentStopwatchBanner) concurrentStopwatchBanner.style.display = 'none';
       }
     }
 
-    animationFrameId = requestAnimationFrame(updateUI);
+    if (typeof requestAnimationFrame === 'function') {
+      animationFrameId = requestAnimationFrame(updateUI);
+    }
   }
 
   // ================= CONTROL SYNC =================
   function applyStateToControls() {
-    // Mode switcher buttons
-    [btnModeStopwatch, btnModeTimer, btnModeDual].forEach(b => b.classList.remove('active'));
+    [btnModeStopwatch, btnModeTimer, btnModeDual].forEach(b => {
+      if (b) b.classList.remove('active');
+    });
+
     if (state.mode === 'dual') {
-      btnModeDual.classList.add('active');
-      presetsContainer.style.display = 'none';
+      if (btnModeDual) btnModeDual.classList.add('active');
+      if (presetsContainer) presetsContainer.style.display = 'none';
     } else if (state.mode === 'timer') {
-      btnModeTimer.classList.add('active');
-      presetsContainer.style.display = 'block';
+      if (btnModeTimer) btnModeTimer.classList.add('active');
+      if (presetsContainer) presetsContainer.style.display = 'block';
     } else {
-      btnModeStopwatch.classList.add('active');
-      presetsContainer.style.display = 'none';
+      if (btnModeStopwatch) btnModeStopwatch.classList.add('active');
+      if (presetsContainer) presetsContainer.style.display = 'none';
     }
 
-    // Preset active highlight
-    const mins = Math.round(state.targetTimer.targetDurationMs / 60000);
+    const targetDuration = Number(state.targetTimer.targetDurationMs) || (30 * 60 * 1000);
+    const mins = Math.round(targetDuration / 60000);
     presetChips.forEach(chip => {
       chip.classList.toggle('active', parseInt(chip.dataset.mins) === mins);
     });
@@ -633,17 +695,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       chip.classList.toggle('active', parseInt(chip.dataset.mins) === mins);
     });
 
-    // Settings
-    settingDualActive.checked = state.allowDualActive !== false;
-    settingSound.checked = state.soundEnabled !== false;
-    settingFloating.checked = state.floatingWidgetEnabled !== false;
-    if (window.soundFX) window.soundFX.enabled = settingSound.checked;
+    if (settingDualActive) settingDualActive.checked = state.allowDualActive !== false;
+    if (settingSound) settingSound.checked = state.soundEnabled !== false;
+    if (settingFloating) settingFloating.checked = state.floatingWidgetEnabled !== false;
+    if (window.soundFX) window.soundFX.enabled = settingSound ? settingSound.checked : true;
   }
 
-  // Switch mode without stopping running timers!
   async function switchMode(newMode) {
     if (state.mode === newMode) return;
-    if (window.soundFX) window.soundFX.tick();
+    safeSound('tick');
     const res = await sendMessage({ type: 'SET_MODE', mode: newMode });
     if (res && res.state) {
       state = normalizeState(res.state);
@@ -651,113 +711,131 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  btnModeStopwatch.addEventListener('click', () => switchMode('stopwatch'));
-  btnModeTimer.addEventListener('click', () => switchMode('timer'));
-  btnModeDual.addEventListener('click', () => switchMode('dual'));
+  if (btnModeStopwatch) btnModeStopwatch.addEventListener('click', () => switchMode('stopwatch'));
+  if (btnModeTimer) btnModeTimer.addEventListener('click', () => switchMode('timer'));
+  if (btnModeDual) btnModeDual.addEventListener('click', () => switchMode('dual'));
 
   // ================= SINGLE MODE CONTROLS =================
-  btnToggleRun.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.start();
+  if (btnToggleRun) {
+    btnToggleRun.addEventListener('click', async () => {
+      safeSound('start');
 
-    if (state.mode === 'timer') {
-      if (state.targetTimer.status === 'running') {
-        const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+      if (state.mode === 'timer') {
+        if (state.targetTimer.status === 'running') {
+          safeSound('pause');
+          const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+          if (res && res.state) state = normalizeState(res.state);
+        } else {
+          const res = await sendMessage({ type: 'START', target: 'timer' });
+          if (res && res.state) state = normalizeState(res.state);
+        }
+      } else {
+        if (state.stopwatch.status === 'running') {
+          safeSound('pause');
+          const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+          if (res && res.state) state = normalizeState(res.state);
+        } else {
+          const res = await sendMessage({ type: 'START', target: 'stopwatch' });
+          if (res && res.state) state = normalizeState(res.state);
+        }
+      }
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      safeSound('tick');
+      warned5min = false;
+      warned1min = false;
+      const target = state.mode === 'timer' ? 'timer' : 'stopwatch';
+      const res = await sendMessage({ type: 'RESET', target });
+      if (res && res.state) state = normalizeState(res.state);
+      renderLaps();
+    });
+  }
+
+  if (btnLap) btnLap.addEventListener('click', () => recordLap());
+
+  // ================= DUAL MODE CONTROLS =================
+  if (btnDualMasterToggle) {
+    btnDualMasterToggle.addEventListener('click', async () => {
+      const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
+
+      if (bothRunning) {
+        safeSound('pause');
+        const res = await sendMessage({ type: 'PAUSE', target: 'both' });
         if (res && res.state) state = normalizeState(res.state);
       } else {
-        const res = await sendMessage({ type: 'START', target: 'timer' });
+        safeSound('start');
+        const res = await sendMessage({ type: 'START', target: 'both' });
         if (res && res.state) state = normalizeState(res.state);
       }
-    } else {
+    });
+  }
+
+  if (btnDualMasterReset) {
+    btnDualMasterReset.addEventListener('click', async () => {
+      safeSound('tick');
+      warned5min = false;
+      warned1min = false;
+      const res = await sendMessage({ type: 'RESET', target: 'both' });
+      if (res && res.state) state = normalizeState(res.state);
+      renderLaps();
+    });
+  }
+
+  if (btnDualSwToggle) {
+    btnDualSwToggle.addEventListener('click', async () => {
       if (state.stopwatch.status === 'running') {
+        safeSound('pause');
         const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
         if (res && res.state) state = normalizeState(res.state);
       } else {
+        safeSound('start');
         const res = await sendMessage({ type: 'START', target: 'stopwatch' });
         if (res && res.state) state = normalizeState(res.state);
       }
-    }
-  });
+    });
+  }
 
-  btnReset.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.tick();
-    warned5min = false;
-    warned1min = false;
-    const target = state.mode === 'timer' ? 'timer' : 'stopwatch';
-    const res = await sendMessage({ type: 'RESET', target });
-    if (res && res.state) state = normalizeState(res.state);
-    renderLaps();
-  });
+  if (btnDualSwLap) btnDualSwLap.addEventListener('click', () => recordLap());
 
-  btnLap.addEventListener('click', () => recordLap());
-
-  // ================= DUAL MODE CONTROLS =================
-  // Master Sync Start / Pause Both
-  btnDualMasterToggle.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.start();
-    const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
-
-    if (bothRunning) {
-      const res = await sendMessage({ type: 'PAUSE', target: 'both' });
+  if (btnDualSwReset) {
+    btnDualSwReset.addEventListener('click', async () => {
+      safeSound('tick');
+      const res = await sendMessage({ type: 'RESET', target: 'stopwatch' });
       if (res && res.state) state = normalizeState(res.state);
-    } else {
-      const res = await sendMessage({ type: 'START', target: 'both' });
+      renderLaps();
+    });
+  }
+
+  if (btnDualTimerToggle) {
+    btnDualTimerToggle.addEventListener('click', async () => {
+      if (state.targetTimer.status === 'running') {
+        safeSound('pause');
+        const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+        if (res && res.state) state = normalizeState(res.state);
+      } else {
+        safeSound('start');
+        const res = await sendMessage({ type: 'START', target: 'timer' });
+        if (res && res.state) state = normalizeState(res.state);
+      }
+    });
+  }
+
+  if (btnDualTimerReset) {
+    btnDualTimerReset.addEventListener('click', async () => {
+      safeSound('tick');
+      warned5min = false;
+      warned1min = false;
+      const res = await sendMessage({ type: 'RESET', target: 'timer' });
       if (res && res.state) state = normalizeState(res.state);
-    }
-  });
+    });
+  }
 
-  btnDualMasterReset.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.tick();
-    warned5min = false;
-    warned1min = false;
-    const res = await sendMessage({ type: 'RESET', target: 'both' });
-    if (res && res.state) state = normalizeState(res.state);
-    renderLaps();
-  });
-
-  // Stopwatch Card Controls
-  btnDualSwToggle.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.start();
-    if (state.stopwatch.status === 'running') {
-      const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
-      if (res && res.state) state = normalizeState(res.state);
-    } else {
-      const res = await sendMessage({ type: 'START', target: 'stopwatch' });
-      if (res && res.state) state = normalizeState(res.state);
-    }
-  });
-
-  btnDualSwLap.addEventListener('click', () => recordLap());
-
-  btnDualSwReset.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.tick();
-    const res = await sendMessage({ type: 'RESET', target: 'stopwatch' });
-    if (res && res.state) state = normalizeState(res.state);
-    renderLaps();
-  });
-
-  // Target Timer Card Controls
-  btnDualTimerToggle.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.start();
-    if (state.targetTimer.status === 'running') {
-      const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
-      if (res && res.state) state = normalizeState(res.state);
-    } else {
-      const res = await sendMessage({ type: 'START', target: 'timer' });
-      if (res && res.state) state = normalizeState(res.state);
-    }
-  });
-
-  btnDualTimerReset.addEventListener('click', async () => {
-    if (window.soundFX) window.soundFX.tick();
-    warned5min = false;
-    warned1min = false;
-    const res = await sendMessage({ type: 'RESET', target: 'timer' });
-    if (res && res.state) state = normalizeState(res.state);
-  });
-
-  // Target Presets
+  // Presets
   async function applyPresetMins(mins) {
-    if (window.soundFX) window.soundFX.tick();
+    safeSound('tick');
     warned5min = false;
     warned1min = false;
     const targetDurationMs = mins * 60 * 1000;
@@ -777,54 +855,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     chip.addEventListener('click', () => applyPresetMins(parseInt(chip.dataset.mins)));
   });
 
-  btnCustomTime.addEventListener('click', () => {
-    customTimeBox.style.display = customTimeBox.style.display === 'none' ? 'flex' : 'none';
-  });
+  if (btnCustomTime) {
+    btnCustomTime.addEventListener('click', () => {
+      if (customTimeBox) {
+        customTimeBox.style.display = customTimeBox.style.display === 'none' ? 'flex' : 'none';
+      }
+    });
+  }
 
-  btnApplyCustom.addEventListener('click', async () => {
-    const hrs = parseInt(customHours.value) || 0;
-    const mins = parseInt(customMinutes.value) || 0;
-    const secs = parseInt(customSeconds.value) || 0;
-    const totalMs = (hrs * 3600 + mins * 60 + secs) * 1000;
+  if (btnApplyCustom) {
+    btnApplyCustom.addEventListener('click', async () => {
+      const hrs = parseInt(customHours.value) || 0;
+      const mins = parseInt(customMinutes.value) || 0;
+      const secs = parseInt(customSeconds.value) || 0;
+      const totalMs = (hrs * 3600 + mins * 60 + secs) * 1000;
 
-    if (totalMs < 10000) {
-      alert('Target duration must be at least 10 seconds.');
-      return;
-    }
+      if (totalMs < 10000) {
+        alert('Target duration must be at least 10 seconds.');
+        return;
+      }
 
-    customTimeBox.style.display = 'none';
-    if (window.soundFX) window.soundFX.tick();
-    const res = await sendMessage({ type: 'SET_TARGET', targetDurationMs: totalMs });
-    if (res && res.state) {
-      state = normalizeState(res.state);
-      applyStateToControls();
-    }
-  });
+      if (customTimeBox) customTimeBox.style.display = 'none';
+      safeSound('tick');
+      const res = await sendMessage({ type: 'SET_TARGET', targetDurationMs: totalMs });
+      if (res && res.state) {
+        state = normalizeState(res.state);
+        applyStateToControls();
+      }
+    });
+  }
 
-  // ================= CONCURRENT BANNER ACTIONS =================
-  btnConcurrentTargetPause.addEventListener('click', async () => {
-    const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
-    if (res && res.state) state = normalizeState(res.state);
-  });
+  // Concurrent Banners
+  if (btnConcurrentTargetPause) {
+    btnConcurrentTargetPause.addEventListener('click', async () => {
+      safeSound('pause');
+      const res = await sendMessage({ type: 'PAUSE', target: 'timer' });
+      if (res && res.state) state = normalizeState(res.state);
+    });
+  }
 
-  btnConcurrentTargetSwitch.addEventListener('click', () => {
-    switchMode('timer');
-  });
+  if (btnConcurrentTargetSwitch) {
+    btnConcurrentTargetSwitch.addEventListener('click', () => {
+      switchMode('timer');
+    });
+  }
 
-  btnConcurrentStopwatchPause.addEventListener('click', async () => {
-    const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
-    if (res && res.state) state = normalizeState(res.state);
-  });
+  if (btnConcurrentStopwatchPause) {
+    btnConcurrentStopwatchPause.addEventListener('click', async () => {
+      safeSound('pause');
+      const res = await sendMessage({ type: 'PAUSE', target: 'stopwatch' });
+      if (res && res.state) state = normalizeState(res.state);
+    });
+  }
 
-  btnConcurrentStopwatchSwitch.addEventListener('click', () => {
-    switchMode('stopwatch');
-  });
+  if (btnConcurrentStopwatchSwitch) {
+    btnConcurrentStopwatchSwitch.addEventListener('click', () => {
+      switchMode('stopwatch');
+    });
+  }
 
-  // ================= LAPS & CHECKPOINTS =================
+  // Laps
   async function recordLap(customLabel = null) {
     const elapsed = getStopwatchElapsed();
     if (state.stopwatch.status !== 'running' && elapsed === 0) return;
-    if (window.soundFX) window.soundFX.lap();
+    safeSound('lap');
     const res = await sendMessage({ type: 'ADD_LAP', label: customLabel });
     if (res && res.state) {
       state = normalizeState(res.state);
@@ -838,13 +932,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderLaps() {
     const count = (state.laps || []).length;
-    if (count > 0) {
-      lapBadge.style.display = 'inline-block';
-      lapBadge.textContent = count;
-    } else {
-      lapBadge.style.display = 'none';
+    if (lapBadge) {
+      if (count > 0) {
+        lapBadge.style.display = 'inline-block';
+        lapBadge.textContent = count;
+      } else {
+        lapBadge.style.display = 'none';
+      }
     }
 
+    if (!lapsList) return;
     if (!state.laps || state.laps.length === 0) {
       lapsList.innerHTML = `
         <div class="empty-state">
@@ -869,14 +966,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
-  // ================= SESSIONS & HISTORY =================
+  // History & Sessions
   function renderHistory() {
     const history = state.history || [];
-    statSolvedCount.textContent = history.length;
+    if (statSolvedCount) statSolvedCount.textContent = history.length;
 
-    const totalMs = history.reduce((acc, cur) => acc + (cur.durationMs || 0), 0);
-    statTotalTime.textContent = formatMinutesShort(totalMs);
+    const totalMs = history.reduce((acc, cur) => acc + (Number(cur.durationMs) || 0), 0);
+    if (statTotalTime) statTotalTime.textContent = formatMinutesShort(totalMs);
 
+    if (!historyList) return;
     if (history.length === 0) {
       historyList.innerHTML = `
         <div class="empty-state">
@@ -909,110 +1007,125 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  // Log Modal Open
-  btnLogModalOpen.addEventListener('click', () => {
-    const swElapsed = getStopwatchElapsed();
-    const duration = swElapsed > 0 ? swElapsed : getTargetElapsed();
-    const parts = formatTimeParts(duration);
-    modalTimeDisplay.textContent = parts.fullText;
-    modalTitle.value = activeProblemTitle.value.trim() || '';
-    modalPlatform.value = activePlatform.value;
-    modalDifficulty.value = activeDifficulty.value;
-    modalNotes.value = '';
-    modalLog.style.display = 'flex';
-  });
-
-  btnModalClose.addEventListener('click', () => { modalLog.style.display = 'none'; });
-  btnModalCancel.addEventListener('click', () => { modalLog.style.display = 'none'; });
-
-  btnModalSave.addEventListener('click', async () => {
-    const title = modalTitle.value.trim() || 'Untitled Problem';
-    const platform = modalPlatform.value;
-    const difficulty = modalDifficulty.value;
-    const verdict = document.querySelector('input[name="verdict"]:checked')?.value || 'Solved';
-    const notes = modalNotes.value.trim();
-    const swElapsed = getStopwatchElapsed();
-    const durationMs = swElapsed > 0 ? swElapsed : getTargetElapsed();
-
-    const res = await sendMessage({
-      type: 'LOG_PROBLEM',
-      title,
-      platform,
-      difficulty,
-      verdict,
-      notes,
-      durationMs
+  // Modal Log
+  if (btnLogModalOpen) {
+    btnLogModalOpen.addEventListener('click', () => {
+      const swElapsed = getStopwatchElapsed();
+      const duration = swElapsed > 0 ? swElapsed : getTargetElapsed();
+      const parts = formatTimeParts(duration);
+      if (modalTimeDisplay) modalTimeDisplay.textContent = parts.fullText;
+      if (modalTitle) modalTitle.value = activeProblemTitle ? activeProblemTitle.value.trim() : '';
+      if (modalPlatform && activePlatform) modalPlatform.value = activePlatform.value;
+      if (modalDifficulty && activeDifficulty) modalDifficulty.value = activeDifficulty.value;
+      if (modalNotes) modalNotes.value = '';
+      if (modalLog) modalLog.style.display = 'flex';
     });
+  }
 
-    if (res && res.state) {
-      state = normalizeState(res.state);
-      renderHistory();
-    }
+  if (btnModalClose) btnModalClose.addEventListener('click', () => { if (modalLog) modalLog.style.display = 'none'; });
+  if (btnModalCancel) btnModalCancel.addEventListener('click', () => { if (modalLog) modalLog.style.display = 'none'; });
 
-    modalLog.style.display = 'none';
-    if (window.soundFX) window.soundFX.lap();
+  if (btnModalSave) {
+    btnModalSave.addEventListener('click', async () => {
+      const title = modalTitle ? modalTitle.value.trim() : 'Untitled Problem';
+      const platform = modalPlatform ? modalPlatform.value : 'LeetCode';
+      const difficulty = modalDifficulty ? modalDifficulty.value : 'Medium';
+      const verdict = document.querySelector('input[name="verdict"]:checked')?.value || 'Solved';
+      const notes = modalNotes ? modalNotes.value.trim() : '';
+      const swElapsed = getStopwatchElapsed();
+      const durationMs = swElapsed > 0 ? swElapsed : getTargetElapsed();
 
-    // Auto-switch to history tab
-    navTabs.forEach(t => t.classList.remove('active'));
-    tabContents.forEach(c => c.classList.remove('active'));
-    document.querySelector('.nav-tab[data-tab="history"]').classList.add('active');
-    document.getElementById('tab-history').classList.add('active');
-  });
+      const res = await sendMessage({
+        type: 'LOG_PROBLEM',
+        title,
+        platform,
+        difficulty,
+        verdict,
+        notes,
+        durationMs
+      });
 
-  // CSV Export
-  btnExportCsv.addEventListener('click', () => {
-    const history = state.history || [];
-    if (history.length === 0) {
-      alert('No sessions to export yet.');
-      return;
-    }
-
-    let csv = 'ID,Date,Problem,Platform,Difficulty,Verdict,Duration (sec),Formatted Time,Notes\n';
-    history.forEach(h => {
-      const durSec = Math.round(h.durationMs / 1000);
-      const formatted = formatTimeParts(h.durationMs).base;
-      const cleanNotes = (h.notes || '').replace(/"/g, '""');
-      const cleanTitle = (h.title || '').replace(/"/g, '""');
-      csv += `"${h.id}","${h.timestamp}","${cleanTitle}","${h.platform}","${h.difficulty}","${h.verdict}",${durSec},"${formatted}","${cleanNotes}"\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `algotimer-sessions-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // Clear History
-  btnClearHistory.addEventListener('click', async () => {
-    if (confirm('Are you sure you want to clear your problem history?')) {
-      const res = await sendMessage({ type: 'CLEAR_HISTORY' });
       if (res && res.state) {
         state = normalizeState(res.state);
         renderHistory();
       }
-    }
-  });
+
+      if (modalLog) modalLog.style.display = 'none';
+      safeSound('lap');
+
+      navTabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      const histTab = document.querySelector('.nav-tab[data-tab="history"]');
+      const histContent = document.getElementById('tab-history');
+      if (histTab) histTab.classList.add('active');
+      if (histContent) histContent.classList.add('active');
+    });
+  }
+
+  // CSV Export
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      const history = state.history || [];
+      if (history.length === 0) {
+        alert('No sessions to export yet.');
+        return;
+      }
+
+      let csv = 'ID,Date,Problem,Platform,Difficulty,Verdict,Duration (sec),Formatted Time,Notes\n';
+      history.forEach(h => {
+        const durSec = Math.round((Number(h.durationMs) || 0) / 1000);
+        const formatted = formatTimeParts(h.durationMs).base;
+        const cleanNotes = (h.notes || '').replace(/"/g, '""');
+        const cleanTitle = (h.title || '').replace(/"/g, '""');
+        csv += `"${h.id}","${h.timestamp}","${cleanTitle}","${h.platform}","${h.difficulty}","${h.verdict}",${durSec},"${formatted}","${cleanNotes}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `algotimer-sessions-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Clear History
+  if (btnClearHistory) {
+    btnClearHistory.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to clear your problem history?')) {
+        const res = await sendMessage({ type: 'CLEAR_HISTORY' });
+        if (res && res.state) {
+          state = normalizeState(res.state);
+          renderHistory();
+        }
+      }
+    });
+  }
 
   // Settings Events
-  settingDualActive.addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    state.allowDualActive = enabled;
-    await sendMessage({ type: 'UPDATE_SETTINGS', allowDualActive: enabled });
-  });
+  if (settingDualActive) {
+    settingDualActive.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+      state.allowDualActive = enabled;
+      await sendMessage({ type: 'UPDATE_SETTINGS', allowDualActive: enabled });
+    });
+  }
 
-  settingSound.addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    if (window.soundFX) window.soundFX.enabled = enabled;
-    await sendMessage({ type: 'UPDATE_SETTINGS', soundEnabled: enabled });
-  });
+  if (settingSound) {
+    settingSound.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+      if (window.soundFX) window.soundFX.enabled = enabled;
+      await sendMessage({ type: 'UPDATE_SETTINGS', soundEnabled: enabled });
+    });
+  }
 
-  settingFloating.addEventListener('change', async (e) => {
-    const enabled = e.target.checked;
-    await sendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: enabled });
-  });
+  if (settingFloating) {
+    settingFloating.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+      await sendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: enabled });
+    });
+  }
 
   // Tab Navigation
   navTabs.forEach(tab => {
@@ -1022,7 +1135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       tabContents.forEach(c => c.classList.remove('active'));
 
       tab.classList.add('active');
-      document.getElementById(`tab-${tabId}`).classList.add('active');
+      const targetContent = document.getElementById(`tab-${tabId}`);
+      if (targetContent) targetContent.classList.add('active');
 
       if (tabId === 'laps') renderLaps();
       if (tabId === 'history') renderHistory();
@@ -1031,17 +1145,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) {
+    if (['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) {
       return;
     }
 
     if (e.code === 'Space') {
       e.preventDefault();
-      if (state.mode === 'dual') btnDualMasterToggle.click();
-      else btnToggleRun.click();
+      if (state.mode === 'dual' && btnDualMasterToggle) btnDualMasterToggle.click();
+      else if (btnToggleRun) btnToggleRun.click();
     } else if (e.key === 'r' || e.key === 'R') {
-      if (state.mode === 'dual') btnDualMasterReset.click();
-      else btnReset.click();
+      if (state.mode === 'dual' && btnDualMasterReset) btnDualMasterReset.click();
+      else if (btnReset) btnReset.click();
     } else if (e.key === 'l' || e.key === 'L') {
       recordLap();
     } else if (e.key === 'm' || e.key === 'M') {

@@ -43,6 +43,24 @@ class SoundFX {
     }
   }
 
+  // Timer started
+  start() {
+    if (!this.enabled) return;
+    this.playTone(587.33, 'sine', 0.08, 0.1); // D5
+    setTimeout(() => {
+      this.playTone(880, 'sine', 0.1, 0.12); // A5
+    }, 60);
+  }
+
+  // Timer paused
+  pause() {
+    if (!this.enabled) return;
+    this.playTone(880, 'sine', 0.08, 0.1);
+    setTimeout(() => {
+      this.playTone(587.33, 'sine', 0.1, 0.08);
+    }, 60);
+  }
+
   // Button click / tick
   tick() {
     this.playTone(880, 'sine', 0.05, 0.08);

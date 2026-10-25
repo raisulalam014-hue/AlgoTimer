@@ -1,10 +1,11 @@
 // AlgoTimer - In-Page Problem Solving Floating Widget Content Script
-// Supports: Draggable overlay, Dual Timer concurrent displays, Pop Out Picture-in-Picture floating screen
+// Supports: Free Resizing, 4-Corner Docking, Dual Real-Time Timers (Stopwatch + Countdown)
 
 (function () {
   if (window.__algotimer_injected) return;
   window.__algotimer_injected = true;
 
+  // Global State
   let state = {
     mode: 'stopwatch',
     allowDualActive: true,
@@ -27,13 +28,81 @@
   };
 
   let animFrameId = null;
-  let isMinimized = false;
+  const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left'];
+  const SIZES = ['normal', 'compact', 'mini'];
+  
+  // Stored preferences
+  let currentCorner = 'top-right';
+  let currentSize = 'normal';
+  let customWidth = null;
+
+  // Safe Chrome Message Sender
+  function safeSendMessage(msg, callback) {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+      try {
+        chrome.runtime.sendMessage(msg, (response) => {
+          if (chrome.runtime.lastError) {
+            // Service worker asleep or no listener; safe to ignore
+          } else if (callback && response) {
+            callback(response);
+          }
+        });
+      } catch (e) {
+        // Safe catch
+      }
+    }
+  }
+
+  // Load Saved Placement & Size from Storage
+  function loadPreferences() {
+    try {
+      const savedCorner = localStorage.getItem('algotimer_corner');
+      if (savedCorner && CORNERS.includes(savedCorner)) currentCorner = savedCorner;
+
+      const savedSize = localStorage.getItem('algotimer_size');
+      if (savedSize && SIZES.includes(savedSize)) currentSize = savedSize;
+
+      const savedWidth = localStorage.getItem('algotimer_width');
+      if (savedWidth) customWidth = parseInt(savedWidth, 10);
+    } catch (e) {}
+
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      try {
+        chrome.storage.local.get(['widgetCorner', 'widgetSize', 'widgetWidth'], (res) => {
+          if (res) {
+            if (res.widgetCorner && CORNERS.includes(res.widgetCorner)) currentCorner = res.widgetCorner;
+            if (res.widgetSize && SIZES.includes(res.widgetSize)) currentSize = res.widgetSize;
+            if (res.widgetWidth) customWidth = res.widgetWidth;
+            applyPositionAndSize();
+          }
+        });
+      } catch (e) {}
+    }
+  }
+
+  function savePreferences() {
+    try {
+      localStorage.setItem('algotimer_corner', currentCorner);
+      localStorage.setItem('algotimer_size', currentSize);
+      if (customWidth) localStorage.setItem('algotimer_width', customWidth);
+    } catch (e) {}
+
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      try {
+        chrome.storage.local.set({
+          widgetCorner: currentCorner,
+          widgetSize: currentSize,
+          widgetWidth: customWidth
+        });
+      } catch (e) {}
+    }
+  }
 
   // Auto-detect problem title based on current platform
   function detectProblemInfo() {
     const host = window.location.hostname;
     let title = '';
-    let platform = 'Other';
+    let platform = 'Coding';
 
     if (host.includes('leetcode.com')) {
       platform = 'LeetCode';
@@ -108,12 +177,13 @@
     return s;
   }
 
-  // Create and inject floating widget
+  // Build and Inject Floating Root DOM
   const root = document.createElement('div');
   root.id = 'algotimer-floating-root';
 
   const widget = document.createElement('div');
   widget.className = 'algotimer-widget';
+  widget.id = 'algotimer-widget-card';
 
   const probInfo = detectProblemInfo();
 
@@ -122,21 +192,29 @@
     <div class="algotimer-header" id="algotimer-drag-handle">
       <div class="algotimer-title">
         <span class="algotimer-icon"></span>
-        <span>AlgoTimer</span>
+        <span id="algotimer-brand-text">AlgoTimer</span>
       </div>
       <div class="algotimer-header-actions">
-        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Pop Up Screen: Float Always-on-Top over other apps">🗗</button>
-        <button class="algotimer-btn-icon" id="algotimer-btn-min" title="Minimize">−</button>
-        <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">✕</button>
-      </div>
-    </div>
+        <!-- Corner Dock Cycler (↗, ↘, ↙, ↖) -->
+        <button class="algotimer-btn-icon" id="algotimer-btn-corner" title="Dock to next corner (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
+          <span class="algotimer-corner-badge" id="algotimer-corner-indicator">↗</span>
+        </button>
 
-    <!-- Minimized pill view -->
-    <div class="algotimer-mini-content" id="algotimer-mini-drag">
-      <span class="algotimer-icon"></span>
-      <span class="algotimer-mini-clock" id="algotimer-mini-time">00:00</span>
-      <button class="algotimer-mini-btn" id="algotimer-mini-toggle" title="Start/Pause">▶</button>
-      <button class="algotimer-mini-btn" id="algotimer-btn-expand" title="Expand">⤢</button>
+        <!-- Size Toggle (Normal -> Compact -> Mini) -->
+        <button class="algotimer-btn-icon" id="algotimer-btn-size" title="Toggle Size (Normal, Compact, Mini)">
+          🗜️
+        </button>
+
+        <!-- Pop Out Window / PiP -->
+        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-on-top PiP Float Screen">
+          ⤢
+        </button>
+
+        <!-- Hide / Close -->
+        <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide timer">
+          ✕
+        </button>
+      </div>
     </div>
 
     <!-- Body -->
@@ -153,7 +231,7 @@
         00:00
       </div>
 
-      <!-- Dual clocks view -->
+      <!-- Dual clocks view (Stopwatch + Countdown Active) -->
       <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
         <div class="algotimer-dual-row">
           <span class="algotimer-subtag">⏱️ Elapsed</span>
@@ -170,13 +248,16 @@
           ▶ Start
         </button>
         <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
-          🏁 Lap
+          Lap
         </button>
         <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
           ↺
         </button>
       </div>
     </div>
+
+    <!-- Resizing Corner Grip Handle -->
+    <div class="algotimer-resize-grip" id="algotimer-resize-grip" title="Drag corner to freely resize smaller or larger"></div>
   `;
 
   root.appendChild(widget);
@@ -187,24 +268,129 @@
   const dualClocksDisplay = document.getElementById('algotimer-dual-clocks-display');
   const dualSwTime = document.getElementById('algotimer-dual-sw-time');
   const dualTimerTime = document.getElementById('algotimer-dual-timer-time');
-  const miniTime = document.getElementById('algotimer-mini-time');
   const playBtn = document.getElementById('algotimer-btn-play');
-  const miniToggle = document.getElementById('algotimer-mini-toggle');
   const lapBtn = document.getElementById('algotimer-btn-lap');
   const resetBtn = document.getElementById('algotimer-btn-reset');
   const modeTag = document.getElementById('algotimer-mode-tag');
-  const minBtn = document.getElementById('algotimer-btn-min');
-  const expandBtn = document.getElementById('algotimer-btn-expand');
-  const closeBtn = document.getElementById('algotimer-btn-close');
+  const cornerBtn = document.getElementById('algotimer-btn-corner');
+  const cornerIndicator = document.getElementById('algotimer-corner-indicator');
+  const sizeBtn = document.getElementById('algotimer-btn-size');
   const pipBtn = document.getElementById('algotimer-btn-pip');
+  const closeBtn = document.getElementById('algotimer-btn-close');
+  const resizeGrip = document.getElementById('algotimer-resize-grip');
 
-  // Draggable logic
-  function setupDraggable(handle) {
+  const cornerSymbols = {
+    'top-right': '↗ TR',
+    'bottom-right': '↘ BR',
+    'bottom-left': '↙ BL',
+    'top-left': '↖ TL'
+  };
+
+  // Apply Position & Size to Elements
+  function applyPositionAndSize() {
+    // Clear root corner classes
+    CORNERS.forEach(c => root.classList.remove(`corner-${c}`));
+    root.classList.add(`corner-${currentCorner}`);
+
+    if (cornerIndicator) {
+      cornerIndicator.textContent = cornerSymbols[currentCorner] || '↗';
+    }
+
+    // Apply size attribute
+    widget.setAttribute('data-size', currentSize);
+
+    if (customWidth) {
+      widget.style.width = `${customWidth}px`;
+    } else {
+      widget.style.width = '';
+    }
+  }
+
+  // Load and apply initial stored preferences
+  loadPreferences();
+  applyPositionAndSize();
+
+  // Corner Cycle Button
+  cornerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const idx = CORNERS.indexOf(currentCorner);
+    currentCorner = CORNERS[(idx + 1) % CORNERS.length];
+    
+    // Clear manual coordinate overrides if any
+    root.style.top = '';
+    root.style.bottom = '';
+    root.style.left = '';
+    root.style.right = '';
+
+    applyPositionAndSize();
+    savePreferences();
+  });
+
+  // Size Preset Cycle Button
+  sizeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const idx = SIZES.indexOf(currentSize);
+    currentSize = SIZES[(idx + 1) % SIZES.length];
+    customWidth = null; // reset manual drag width on preset click
+    applyPositionAndSize();
+    savePreferences();
+  });
+
+  // Corner Drag-to-Resize Handle Logic
+  (function setupResizing() {
+    let isResizing = false;
+    let startX, startW;
+
+    resizeGrip.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isResizing = true;
+      startX = e.clientX;
+      startW = widget.offsetWidth;
+
+      const onMouseMove = (ev) => {
+        if (!isResizing) return;
+        const dx = ev.clientX - startX;
+        let newW = Math.max(140, Math.min(420, startW + dx));
+        widget.style.width = `${newW}px`;
+        customWidth = newW;
+
+        // Auto-adapt size tier based on width
+        if (newW < 180) {
+          widget.setAttribute('data-size', 'mini');
+          currentSize = 'mini';
+        } else if (newW < 230) {
+          widget.setAttribute('data-size', 'compact');
+          currentSize = 'compact';
+        } else {
+          widget.setAttribute('data-size', 'normal');
+          currentSize = 'normal';
+        }
+      };
+
+      const onMouseUp = () => {
+        if (isResizing) {
+          isResizing = false;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+          savePreferences();
+        }
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
+  })();
+
+  // Draggable logic for Header
+  (function setupDraggable() {
     let isDragging = false;
     let startX, startY, origX, origY;
 
+    const handle = document.getElementById('algotimer-drag-handle');
+
     handle.addEventListener('mousedown', (e) => {
-      if (e.target.tagName.toLowerCase() === 'button') return;
+      if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
@@ -212,6 +398,9 @@
       const rect = root.getBoundingClientRect();
       origX = rect.left;
       origY = rect.top;
+
+      // Switch to manual pixel positioning
+      CORNERS.forEach(c => root.classList.remove(`corner-${c}`));
 
       const onMouseMove = (ev) => {
         if (!isDragging) return;
@@ -224,33 +413,60 @@
         root.style.left = `${newX}px`;
         root.style.top = `${newY}px`;
         root.style.right = 'auto';
+        root.style.bottom = 'auto';
       };
 
       const onMouseUp = () => {
-        isDragging = false;
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
+        if (isDragging) {
+          isDragging = false;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+
+          // Check if near any of the 4 corners for snap-docking
+          const rect = root.getBoundingClientRect();
+          const midX = window.innerWidth / 2;
+          const midY = window.innerHeight / 2;
+
+          if (rect.top < 60 && rect.right > window.innerWidth - 60) {
+            currentCorner = 'top-right';
+            root.style.left = '';
+            root.style.top = '';
+            applyPositionAndSize();
+          } else if (rect.top < 60 && rect.left < 60) {
+            currentCorner = 'top-left';
+            root.style.left = '';
+            root.style.top = '';
+            applyPositionAndSize();
+          } else if (rect.bottom > window.innerHeight - 60 && rect.right > window.innerWidth - 60) {
+            currentCorner = 'bottom-right';
+            root.style.left = '';
+            root.style.top = '';
+            applyPositionAndSize();
+          } else if (rect.bottom > window.innerHeight - 60 && rect.left < 60) {
+            currentCorner = 'bottom-left';
+            root.style.left = '';
+            root.style.top = '';
+            applyPositionAndSize();
+          } else {
+            // Save nearest corner label
+            const isRight = rect.left + rect.width / 2 > midX;
+            const isBottom = rect.top + rect.height / 2 > midY;
+            if (isRight && !isBottom) currentCorner = 'top-right';
+            else if (!isRight && !isBottom) currentCorner = 'top-left';
+            else if (isRight && isBottom) currentCorner = 'bottom-right';
+            else currentCorner = 'bottom-left';
+            if (cornerIndicator) cornerIndicator.textContent = cornerSymbols[currentCorner] || '↗';
+          }
+          savePreferences();
+        }
       };
 
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
     });
-  }
+  })();
 
-  setupDraggable(document.getElementById('algotimer-drag-handle'));
-  setupDraggable(document.getElementById('algotimer-mini-drag'));
-
-  // Minimize / Expand / Close
-  minBtn.addEventListener('click', () => {
-    isMinimized = true;
-    widget.classList.add('minimized');
-  });
-
-  expandBtn.addEventListener('click', () => {
-    isMinimized = false;
-    widget.classList.remove('minimized');
-  });
-
+  // Close / Hide button
   closeBtn.addEventListener('click', () => {
     root.style.display = 'none';
   });
@@ -260,8 +476,8 @@
     if ('documentPictureInPicture' in window) {
       try {
         const pipWindow = await window.documentPictureInPicture.requestWindow({
-          width: 300,
-          height: 250
+          width: 280,
+          height: 180
         });
 
         // Copy styles
@@ -278,8 +494,8 @@
         console.warn('PiP from widget failed:', err);
       }
     }
-    // Fallback: request popup via background
-    chrome.runtime.sendMessage({ type: 'OPEN_POPUP_WINDOW' });
+    // Fallback: request standalone popup window via background
+    safeSendMessage({ type: 'OPEN_POPUP_WINDOW' });
   });
 
   // Calculate elapsed
@@ -302,13 +518,13 @@
     return Math.max(0, state.targetTimer.targetDurationMs - elapsed);
   }
 
-  // Animation frame clock ticker
+  // Animation frame clock ticker: smoothly updates stopwatch and countdown
   function tick() {
     const swElapsed = getStopwatchElapsed();
     const targetRemaining = getTargetRemaining();
 
     if (state.mode === 'dual') {
-      modeTag.textContent = '⚡ DUAL MODE (BOTH)';
+      modeTag.textContent = '⚡ DUAL (BOTH ACTIVE)';
       clockDisplay.style.display = 'none';
       dualClocksDisplay.style.display = 'flex';
 
@@ -317,7 +533,6 @@
 
       dualSwTime.textContent = swFormatted;
       dualTimerTime.textContent = timerFormatted;
-      miniTime.textContent = `${swFormatted} | ${timerFormatted}`;
 
       if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
         dualTimerTime.classList.add('warning');
@@ -328,20 +543,17 @@
       const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
       if (bothRunning) {
         playBtn.textContent = '⏸ Pause Both';
-        miniToggle.textContent = '⏸';
       } else {
-        playBtn.textContent = '⚡ Start Both';
-        miniToggle.textContent = '▶';
+        playBtn.textContent = '▶ Start Both';
       }
 
     } else if (state.mode === 'timer') {
-      modeTag.textContent = 'TARGET TIMER';
+      modeTag.textContent = 'TARGET COUNTDOWN';
       clockDisplay.style.display = 'block';
       dualClocksDisplay.style.display = 'none';
 
       const formatted = formatTime(targetRemaining);
       clockDisplay.textContent = formatted;
-      miniTime.textContent = formatted;
 
       if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
         clockDisplay.classList.add('warning');
@@ -351,10 +563,8 @@
 
       if (state.targetTimer.status === 'running') {
         playBtn.textContent = '⏸ Pause';
-        miniToggle.textContent = '⏸';
       } else {
         playBtn.textContent = '▶ Start';
-        miniToggle.textContent = '▶';
       }
 
     } else {
@@ -366,14 +576,11 @@
 
       const formatted = formatTime(swElapsed);
       clockDisplay.textContent = formatted;
-      miniTime.textContent = formatted;
 
       if (state.stopwatch.status === 'running') {
         playBtn.textContent = '⏸ Pause';
-        miniToggle.textContent = '⏸';
       } else {
         playBtn.textContent = '▶ Start';
-        miniToggle.textContent = '▶';
       }
     }
 
@@ -386,28 +593,24 @@
   playBtn.addEventListener('click', () => {
     if (state.mode === 'dual') {
       const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
-      if (bothRunning) chrome.runtime.sendMessage({ type: 'PAUSE', target: 'both' });
-      else chrome.runtime.sendMessage({ type: 'START', target: 'both' });
+      if (bothRunning) safeSendMessage({ type: 'PAUSE', target: 'both' });
+      else safeSendMessage({ type: 'START', target: 'both' });
     } else if (state.mode === 'timer') {
-      if (state.targetTimer.status === 'running') chrome.runtime.sendMessage({ type: 'PAUSE', target: 'timer' });
-      else chrome.runtime.sendMessage({ type: 'START', target: 'timer' });
+      if (state.targetTimer.status === 'running') safeSendMessage({ type: 'PAUSE', target: 'timer' });
+      else safeSendMessage({ type: 'START', target: 'timer' });
     } else {
-      if (state.stopwatch.status === 'running') chrome.runtime.sendMessage({ type: 'PAUSE', target: 'stopwatch' });
-      else chrome.runtime.sendMessage({ type: 'START', target: 'stopwatch' });
+      if (state.stopwatch.status === 'running') safeSendMessage({ type: 'PAUSE', target: 'stopwatch' });
+      else safeSendMessage({ type: 'START', target: 'stopwatch' });
     }
   });
 
-  miniToggle.addEventListener('click', () => {
-    playBtn.click();
-  });
-
   lapBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'ADD_LAP' });
+    safeSendMessage({ type: 'ADD_LAP' });
   });
 
   resetBtn.addEventListener('click', () => {
     const target = state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch');
-    chrome.runtime.sendMessage({ type: 'RESET', target });
+    safeSendMessage({ type: 'RESET', target });
   });
 
   // Sync state from background
@@ -422,16 +625,18 @@
   }
 
   // Initial fetch
-  chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+  safeSendMessage({ type: 'GET_STATE' }, (response) => {
     if (response && response.state) {
       syncState(response.state);
     }
   });
 
   // State update listener
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'STATE_UPDATED') {
-      syncState(msg.state);
-    }
-  });
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg && msg.type === 'STATE_UPDATED') {
+        syncState(msg.state);
+      }
+    });
+  }
 })();
