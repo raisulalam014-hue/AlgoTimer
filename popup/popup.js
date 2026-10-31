@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const settingDualActive = document.getElementById('setting-dual-active');
   const settingSound = document.getElementById('setting-sound');
   const settingFloating = document.getElementById('setting-floating');
+  const settingFloatingDisplayMode = document.getElementById('setting-floating-display-mode');
 
   // Problem Logging
   const activeProblemTitle = document.getElementById('active-problem-title');
@@ -698,6 +699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settingDualActive) settingDualActive.checked = state.allowDualActive !== false;
     if (settingSound) settingSound.checked = state.soundEnabled !== false;
     if (settingFloating) settingFloating.checked = state.floatingWidgetEnabled !== false;
+    if (settingFloatingDisplayMode) settingFloatingDisplayMode.value = state.floatingWidgetDisplayMode || 'coding_only';
     if (window.soundFX) window.soundFX.enabled = settingSound ? settingSound.checked : true;
   }
 
@@ -1124,6 +1126,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingFloating.addEventListener('change', async (e) => {
       const enabled = e.target.checked;
       await sendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: enabled });
+    });
+  }
+
+  if (settingFloatingDisplayMode) {
+    settingFloatingDisplayMode.addEventListener('change', async (e) => {
+      await sendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetDisplayMode: e.target.value });
     });
   }
 

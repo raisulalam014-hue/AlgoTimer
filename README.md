@@ -32,15 +32,19 @@
 - `60m Mock` — Full interview simulation
 - `Custom...` — Custom hours, minutes, and seconds
 
-### 4. 💻 Floating In-Page Overlay
-- Sleek, draggable, minimizable floating stopwatch directly injected onto coding platforms:
-  - **LeetCode** (`leetcode.com`)
-  - **Codeforces** (`codeforces.com`)
-  - **HackerRank** (`hackerrank.com`)
-  - **NeetCode** (`neetcode.io`)
-  - **GeeksforGeeks** (`geeksforgeeks.org`)
-  - **CodeChef** (`codechef.com`)
-  - **AtCoder** (`atcoder.jp`)
+### 4. 💻 Floating In-Page Overlay & Dynamic Edge Pill (v1.3.0)
+- **Smart Visibility Control (No More Unwanted New-Tab Popups!)**:
+  - **Coding Sites Only (Default)**: Automatically activates exclusively on coding platforms (**LeetCode**, **Codeforces**, **HackerRank**, **NeetCode**, **GeeksforGeeks**, **CodeChef**, **AtCoder**, **CSES**, etc.) — won't clutter everyday browsing, Google Search, or YouTube.
+  - **Only When Running Mode**: Keep the widget completely hidden until you actively start a countdown or stopwatch.
+  - **All Webpages Mode**: Available for general browsing & mock interviews.
+- **Dynamic Dismissal & Close Menu**:
+  - Click `✕` to reveal instant controls:
+    - 🗜️ **Minimize to Edge Pill**: Folds the timer into an ultra-discreet, glowing edge tab (`⏱️ 12:34`) that expands smoothly on click.
+    - 🌐 **Hide on this website**: Remembers your preference per-domain across all tabs and sessions.
+    - ✕ **Close for this tab**: Closes the overlay for the active tab without affecting other tabs.
+    - 🚫 **Turn off everywhere**: One-click global disable directly from the in-page widget.
+- **Difficulty & Problem Detection**:
+  - Automatically extracts problem titles and tags difficulty levels (**Easy** 🟢, **Medium** 🟡, **Hard** 🔴) on LeetCode.
 
 ### 5. 🏁 Interview Phase Milestones (Laps)
 - 📖 **Understand**: Problem comprehension & reading edge cases

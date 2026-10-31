@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AlgoTimer - Problem Solving Stopwatch & Timer",
-  "version": "1.2.0",
-  "description": "Precision stopwatch, concurrent dual countdown timer, 4-corner dockable floating HUD, and OS-level pop-up screen for any tab, LeetCode, Codeforces, and interview prep.",
+  "version": "1.3.0",
+  "description": "Smart problem solving stopwatch, dual countdown timer, dockable corner HUD with edge pill collapse, and pop-up floating screen.",
   "permissions": [
     "storage",
     "alarms",

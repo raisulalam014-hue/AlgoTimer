@@ -28,6 +28,7 @@ const DEFAULT_STATE = {
 
   soundEnabled: true,
   floatingWidgetEnabled: true,
+  floatingWidgetDisplayMode: 'coding_only', // 'coding_only' | 'running_only' | 'always'
   laps: [],
   currentProblem: {
     title: '',
@@ -423,6 +424,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'UPDATE_SETTINGS': {
           if (message.soundEnabled !== undefined) state.soundEnabled = message.soundEnabled;
           if (message.floatingWidgetEnabled !== undefined) state.floatingWidgetEnabled = message.floatingWidgetEnabled;
+          if (message.floatingWidgetDisplayMode !== undefined) state.floatingWidgetDisplayMode = message.floatingWidgetDisplayMode;
           if (message.allowDualActive !== undefined) state.allowDualActive = message.allowDualActive;
           await chrome.storage.local.set({ algoTimerState: state });
           broadcastState(state);

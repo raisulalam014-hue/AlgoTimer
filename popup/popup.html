@@ -49,7 +49,7 @@
             <line x1="10" y1="14" x2="21" y2="3"></line>
           </svg>
         </button>
-        <span class="version-tag">v1.1</span>
+        <span class="version-tag">v1.3</span>
       </div>
     </header>
 
@@ -337,10 +337,21 @@
         <label class="setting-row">
           <div class="setting-info">
             <span class="setting-title">Floating Overlay Widget</span>
-            <span class="setting-desc">Show on LeetCode, Codeforces & HackerRank problem pages</span>
+            <span class="setting-desc">Enable in-page floating widget & corner dock</span>
           </div>
           <input type="checkbox" id="setting-floating" checked>
         </label>
+        <div class="setting-row" style="margin-top: 6px;">
+          <div class="setting-info">
+            <span class="setting-title">Widget Auto-Show Behavior</span>
+            <span class="setting-desc">Choose when the corner timer appears on web pages</span>
+          </div>
+          <select id="setting-floating-display-mode" class="mini-select" style="min-width: 140px; padding: 4px 8px; font-size: 11px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #f8fafc;">
+            <option value="coding_only" selected>Coding Sites Only</option>
+            <option value="running_only">Only When Running</option>
+            <option value="always">All Webpages</option>
+          </select>
+        </div>
       </div>
 
       <div class="settings-group">

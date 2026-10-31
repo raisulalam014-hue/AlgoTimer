@@ -24,7 +24,9 @@
     startTime: null,
     elapsedBeforePause: 0,
     targetDurationMs: 30 * 60 * 1000,
-    floatingWidgetEnabled: true
+    floatingWidgetEnabled: true,
+    floatingWidgetDisplayMode: 'coding_only',
+    edgePillEnabled: true
   };
 
   let animFrameId = null;
@@ -35,6 +37,9 @@
   let currentCorner = 'top-right';
   let currentSize = 'normal';
   let customWidth = null;
+  let isMinimizedToPill = false;
+  let isClosedForTab = false;
+  let isSiteMuted = false;
 
   // Safe Chrome Message Sender
   function safeSendMessage(msg, callback) {
@@ -64,6 +69,9 @@
 
       const savedWidth = localStorage.getItem('algotimer_width');
       if (savedWidth) customWidth = parseInt(savedWidth, 10);
+      const currentHost = window.location.hostname;
+      if (localStorage.getItem('algotimer_muted_' + currentHost) === 'true') isSiteMuted = true;
+      if (localStorage.getItem('algotimer_pill_' + currentHost) === 'true') isMinimizedToPill = true;
     } catch (e) {}
 
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
@@ -99,6 +107,20 @@
   }
 
   // Auto-detect problem title based on current platform
+  function isCodingPlatform() {
+    const host = window.location.hostname.toLowerCase();
+    return host.includes('leetcode.com') ||
+           host.includes('codeforces.com') ||
+           host.includes('hackerrank.com') ||
+           host.includes('neetcode.io') ||
+           host.includes('geeksforgeeks.org') ||
+           host.includes('codechef.com') ||
+           host.includes('atcoder.jp') ||
+           host.includes('cses.fi') ||
+           host.includes('kattis.com') ||
+           host.includes('spoj.com');
+  }
+
   function detectProblemInfo() {
     const host = window.location.hostname;
     let title = '';
@@ -132,7 +154,13 @@
       if (el) title = el.textContent.trim();
     }
 
-    return { title: title || 'Problem Solving Session', platform };
+    let difficulty = '';
+    if (host.includes('leetcode.com')) {
+      const del = document.querySelector('div[class*="text-difficulty-"], div[ class*="text-olive"], div[ class*="text-yellow"], div[ class*="text-pink"]');
+      if (del) difficulty = del.textContent.trim();
+    }
+    if (!title && !isCodingPlatform()) title = document.title ? document.title.split('-')[0].split('|')[0].trim() : 'Session';
+    return { title: title || 'Problem Solving Session', platform, difficulty };
   }
 
   // Format milliseconds to MM:SS or HH:MM:SS
@@ -466,9 +494,113 @@
     });
   })();
 
+  // V1.3.0 Dynamic Edge Pill Trigger
+  const pillTrigger = document.createElement('div');
+  pillTrigger.id = 'algotimer-pill-trigger';
+  pillTrigger.innerHTML = '<span>⏱️</span><span id="algotimer-pill-digits">00:00</span>';
+  pillTrigger.title = 'AlgoTimer (Click to expand widget)';
+  document.body.appendChild(pillTrigger);
+
+  const pillDigits = document.getElementById('algotimer-pill-digits');
+
+  function showPillTrigger() {
+    pillTrigger.className = 'corner-' + currentCorner;
+    if (state.stopwatch.status === 'running' || state.targetTimer.status === 'running') {
+      pillTrigger.classList.add('pill-running');
+    } else {
+      pillTrigger.classList.remove('pill-running');
+    }
+    pillTrigger.style.display = 'flex';
+  }
+
+  function hidePillTrigger() {
+    pillTrigger.style.display = 'none';
+  }
+
+  pillTrigger.addEventListener('click', () => {
+    isMinimizedToPill = false;
+    isClosedForTab = false;
+    try {
+      localStorage.removeItem('algotimer_pill_' + window.location.hostname);
+    } catch (e) {}
+    hidePillTrigger();
+    evaluateVisibility();
+  });
+
+  // Dynamic Close & Dismissal Dropdown Menu
+  let closeMenuExpanded = false;
+  function toggleCloseMenu(show) {
+    let menu = document.getElementById('algotimer-close-menu');
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.id = 'algotimer-close-menu';
+      menu.className = 'algotimer-close-menu';
+      menu.innerHTML = `
+        <button class="algotimer-menu-item" id="algotimer-menu-minimize">
+          <span>🗜️</span> Minimize to edge pill
+        </button>
+        <button class="algotimer-menu-item" id="algotimer-menu-mute-site">
+          <span>🌐</span> Hide on this website
+        </button>
+        <button class="algotimer-menu-item" id="algotimer-menu-hide-tab">
+          <span>✕</span> Close for this tab
+        </button>
+        <button class="algotimer-menu-item danger" id="algotimer-menu-disable-global">
+          <span>🚫</span> Turn off everywhere
+        </button>
+      `;
+      widget.appendChild(menu);
+
+      document.getElementById('algotimer-menu-minimize').addEventListener('click', (e) => {
+        e.stopPropagation();
+        isMinimizedToPill = true;
+        try {
+          localStorage.setItem('algotimer_pill_' + window.location.hostname, 'true');
+        } catch (er) {}
+        toggleCloseMenu(false);
+        evaluateVisibility();
+      });
+
+      document.getElementById('algotimer-menu-mute-site').addEventListener('click', (e) => {
+        e.stopPropagation();
+        isSiteMuted = true;
+        try {
+          localStorage.setItem('algotimer_muted_' + window.location.hostname, 'true');
+        } catch (er) {}
+        toggleCloseMenu(false);
+        evaluateVisibility();
+      });
+
+      document.getElementById('algotimer-menu-hide-tab').addEventListener('click', (e) => {
+        e.stopPropagation();
+        isClosedForTab = true;
+        toggleCloseMenu(false);
+        evaluateVisibility();
+      });
+
+      document.getElementById('algotimer-menu-disable-global').addEventListener('click', (e) => {
+        e.stopPropagation();
+        safeSendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: false });
+        state.floatingWidgetEnabled = false;
+        toggleCloseMenu(false);
+        evaluateVisibility();
+      });
+    }
+
+    closeMenuExpanded = (typeof show === 'boolean') ? show : !closeMenuExpanded;
+    menu.style.display = closeMenuExpanded ? 'flex' : 'none';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (closeMenuExpanded && !e.target.closest('#algotimer-close-menu') && !e.target.closest('#algotimer-btn-close')) {
+      toggleCloseMenu(false);
+    }
+  });
+
   // Close / Hide button
-  closeBtn.addEventListener('click', () => {
-    root.style.display = 'none';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCloseMenu();
   });
 
   // Pop Up Screen (Opens dedicated Always-on-Top Floating window outside browser over other apps)
@@ -511,6 +643,7 @@
 
       dualSwTime.textContent = swFormatted;
       dualTimerTime.textContent = timerFormatted;
+      if (pillDigits) pillDigits.textContent = timerFormatted;
 
       if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
         dualTimerTime.classList.add('warning');
@@ -532,6 +665,7 @@
 
       const formatted = formatTime(targetRemaining);
       clockDisplay.textContent = formatted;
+      if (pillDigits) pillDigits.textContent = formatted;
 
       if (targetRemaining <= 300000 && targetRemaining > 0 && state.targetTimer.status === 'running') {
         clockDisplay.classList.add('warning');
@@ -554,6 +688,7 @@
 
       const formatted = formatTime(swElapsed);
       clockDisplay.textContent = formatted;
+      if (pillDigits) pillDigits.textContent = formatted;
 
       if (state.stopwatch.status === 'running') {
         playBtn.textContent = '⏸ Pause';
@@ -566,6 +701,7 @@
   }
 
   tick();
+  evaluateVisibility(); // Apply initial visibility based on preferences
 
   // Button actions
   playBtn.addEventListener('click', () => {
@@ -591,15 +727,60 @@
     safeSendMessage({ type: 'RESET', target });
   });
 
+  // V1.3.0 Dynamic Visibility Evaluator
+  // Prevents unwanted auto-appearance on new tabs; respects per-tab, per-site, and display mode settings
+  function evaluateVisibility() {
+    // Tab-level close: stays gone until page reload
+    if (isClosedForTab) {
+      root.style.display = 'none';
+      hidePillTrigger();
+      return;
+    }
+    // Per-site mute: remembered in localStorage
+    if (isSiteMuted) {
+      root.style.display = 'none';
+      hidePillTrigger();
+      return;
+    }
+    // Global disable via settings
+    if (state.floatingWidgetEnabled === false) {
+      root.style.display = 'none';
+      hidePillTrigger();
+      return;
+    }
+
+    const displayMode = state.floatingWidgetDisplayMode || 'coding_only';
+    const isTimerRunning = (state.stopwatch && state.stopwatch.status === 'running') ||
+                           (state.targetTimer && state.targetTimer.status === 'running');
+
+    // "Coding Sites Only" mode: hide on non-coding sites unless timer is running
+    if (displayMode === 'coding_only' && !isCodingPlatform() && !isTimerRunning) {
+      root.style.display = 'none';
+      hidePillTrigger();
+      return;
+    }
+    // "Only When Running" mode: hide if nothing is running
+    if (displayMode === 'running_only' && !isTimerRunning) {
+      root.style.display = 'none';
+      hidePillTrigger();
+      return;
+    }
+    // Minimized to pill: show tiny pill instead of full widget
+    if (isMinimizedToPill) {
+      root.style.display = 'none';
+      showPillTrigger();
+      return;
+    }
+    // Normal: show full widget
+    root.style.display = 'block';
+    hidePillTrigger();
+  }
+
   // Sync state from background
   function syncState(newState) {
     if (!newState) return;
     state = normalizeState(newState);
-    if (state.floatingWidgetEnabled === false) {
-      root.style.display = 'none';
-    } else if (root.style.display === 'none') {
-      root.style.display = 'block';
-    }
+    evaluateVisibility();
   }
 
   // Initial fetch
