@@ -72,6 +72,7 @@
       const currentHost = window.location.hostname;
       if (localStorage.getItem('algotimer_muted_' + currentHost) === 'true') isSiteMuted = true;
       if (localStorage.getItem('algotimer_pill_' + currentHost) === 'true') isMinimizedToPill = true;
+      if (sessionStorage.getItem('algotimer_tab_closed') === 'true') isClosedForTab = true;
     } catch (e) {}
 
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
@@ -527,85 +528,29 @@
     evaluateVisibility();
   });
 
-  // Dynamic Close & Dismissal Dropdown Menu
-  let closeMenuExpanded = false;
-  function toggleCloseMenu(show) {
-    let menu = document.getElementById('algotimer-close-menu');
-    if (!menu) {
-      menu = document.createElement('div');
-      menu.id = 'algotimer-close-menu';
-      menu.className = 'algotimer-close-menu';
-      menu.innerHTML = `
-        <button class="algotimer-menu-item" id="algotimer-menu-minimize">
-          <span>🗜️</span> Minimize to edge pill
-        </button>
-        <button class="algotimer-menu-item" id="algotimer-menu-mute-site">
-          <span>🌐</span> Hide on this website
-        </button>
-        <button class="algotimer-menu-item" id="algotimer-menu-hide-tab">
-          <span>✕</span> Close for this tab
-        </button>
-        <button class="algotimer-menu-item danger" id="algotimer-menu-disable-global">
-          <span>🚫</span> Turn off everywhere
-        </button>
-      `;
-      widget.appendChild(menu);
-
-      document.getElementById('algotimer-menu-minimize').addEventListener('click', (e) => {
-        e.stopPropagation();
-        isMinimizedToPill = true;
-        try {
-          localStorage.setItem('algotimer_pill_' + window.location.hostname, 'true');
-        } catch (er) {}
-        toggleCloseMenu(false);
-        evaluateVisibility();
-      });
-
-      document.getElementById('algotimer-menu-mute-site').addEventListener('click', (e) => {
-        e.stopPropagation();
-        isSiteMuted = true;
-        try {
-          localStorage.setItem('algotimer_muted_' + window.location.hostname, 'true');
-        } catch (er) {}
-        toggleCloseMenu(false);
-        evaluateVisibility();
-      });
-
-      document.getElementById('algotimer-menu-hide-tab').addEventListener('click', (e) => {
-        e.stopPropagation();
-        isClosedForTab = true;
-        toggleCloseMenu(false);
-        evaluateVisibility();
-      });
-
-      document.getElementById('algotimer-menu-disable-global').addEventListener('click', (e) => {
-        e.stopPropagation();
-        safeSendMessage({ type: 'UPDATE_SETTINGS', floatingWidgetEnabled: false });
-        state.floatingWidgetEnabled = false;
-        toggleCloseMenu(false);
-        evaluateVisibility();
-      });
-    }
-
-    closeMenuExpanded = (typeof show === 'boolean') ? show : !closeMenuExpanded;
-    menu.style.display = closeMenuExpanded ? 'flex' : 'none';
-  }
-
-  document.addEventListener('click', (e) => {
-    if (closeMenuExpanded && !e.target.closest('#algotimer-close-menu') && !e.target.closest('#algotimer-btn-close')) {
-      toggleCloseMenu(false);
-    }
-  });
-
-  // Close / Hide button
+  // Close / Hide button: Instantly and reliably closes the in-page widget
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleCloseMenu();
+    e.preventDefault();
+    isClosedForTab = true;
+    root.style.display = 'none';
+    hidePillTrigger();
+    try {
+      sessionStorage.setItem('algotimer_tab_closed', 'true');
+    } catch (err) {}
   });
 
   // Pop Up Screen (Opens dedicated Always-on-Top Floating window outside browser over other apps)
-  pipBtn.addEventListener('click', () => {
+  pipBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     safeSendMessage({ type: 'OPEN_FLOAT_WINDOW' });
+    // Automatically hide in-page widget so you don't have two duplicate popups on screen
+    isClosedForTab = true;
+    root.style.display = 'none';
+    hidePillTrigger();
+    try {
+      sessionStorage.setItem('algotimer_tab_closed', 'true');
+    } catch (err) {}
   });
 
   // Calculate elapsed
