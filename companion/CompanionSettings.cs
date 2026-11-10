@@ -37,8 +37,8 @@ internal sealed class CompanionSettings
             loaded.Hotkeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var pair in defaults.Hotkeys)
             {
-                loaded.Hotkeys[pair.Key] = configured.TryGetValue(pair.Key, out var value) && !string.IsNullOrWhiteSpace(value)
-                    ? value
+                loaded.Hotkeys[pair.Key] = configured.TryGetValue(pair.Key, out var value)
+                    ? value ?? ""
                     : pair.Value;
             }
             return loaded;

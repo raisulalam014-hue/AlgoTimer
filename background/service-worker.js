@@ -152,10 +152,13 @@ function connectCompanion() {
     port.onMessage.addListener((message) => {
       if (message.type === 'status') {
         saveCompanionStatus(message.status || 'connected', {
-          message: message.status === 'connected' ? 'Windows companion connected.' : 'Windows companion status updated.',
+          message: message.message || (message.status === 'connected' ? 'Windows companion connected.' : 'Windows companion status updated.'),
           version: message.version,
           hotkeys: message.hotkeys || {},
-          registered: message.registered || {}
+          registered: message.registered || {},
+          enabled: message.enabled || {},
+          corner: message.corner || 'top-right',
+          pinned: Boolean(message.pinned)
         });
       } else if (message.type === 'hotkey-status') {
         const hotkeys = Object.assign({}, companionStatus.hotkeys || {});
@@ -492,6 +495,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if (!companionPort) connectCompanion();
           const shown = postCompanionMessage({ type: 'show-window' });
           sendResponse({ success: shown, error: shown ? undefined : 'Windows companion is not connected.' });
+          break;
+        }
+
+        case 'SET_COMPANION_HOTKEYS': {
+          if (!companionPort) connectCompanion();
+          const saved = postCompanionMessage({ type: 'set-hotkeys', hotkeys: message.hotkeys || {} });
+          sendResponse({
+            success: saved,
+            error: saved ? undefined : 'Connect the Windows companion before saving system-wide shortcuts.'
+          });
+          break;
+        }
+
+        case 'SET_COMPANION_WINDOW_SETTINGS': {
+          if (!companionPort) connectCompanion();
+          const updated = postCompanionMessage({
+            type: 'set-window-settings',
+            corner: message.corner,
+            pinned: Boolean(message.pinned)
+          });
+          sendResponse({
+            success: updated,
+            error: updated ? undefined : 'Connect the Windows companion before saving native window placement.'
+          });
           break;
         }
 

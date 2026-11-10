@@ -34,6 +34,18 @@ internal sealed class CompanionWindow : Form
     public string Corner => _settings.Corner;
     public string? ScreenDevice => _settings.ScreenDevice;
 
+    public void SetPositioning(string corner, bool pinned)
+    {
+        if (corner is not ("top-left" or "top-right" or "bottom-left" or "bottom-right")) return;
+        _settings.Corner = corner;
+        _settings.Pinned = pinned;
+        _cornerPicker.SelectedIndex = CornerIndex(corner);
+        UpdatePinLabel();
+        SetTheme(_theme);
+        if (pinned) ApplyCornerPosition();
+        else SaveCurrentSettings();
+    }
+
     public CompanionWindow(CompanionSettings settings)
     {
         _settings = settings;

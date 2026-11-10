@@ -15,6 +15,7 @@ internal sealed class CompanionContext : ApplicationContext
     private readonly CompanionWindow _window;
     private readonly GlobalHotkeys _hotkeys;
     private readonly CompanionSettings _settings;
+    private Dictionary<string, bool> _registeredHotkeys = new(StringComparer.OrdinalIgnoreCase);
 
     public CompanionContext()
     {
@@ -39,15 +40,8 @@ internal sealed class CompanionContext : ApplicationContext
         _window.CommandRequested += command => NativeMessaging.Write(new { type = "command", command });
         _window.SettingsChanged += SaveSettings;
 
-        var registered = _hotkeys.Register(_settings.Hotkeys);
-        NativeMessaging.Write(new
-        {
-            type = "status",
-            status = "connected",
-            version = 1,
-            hotkeys = _settings.Hotkeys,
-            registered
-        });
+        _registeredHotkeys = _hotkeys.Register(_settings.Hotkeys);
+        WriteStatus();
         _window.SetConnectionMessage("Connected to AlgoTimer · timer state syncs from Chrome");
 
         _ = Task.Run(() => NativeMessaging.ReadLoop(
@@ -92,10 +86,70 @@ internal sealed class CompanionContext : ApplicationContext
                     _window.BeginInvoke((Action)(() => _window.SetTheme(theme)));
                 }
                 break;
+            case "set-hotkeys":
+                if (message.TryGetProperty("hotkeys", out var hotkeysValue) &&
+                    hotkeysValue.ValueKind == System.Text.Json.JsonValueKind.Object)
+                {
+                    var configured = hotkeysValue.Clone();
+                    _window.BeginInvoke((Action)(() => ApplyHotkeys(configured)));
+                }
+                break;
+            case "set-window-settings":
+            {
+                var corner = message.TryGetProperty("corner", out var cornerValue) &&
+                             cornerValue.ValueKind == System.Text.Json.JsonValueKind.String
+                    ? cornerValue.GetString() ?? _window.Corner
+                    : _window.Corner;
+                var pinned = message.TryGetProperty("pinned", out var pinnedValue) &&
+                             pinnedValue.ValueKind == System.Text.Json.JsonValueKind.True;
+                _window.BeginInvoke((Action)(() =>
+                {
+                    _window.SetPositioning(corner, pinned);
+                    WriteStatus("Native timer position saved.");
+                }));
+                break;
+            }
             case "hello":
-                NativeMessaging.Write(new { type = "status", status = "connected", version = 1, hotkeys = _settings.Hotkeys });
+                WriteStatus();
                 break;
         }
+    }
+
+    private Dictionary<string, bool> EnabledHotkeys() =>
+        _settings.Hotkeys.ToDictionary(pair => pair.Key, pair => !string.IsNullOrWhiteSpace(pair.Value), StringComparer.OrdinalIgnoreCase);
+
+    private void ApplyHotkeys(System.Text.Json.JsonElement hotkeys)
+    {
+        var configured = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var command in _settings.Hotkeys.Keys)
+        {
+            var binding = hotkeys.TryGetProperty(command, out var value) &&
+                          value.ValueKind == System.Text.Json.JsonValueKind.String
+                ? value.GetString() ?? ""
+                : "";
+            configured[command] = binding.Trim();
+        }
+        _settings.Hotkeys = configured;
+        _settings.Save();
+        _registeredHotkeys = _hotkeys.Register(_settings.Hotkeys);
+        WriteStatus("System-wide shortcuts saved.");
+        _window.SetConnectionMessage("Global shortcuts saved · timer state syncs from Chrome");
+    }
+
+    private void WriteStatus(string? message = null)
+    {
+        NativeMessaging.Write(new
+        {
+            type = "status",
+            status = "connected",
+            version = 1,
+            message,
+            hotkeys = _settings.Hotkeys,
+            registered = _registeredHotkeys,
+            enabled = EnabledHotkeys(),
+            corner = _window.Corner,
+            pinned = _window.Pinned
+        });
     }
 
     private void SaveSettings()

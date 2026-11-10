@@ -52,9 +52,9 @@ The companion is launched by Chrome when the extension connects; no service or b
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>4</kbd> | Reset active timer |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>5</kbd> | Show / Hide native timer |
 
-These are registered by Windows while the companion is connected, so they work with other applications focused. Windows may reject a shortcut already claimed by another application; the popup shows registration conflicts. Use **Edit shortcuts** in the native window to customize the `Hotkeys` values in `%AppData%\AlgoTimer\companion.settings.json`, then reload the extension in Chrome. The native window remains topmost while the companion is connected and can be pinned to any corner on a selected display.
+These are registered by Windows while the companion is connected, so they work with other applications focused. In **Settings → System-wide shortcuts**, edit a binding, switch it off, and choose **Save global shortcuts** to apply it immediately; **Reset defaults** restores the combinations above. Windows may reject a shortcut already claimed by another application; the settings panel reports registration conflicts. The native timer can be positioned and pinned to any screen corner from the same panel or its own controls. It remains genuinely topmost only while the companion is running.
 
-The v1 native-messaging protocol uses Chrome's standard stdio framing (a 4-byte little-endian message length followed by JSON). Chrome sends `hello`, timer `state`, `theme`, and window show/hide requests; the companion returns status and hotkey registration results, and sends timer commands back to Chrome. Timer commands are persisted and broadcast by the extension background before the native display updates.
+The v1 native-messaging protocol uses Chrome's standard stdio framing (a 4-byte little-endian message length followed by JSON). Chrome sends `hello`, timer `state`, `theme`, hotkey updates, window placement, and show/hide requests; the companion returns status and hotkey registration results, and sends timer commands back to Chrome. Timer commands are persisted and broadcast by the extension background before the native display updates.
 
 ### 4. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
 - **Stopwatch & Target Countdown Together**: Measure total elapsed problem time while simultaneously tracking remaining countdown time.
@@ -83,7 +83,7 @@ The v1 native-messaging protocol uses Chrome's standard stdio framing (a 4-byte 
 
 ## Keyboard Shortcuts
 
-The extension registers four Chrome commands. Its timer shortcut toggles Start/Resume and Pause based on the active timer state. Defaults can be customized at `chrome://extensions/shortcuts`. On Windows, install the optional companion for separate cross-app shortcuts that distinguish Start and Pause and show the genuine topmost native timer.
+The extension registers four Chrome commands. Its timer shortcut toggles Start/Resume and Pause based on the active timer state. Defaults can be customized at `chrome://extensions/shortcuts` or with **Customize shortcuts** in the popup. These browser shortcuts may work across tabs but cannot reliably capture input while another desktop application is focused. On Windows, install the optional companion for configurable cross-app shortcuts that distinguish Start and Pause and show the genuine topmost native timer.
 
 | Shortcut | Action |
 | :---: | :--- |

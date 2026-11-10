@@ -475,6 +475,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnPopoutPip) btnPopoutPip.addEventListener('click', triggerPopoutWindow);
   if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener('click', triggerPopoutWindow);
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
+  const btnOpenFloatingFromTimer = document.getElementById('btn-open-floating-from-timer');
+  if (btnOpenFloatingFromTimer) btnOpenFloatingFromTimer.addEventListener('click', triggerPopoutWindow);
+  const btnOpenShortcutsFromTimer = document.getElementById('btn-open-shortcuts-from-timer');
+  if (btnOpenShortcutsFromTimer) {
+    btnOpenShortcutsFromTimer.addEventListener('click', () => {
+      document.querySelector('.nav-tab[data-tab="settings"]')?.click();
+      document.getElementById('windows-companion-settings')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
     // ================= DYNAMIC THEME ENGINE =================
   const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
@@ -569,6 +578,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const swElapsed = getStopwatchElapsed();
     const targetRemaining = getTargetRemaining();
     const targetElapsed = getTargetElapsed();
+    const activeStatus = state.mode === 'dual'
+      ? (state.stopwatch.status === 'running' || state.targetTimer.status === 'running'
+        ? 'running'
+        : state.stopwatch.status === 'paused' || state.targetTimer.status === 'paused' ? 'paused' : 'stopped')
+      : state.mode === 'timer' ? state.targetTimer.status : state.stopwatch.status;
+    const timerRunningState = document.getElementById('timer-running-state');
+    if (timerRunningState) {
+      const stateLabel = activeStatus === 'running' ? 'RUNNING'
+        : activeStatus === 'paused' ? 'PAUSED'
+          : activeStatus === 'finished' ? 'FINISHED' : 'READY';
+      timerRunningState.textContent = stateLabel;
+      timerRunningState.dataset.state = activeStatus;
+    }
 
     // 1. Dual Mode Rendering
     if (state.mode === 'dual') {
@@ -1258,6 +1280,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const companionHotkeys = document.getElementById('companion-hotkeys');
   const btnShowCompanion = document.getElementById('btn-show-companion');
   const btnReconnectCompanion = document.getElementById('btn-reconnect-companion');
+  const companionCornerSelect = document.getElementById('companion-corner-select');
+  const companionPinnedToggle = document.getElementById('companion-pinned');
+  const companionTopmostNote = document.getElementById('companion-topmost-note');
+  const btnSaveCompanionPosition = document.getElementById('btn-save-companion-position');
+  const btnSaveCompanionHotkeys = document.getElementById('btn-save-companion-shortcuts');
+  const btnResetCompanionHotkeys = document.getElementById('btn-reset-companion-shortcuts');
+  const defaultCompanionHotkeys = {
+    'start-timer': 'Ctrl+Alt+1',
+    'pause-timer': 'Ctrl+Alt+2',
+    'record-lap': 'Ctrl+Alt+3',
+    'reset-timer': 'Ctrl+Alt+4',
+    'toggle-window': 'Ctrl+Alt+5'
+  };
   const companionCommandLabels = {
     'start-timer': 'Start / Resume',
     'pause-timer': 'Pause',
@@ -1270,20 +1305,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!companionSettings || !companion) return;
     companionStatusLabel.textContent = companion.message || companion.status || 'Companion status unavailable';
     companionStatusLabel.dataset.status = companion.status || 'unknown';
+    if (companionCornerSelect) companionCornerSelect.value = companion.corner || 'top-right';
+    if (companionPinnedToggle) companionPinnedToggle.checked = Boolean(companion.pinned);
+    if (companionTopmostNote) {
+      companionTopmostNote.textContent = companion.status === 'connected'
+        ? 'Always-on-top is active while the Windows companion is running.'
+        : 'Always-on-top requires the connected Windows companion.';
+    }
     companionHotkeys.replaceChildren();
     Object.entries(companionCommandLabels).forEach(([command, label]) => {
       const row = document.createElement('div');
       row.className = 'companion-hotkey-row';
+      row.dataset.command = command;
       const name = document.createElement('span');
+      name.className = 'companion-hotkey-name';
       name.textContent = label;
-      const binding = document.createElement('kbd');
-      binding.textContent = companion.hotkeys?.[command] || 'Not configured';
+      const binding = document.createElement('input');
+      binding.type = 'text';
+      binding.className = 'companion-hotkey-binding';
+      binding.setAttribute('aria-label', `${label} global shortcut`);
+      binding.placeholder = 'Ctrl+Alt+key';
+      binding.value = companion.hotkeys?.[command] ?? defaultCompanionHotkeys[command];
+      const enabledLabel = document.createElement('label');
+      enabledLabel.className = 'hotkey-enabled';
+      const enabled = document.createElement('input');
+      enabled.type = 'checkbox';
+      enabled.className = 'companion-hotkey-enabled';
+      enabled.checked = binding.value.length > 0;
+      binding.disabled = !enabled.checked;
+      enabled.addEventListener('change', () => {
+        binding.disabled = !enabled.checked;
+        if (!enabled.checked) binding.value = '';
+        else if (!binding.value.trim()) binding.value = defaultCompanionHotkeys[command];
+      });
+      enabledLabel.append(enabled, document.createTextNode('On'));
       const availability = document.createElement('span');
       availability.className = 'companion-hotkey-state';
       availability.textContent = companion.status !== 'connected'
         ? 'Offline'
-        : (companion.registered?.[command] === false ? 'Conflict' : 'Ready');
-      row.append(name, binding, availability);
+        : (!binding.value ? 'Off' : (companion.registered?.[command] === false ? 'Conflict' : 'Ready'));
+      availability.dataset.state = availability.textContent.toLowerCase();
+      row.append(name, binding, enabledLabel, availability);
       companionHotkeys.append(row);
     });
   }
@@ -1295,6 +1357,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!response.success && companionStatusLabel) {
         companionStatusLabel.textContent = response.error || 'Connect the Windows companion first.';
       }
+      if (btnSaveCompanionPosition) {
+        btnSaveCompanionPosition.addEventListener('click', async () => {
+          const response = await sendMessage({
+            type: 'SET_COMPANION_WINDOW_SETTINGS',
+            corner: companionCornerSelect?.value || 'top-right',
+            pinned: Boolean(companionPinnedToggle?.checked)
+          });
+          companionStatusLabel.textContent = response.success
+            ? 'Sending placement to the Windows companion…'
+            : response.error || 'Could not save native timer placement.';
+          if (!response.success) companionStatusLabel.dataset.status = 'unavailable';
+        });
+      }
     });
   }
   if (btnReconnectCompanion) {
@@ -1302,6 +1377,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       const response = await sendMessage({ type: 'RECONNECT_COMPANION' });
       if (response.companion) renderCompanionStatus(response.companion);
       else if (companionStatusLabel) companionStatusLabel.textContent = 'Could not reconnect to the Windows companion.';
+    });
+  }
+  if (btnResetCompanionHotkeys) {
+    btnResetCompanionHotkeys.addEventListener('click', () => {
+      Object.entries(defaultCompanionHotkeys).forEach(([command, shortcut]) => {
+        const row = companionHotkeys.querySelector(`[data-command="${command}"]`);
+        const binding = row?.querySelector('.companion-hotkey-binding');
+        const enabled = row?.querySelector('.companion-hotkey-enabled');
+        if (binding) {
+          binding.value = shortcut;
+          binding.disabled = false;
+        }
+        if (enabled) enabled.checked = true;
+      });
+      companionStatusLabel.textContent = 'Defaults loaded. Save to apply them.';
+    });
+  }
+  if (btnSaveCompanionHotkeys) {
+    btnSaveCompanionHotkeys.addEventListener('click', async () => {
+      const hotkeys = {};
+      for (const [command, label] of Object.entries(companionCommandLabels)) {
+        const row = companionHotkeys.querySelector(`[data-command="${command}"]`);
+        const enabled = row?.querySelector('.companion-hotkey-enabled')?.checked;
+        const binding = row?.querySelector('.companion-hotkey-binding')?.value.trim() || '';
+        if (enabled && (!binding.includes('+') || !/(ctrl|control|alt|shift|win|windows)/i.test(binding))) {
+          companionStatusLabel.textContent = `Add a modifier and key for ${label}, or switch it off.`;
+          companionStatusLabel.dataset.status = 'unavailable';
+          row?.querySelector('.companion-hotkey-binding')?.focus();
+          return;
+        }
+        hotkeys[command] = enabled ? binding : '';
+      }
+      const response = await sendMessage({ type: 'SET_COMPANION_HOTKEYS', hotkeys });
+      if (!response.success) {
+        companionStatusLabel.textContent = response.error || 'Could not save global shortcuts.';
+        companionStatusLabel.dataset.status = 'unavailable';
+      } else {
+        companionStatusLabel.textContent = 'Sending shortcut changes to Windows…';
+      }
     });
   }
   if (isExtension && companionSettings) {

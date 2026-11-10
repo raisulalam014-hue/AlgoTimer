@@ -27,9 +27,18 @@ internal sealed class GlobalHotkeys : NativeWindow, IDisposable
 
     public Dictionary<string, bool> Register(IReadOnlyDictionary<string, string> bindings)
     {
+        foreach (var id in _commands.Keys) UnregisterHotKey(Handle, id);
+        _commands.Clear();
+        _nextId = FirstHotkeyId;
+
         var result = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
         foreach (var (command, binding) in bindings)
         {
+            if (string.IsNullOrWhiteSpace(binding))
+            {
+                result[command] = false;
+                continue;
+            }
             try
             {
                 var (modifiers, key) = Parse(binding);

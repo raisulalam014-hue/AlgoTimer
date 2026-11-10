@@ -27,7 +27,7 @@
       </div>
       <div class="header-badges">
         <!-- Quick Dynamic Theme Cycler Button -->
-        <button class="header-btn" id="btn-quick-theme" title="Switch Dynamic Color Combination (Cosmic, Cyan, Violet, Emerald)">
+        <button class="header-btn" id="btn-quick-theme" title="Cycle timer designs: Sunset Glass, Warm Minimal, Aurora, Graphite Neon, Full Black">
           <span class="theme-quick-dot"></span>
           <span class="btn-text" id="header-theme-label">Cosmic</span>
         </button>
@@ -155,8 +155,23 @@
           </div>
         </div>
 
-        <!-- Main Stopwatch Dial & Precision Ring -->
-        <div class="dial-wrapper">
+        <section class="timer-focus-card" aria-label="Timer controls">
+          <div class="timer-card-heading">
+            <div>
+              <span class="timer-card-kicker">FOCUS TIMER</span>
+              <h2>Stay in flow</h2>
+            </div>
+            <div class="timer-card-status">
+              <div class="dial-badge-pill" id="dial-status-pill">
+                <span class="status-pulse-dot"></span>
+                <span id="dial-status-label">STOPWATCH</span>
+              </div>
+              <span class="timer-state-pill" id="timer-running-state" data-state="stopped">READY</span>
+            </div>
+          </div>
+
+          <!-- Main Stopwatch Dial & Precision Ring -->
+          <div class="dial-wrapper">
           <svg class="dial-svg" viewBox="0 0 200 200">
             <defs>
               <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -181,10 +196,6 @@
           </svg>
 
           <div class="dial-center-content">
-            <div class="dial-badge-pill" id="dial-status-pill">
-              <span class="status-pulse-dot"></span>
-              <span id="dial-status-label">STOPWATCH</span>
-            </div>
             <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
             <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
 
@@ -234,6 +245,20 @@
             <kbd class="key-badge">L</kbd>
           </button>
         </div>
+      </section>
+
+      <div class="timer-quick-actions" aria-label="Timer quick actions">
+        <button class="quick-action-card" id="btn-open-floating-from-timer">
+          <span class="quick-action-icon" aria-hidden="true">↗</span>
+          <span><strong>Floating timer</strong><small>Keep it beside your editor</small></span>
+          <span class="quick-action-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="quick-action-card" id="btn-open-shortcuts-from-timer">
+          <span class="quick-action-icon" aria-hidden="true">⌘</span>
+          <span><strong>Keyboard shortcuts</strong><small>Manage browser and global keys</small></span>
+          <span class="quick-action-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
       </div>
 
       <!-- ================= DUAL MODE VIEW (BOTH ACTIVE) ================= -->
@@ -454,31 +479,59 @@
         </div>
       </div>
 
-      <div class="settings-group" id="windows-companion-settings">
-        <h4>Windows Companion</h4>
+      <div class="settings-group shortcut-center" id="windows-companion-settings">
+        <div class="shortcut-center-heading">
+          <div>
+            <span class="timer-card-kicker">WINDOWS COMPANION</span>
+            <h4>System-wide shortcuts</h4>
+          </div>
+          <span class="shortcut-status-pill" id="companion-status" data-status="unknown">Checking companion…</span>
+        </div>
         <div class="setting-action-card">
           <div class="setting-info">
-            <span class="setting-title" id="companion-status">Checking companion…</span>
-            <span class="setting-desc">System-wide hotkeys work while other apps are focused only when the optional Windows companion is installed and connected. Its native timer is genuinely always-on-top.</span>
+            <span class="setting-desc">These Windows hotkeys work across apps only while the optional companion is installed and connected. Its native timer can stay above other windows; the Chrome popup alone cannot.</span>
           </div>
           <div class="companion-actions">
             <button class="btn btn-secondary btn-sm" id="btn-show-companion">Show native timer</button>
             <button class="btn-xs" id="btn-reconnect-companion">Reconnect</button>
           </div>
-          <div class="companion-hotkeys" id="companion-hotkeys"></div>
-          <p class="setting-desc">Defaults: Ctrl+Alt+1 Start, +2 Pause/Resume, +3 Lap, +4 Reset, +5 Show/Hide. Use Edit shortcuts in the native timer to customize them, then reload AlgoTimer in Chrome to apply. See README for installation.</p>
+          <div class="companion-position-controls">
+            <label>
+              <span>Pin corner</span>
+              <select id="companion-corner-select" aria-label="Native timer corner">
+                <option value="top-left">Top left</option>
+                <option value="top-right">Top right</option>
+                <option value="bottom-left">Bottom left</option>
+                <option value="bottom-right">Bottom right</option>
+              </select>
+            </label>
+            <label class="companion-pin-toggle"><input type="checkbox" id="companion-pinned"> Pinned</label>
+            <button class="btn-xs" id="btn-save-companion-position" type="button">Save position</button>
+            <span class="companion-topmost-note" id="companion-topmost-note">Always-on-top requires the connected Windows companion.</span>
+          </div>
+          <div class="companion-hotkeys shortcut-config-list" id="companion-hotkeys"></div>
+          <div class="shortcut-editor-actions">
+            <button class="btn-xs" id="btn-reset-companion-shortcuts" type="button">Reset defaults</button>
+            <button class="btn btn-secondary btn-sm" id="btn-save-companion-shortcuts" type="button">Save global shortcuts</button>
+          </div>
+          <p class="setting-desc shortcut-limit-note">Changes are sent to the connected Windows companion. Key conflicts are reported as unavailable; browser shortcuts below are managed separately by Chrome.</p>
         </div>
       </div>
 
-      <div class="settings-group">
-        <h4>Keyboard Shortcuts</h4>
-        <div class="shortcut-list">
-          <div class="shortcut-item"><span>Start / Resume / Pause</span><kbd class="key-badge" id="shortcut-toggle-timer">Alt + Shift + 1</kbd></div>
-          <div class="shortcut-item"><span>Record Lap</span><kbd class="key-badge" id="shortcut-record-lap">Alt + Shift + 2</kbd></div>
-          <div class="shortcut-item"><span>Reset Active Timer</span><kbd class="key-badge" id="shortcut-reset-timer">Alt + Shift + 3</kbd></div>
-          <div class="shortcut-item"><span>Show / Minimize Floating Timer</span><kbd class="key-badge" id="shortcut-toggle-floating-window">Alt + Shift + 4</kbd></div>
-          <p class="setting-desc">Use P while the floating window is focused to pin or unpin it. Alt + Shift + 4 can show or minimize the window where your browser and OS allow global extension shortcuts; it cannot reliably capture keys while another desktop app is focused.</p>
-          <p class="setting-desc">Customize supported shortcuts in Chrome's Extensions shortcuts.</p>
+      <div class="settings-group shortcut-center">
+        <div class="shortcut-center-heading">
+          <div>
+            <span class="timer-card-kicker">CHROME EXTENSION</span>
+            <h4>Browser shortcuts</h4>
+          </div>
+          <span class="shortcut-scope-tag">Browser scope</span>
+        </div>
+        <div class="shortcut-list shortcut-config-list">
+          <div class="shortcut-item"><span><strong>Start / Pause</strong><small>Toggle the active timer</small></span><kbd class="key-badge" id="shortcut-toggle-timer">Alt + Shift + 1</kbd></div>
+          <div class="shortcut-item"><span><strong>Lap</strong><small>Record a split</small></span><kbd class="key-badge" id="shortcut-record-lap">Alt + Shift + 2</kbd></div>
+          <div class="shortcut-item"><span><strong>Reset</strong><small>Reset the active timer</small></span><kbd class="key-badge" id="shortcut-reset-timer">Alt + Shift + 3</kbd></div>
+          <div class="shortcut-item"><span><strong>Show / Hide</strong><small>Floating timer window</small></span><kbd class="key-badge" id="shortcut-toggle-floating-window">Alt + Shift + 4</kbd></div>
+          <p class="setting-desc shortcut-limit-note">Chrome controls these bindings. They may work in other browser tabs, but cannot reliably capture keys while VS Code or another desktop app has focus.</p>
           <button class="btn-xs" id="btn-open-shortcuts">Customize shortcuts</button>
         </div>
       </div>
