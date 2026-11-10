@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cosmic">
+<html lang="en" data-theme="sunset">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AlgoTimer - Problem Solving Stopwatch & Timer</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="modern.css">
 </head>
-<body>
+<body class="modern-popup">
   <div class="app-container">
+    <div class="runtime-alert" id="runtime-alert" role="alert" hidden></div>
     <!-- Ambient Horizon Light Flare (from bottom reference) -->
     <div class="horizon-flare" aria-hidden="true"></div>
 
@@ -72,6 +74,14 @@
 
     <!-- TAB 1: TIMER / STOPWATCH -->
     <main class="tab-content active" id="tab-timer">
+      <div class="workspace-heading">
+        <div>
+          <span class="eyebrow">Focus session</span>
+          <h1>Problem-solving timer</h1>
+          <p>Track time, mark progress, and keep your practice in flow.</p>
+        </div>
+        <span class="workspace-save-note">Saved automatically</span>
+      </div>
       <!-- Mode Segmented Switcher (Stopwatch, Target Timer, Dual Both) -->
       <div class="mode-switcher">
         <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
@@ -369,24 +379,28 @@
     <section class="tab-content" id="tab-settings">
       <!-- Dynamic Theme & Accent Combinations -->
       <div class="settings-group">
-        <h4>Dynamic Color Theme</h4>
-        <p class="setting-desc" style="margin-bottom: 8px;">Select your preferred dynamic neon palette:</p>
+        <h4>Timer Design</h4>
+        <p class="setting-desc" style="margin-bottom: 8px;">Choose a complete timer look. Your selection syncs to the floating timer.</p>
         <div class="theme-palette-row">
-          <button class="theme-pill-btn active" data-theme-choice="cosmic" title="Cosmic Neon: Deep Obsidian, Violet Nebula Bloom, Electric Cyan & Magenta Horizon">
-            <span class="theme-dot dot-cosmic"></span>
-            <span>Cosmic Neon</span>
+          <button class="theme-pill-btn active" data-theme-choice="sunset" title="Sunset Glass: dark plum with warm orange and pink accents">
+            <span class="theme-dot dot-sunset"></span>
+            <span>Sunset Glass</span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="cyan" title="Cyber Cyan: Pure Sci-Fi HUD & Electric Turquoise">
-            <span class="theme-dot dot-cyan"></span>
-            <span>Cyber Cyan</span>
+          <button class="theme-pill-btn" data-theme-choice="warm" title="Warm Minimal: soft neutral surfaces with vivid orange accents">
+            <span class="theme-dot dot-warm"></span>
+            <span>Warm Minimal</span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="violet" title="Nebula Violet: Velvet Violet & Indigo Bloom">
-            <span class="theme-dot dot-violet"></span>
-            <span>Nebula Violet</span>
+          <button class="theme-pill-btn" data-theme-choice="aurora" title="Aurora: cool blue and violet surfaces with coral highlights">
+            <span class="theme-dot dot-aurora"></span>
+            <span>Aurora</span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="emerald" title="Matrix Emerald: Neon Mint & Sleek Terminal">
-            <span class="theme-dot dot-emerald"></span>
-            <span>Matrix Emerald</span>
+          <button class="theme-pill-btn" data-theme-choice="graphite" title="Graphite Neon: charcoal surfaces with violet and warm yellow details">
+            <span class="theme-dot dot-graphite"></span>
+            <span>Graphite Neon</span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="black" title="Full Black: pure black surfaces with high-contrast timer controls">
+            <span class="theme-dot dot-black"></span>
+            <span>Full Black</span>
           </button>
         </div>
       </div>
@@ -440,6 +454,22 @@
         </div>
       </div>
 
+      <div class="settings-group" id="windows-companion-settings">
+        <h4>Windows Companion</h4>
+        <div class="setting-action-card">
+          <div class="setting-info">
+            <span class="setting-title" id="companion-status">Checking companion…</span>
+            <span class="setting-desc">System-wide hotkeys work while other apps are focused only when the optional Windows companion is installed and connected. Its native timer is genuinely always-on-top.</span>
+          </div>
+          <div class="companion-actions">
+            <button class="btn btn-secondary btn-sm" id="btn-show-companion">Show native timer</button>
+            <button class="btn-xs" id="btn-reconnect-companion">Reconnect</button>
+          </div>
+          <div class="companion-hotkeys" id="companion-hotkeys"></div>
+          <p class="setting-desc">Defaults: Ctrl+Alt+1 Start, +2 Pause/Resume, +3 Lap, +4 Reset, +5 Show/Hide. Use Edit shortcuts in the native timer to customize them, then reload AlgoTimer in Chrome to apply. See README for installation.</p>
+        </div>
+      </div>
+
       <div class="settings-group">
         <h4>Keyboard Shortcuts</h4>
         <div class="shortcut-list">
@@ -447,7 +477,8 @@
           <div class="shortcut-item"><span>Record Lap</span><kbd class="key-badge" id="shortcut-record-lap">Alt + Shift + 2</kbd></div>
           <div class="shortcut-item"><span>Reset Active Timer</span><kbd class="key-badge" id="shortcut-reset-timer">Alt + Shift + 3</kbd></div>
           <div class="shortcut-item"><span>Show / Minimize Floating Timer</span><kbd class="key-badge" id="shortcut-toggle-floating-window">Alt + Shift + 4</kbd></div>
-          <p class="setting-desc">Global shortcuts work where your browser/OS permits. Customize them in Chrome's Extensions shortcuts.</p>
+          <p class="setting-desc">Use P while the floating window is focused to pin or unpin it. Alt + Shift + 4 can show or minimize the window where your browser and OS allow global extension shortcuts; it cannot reliably capture keys while another desktop app is focused.</p>
+          <p class="setting-desc">Customize supported shortcuts in Chrome's Extensions shortcuts.</p>
           <button class="btn-xs" id="btn-open-shortcuts">Customize shortcuts</button>
         </div>
       </div>

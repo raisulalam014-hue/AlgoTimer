@@ -11,13 +11,13 @@
 
 ## 🚀 Key Highlights & Features
 
-### 1. 🎨 Dynamic Cyber-Luxury Theme Engine (No AI Slop)
-- **Deep Obsidian & Cosmic Violet Glow**: Deep space backdrop (`#060713`) infused with ambient violet nebula lighting.
-- **4 Live Dynamic Color Palettes**:
-  - 🌌 **Cosmic Neon (Default)**: Multi-stop gradient (`#00f2fe` Electric Cyan → `#8b5cf6` Radiant Purple → `#ec4899` Horizon Magenta).
-  - ⚡ **Cyber Cyan**: Pure sci-fi HUD turquoise with luminous neon glow.
-  - 🔮 **Nebula Violet**: Deep velvet violet and lavender bloom.
-  - 🌲 **Matrix Emerald**: Sleek terminal mint and dark emerald.
+### 1. 🎨 Five Complete Timer Designs
+- **Sunset Glass**: dark plum surfaces with warm orange, coral, and pink accents.
+- **Warm Minimal**: soft neutral surfaces with crisp orange controls.
+- **Aurora**: cool blue-violet cards with coral highlights.
+- **Graphite Neon**: charcoal surfaces with violet and warm-yellow details.
+- **Full Black**: pure-black surfaces with high-contrast white text and warm yellow controls.
+- Choose a design in **Settings → Timer Design**. It is saved and synchronized across the popup, browser floating timer, and Windows companion.
 - **Precision HUD Dial & Sub-Gauges**: Outer dotted perimeter tick track, glowing SVG progress ring, and 3 mini precision sub-gauges (`LAPS`, `SPLIT`, `STATUS`).
 - **Luminous Horizon Flare**: Neon crescent horizon flare across the bottom edge inspired by futuristic cockpit displays.
 
@@ -28,26 +28,54 @@
 - **Mini and expanded modes**: Switch between a compact click-to-expand timer and the full timer controls without starting another timer.
 - **Persistent layout**: Corner, pin state, free position, and view mode are restored when the floating timer is reopened.
 
-### 3. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
+### 3. 🪟 Optional Windows Companion
+- A lightweight .NET 8 Windows companion provides a real topmost native timer, four-corner pinning per display, and cross-app global hotkeys.
+- The extension background remains the **single source of timer state**; the companion receives timestamped state updates and routes timer commands back to it.
+- If the companion is missing or disconnected, the Chrome extension remains usable and the popup reports the companion status.
+
+#### Install the companion
+1. Install the AlgoTimer extension in Chrome and copy its 32-character ID from `chrome://extensions`.
+2. Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) if it is not already available.
+3. Open PowerShell in the repository's `companion` folder and run `.\build.ps1`.
+4. Run `.\install.ps1` and enter the extension ID when prompted. This registers the native messaging host for the current Windows user only.
+5. Reload AlgoTimer in Chrome, open **Settings → Windows Companion**, and check that it reports a connection.
+
+The companion is launched by Chrome when the extension connects; no service or background startup task is installed. To remove the registration, run `.\uninstall.ps1`. The script only removes the companion's current-user Chrome native-messaging registration; published files are left in place.
+
+#### Windows companion shortcuts
+
+| Shortcut | Action |
+| :---: | :--- |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>1</kbd> | Start / Resume active timer |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>2</kbd> | Pause active timer |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>3</kbd> | Record a lap |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>4</kbd> | Reset active timer |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>5</kbd> | Show / Hide native timer |
+
+These are registered by Windows while the companion is connected, so they work with other applications focused. Windows may reject a shortcut already claimed by another application; the popup shows registration conflicts. Use **Edit shortcuts** in the native window to customize the `Hotkeys` values in `%AppData%\AlgoTimer\companion.settings.json`, then reload the extension in Chrome. The native window remains topmost while the companion is connected and can be pinned to any corner on a selected display.
+
+The v1 native-messaging protocol uses Chrome's standard stdio framing (a 4-byte little-endian message length followed by JSON). Chrome sends `hello`, timer `state`, `theme`, and window show/hide requests; the companion returns status and hotkey registration results, and sends timer commands back to Chrome. Timer commands are persisted and broadcast by the extension background before the native display updates.
+
+### 4. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
 - **Stopwatch & Target Countdown Together**: Measure total elapsed problem time while simultaneously tracking remaining countdown time.
 - **Master Controls**: Start, pause, or reset both timers together in lockstep with zero drift.
 
-### 4. 🎯 Problem-Solving Presets & Custom Duration
+### 5. 🎯 Problem-Solving Presets & Custom Duration
 - Quick one-click time targets: `5m`, `15m (Easy)`, `30m (Medium)`, `45m (Hard)`, `60m (Mock Interview)`.
 - Custom hour / minute / second target input with smart persistence.
 
-### 5. 💻 Floating In-Page Overlay on Coding Sites
+### 6. 💻 Floating In-Page Overlay on Coding Sites
 - Works seamlessly directly on LeetCode, HackerRank, Codeforces, NeetCode, CodeChef.
 - Draggable and resizable corner dock with non-intrusive HUD styling.
 
-### 6. 🏁 Interview Phase Milestones (Laps)
+### 7. 🏁 Interview Phase Milestones (Laps)
 - One-click phase recording: `📖 Understand`, `💡 Approach`, `💻 Code`, `🧪 Debug`.
 - Real-time lap splits and pace comparison.
 
-### 7. ⏱️ Zero-Drift Background Engine
+### 8. ⏱️ Zero-Drift Background Engine
 - Runs on Chrome Manifest V3 Service Worker with `chrome.alarms` and high-resolution timestamps. Keeps ticking even when popup is closed!
 
-### 8. 📊 Session Logger & CSV Exporter
+### 9. 📊 Session Logger & CSV Exporter
 - Log problem title, platform, difficulty, outcome (`Solved`, `Upsolved`, `Need Review`), and takeaway notes.
 - Export all your practice history to clean CSV for Notion, Google Sheets, or Excel.
 
@@ -55,7 +83,7 @@
 
 ## Keyboard Shortcuts
 
-The extension registers four global Chrome commands (the supported command slots). The timer shortcut toggles Start/Resume and Pause based on the active timer state. Defaults can be customized at chrome://extensions/shortcuts.
+The extension registers four Chrome commands. Its timer shortcut toggles Start/Resume and Pause based on the active timer state. Defaults can be customized at `chrome://extensions/shortcuts`. On Windows, install the optional companion for separate cross-app shortcuts that distinguish Start and Pause and show the genuine topmost native timer.
 
 | Shortcut | Action |
 | :---: | :--- |
@@ -110,6 +138,7 @@ AlgoTimer/
 │   └── audio.js               # Procedural audio chime synthesizer
 ├── background/
 │   └── service-worker.js      # Zero-drift background engine & badge updater
+├── companion/                 # Optional Windows native hotkey / topmost timer host
 ├── content/
 │   ├── content.js             # In-page floating overlay on coding platforms
 │   └── content.css            # In-page widget styles & HUD

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cosmic">
+<html lang="en" data-theme="sunset">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer - Live Interactive Demo & Testing Studio</title>
+  <title>AlgoTimer — Problem-solving workspace</title>
   <link rel="stylesheet" href="popup/popup.css">
   <link rel="stylesheet" href="content/content.css">
   <style>
@@ -350,8 +350,9 @@
       line-height: 1.4;
     }
   </style>
+  <link rel="stylesheet" href="popup/modern.css">
 </head>
-<body>
+<body class="modern-service">
   <!-- Top Demo Bar -->
   <header class="demo-topbar">
     <div class="demo-brand">
@@ -363,16 +364,16 @@
         </svg>
       </div>
       <div class="demo-title-group">
-        <h1>AlgoTimer - Problem Solving Stopwatch & Timer</h1>
-        <p>Interactive Demo: 4-Corner Dockable HUD, Free Resizing, Dual Concurrent Timers & Pop-Up Screen</p>
+        <h1>AlgoTimer — Problem-solving workspace</h1>
+        <p>A focused timer and practice companion for your next coding session.</p>
       </div>
     </div>
     <div class="demo-topbar-actions">
       <button class="demo-btn demo-btn-primary" id="btn-topbar-pip">
-        ⤢ Pop Up Float Screen
+        ⤢ Open floating timer
       </button>
       <button class="demo-btn" id="btn-topbar-window">
-        ↗ Standalone Window
+        ↗ Open timer window
       </button>
       <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="demo-btn">
         ★ GitHub Repo
@@ -385,8 +386,8 @@
     <!-- Left Column: Extension Popup Interface -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>Extension Popup Interface</span>
-        <span style="color: #38bdf8;">Default Chrome Action</span>
+        <span>Timer workspace</span>
+        <span>Focus tools</span>
       </div>
 
       <div class="browser-frame">
@@ -457,6 +458,14 @@
 
           <!-- TAB 1: TIMER / STOPWATCH -->
           <main class="tab-content active" id="tab-timer">
+            <div class="workspace-heading">
+              <div>
+                <span class="eyebrow">Focus session</span>
+                <h1>Problem-solving timer</h1>
+                <p>Track time, mark progress, and keep your practice in flow.</p>
+              </div>
+              <span class="workspace-save-note">Saved automatically</span>
+            </div>
             <!-- Mode Segmented Switcher -->
             <div class="mode-switcher">
               <button class="mode-tab active" id="btn-mode-stopwatch" data-mode="stopwatch">
@@ -735,24 +744,28 @@
           <section class="tab-content" id="tab-settings">
                         <!-- Dynamic Theme Settings -->
             <div class="settings-group">
-              <h4>Dynamic Color Theme</h4>
-              <p class="setting-desc" style="margin-bottom: 8px;">Select your preferred dynamic neon palette:</p>
+              <h4>Timer Design</h4>
+              <p class="setting-desc" style="margin-bottom: 8px;">Choose a complete timer look. Your selection syncs to the floating timer.</p>
               <div class="theme-palette-row">
-                <button class="theme-pill-btn active" data-theme-choice="cosmic" title="Cosmic Neon">
-                  <span class="theme-dot dot-cosmic"></span>
-                  <span>Cosmic Neon</span>
+                <button class="theme-pill-btn active" data-theme-choice="sunset" title="Sunset Glass">
+                  <span class="theme-dot dot-sunset"></span>
+                  <span>Sunset Glass</span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="cyan" title="Cyber Cyan">
-                  <span class="theme-dot dot-cyan"></span>
-                  <span>Cyber Cyan</span>
+                <button class="theme-pill-btn" data-theme-choice="warm" title="Warm Minimal">
+                  <span class="theme-dot dot-warm"></span>
+                  <span>Warm Minimal</span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="violet" title="Nebula Violet">
-                  <span class="theme-dot dot-violet"></span>
-                  <span>Nebula Violet</span>
+                <button class="theme-pill-btn" data-theme-choice="aurora" title="Aurora">
+                  <span class="theme-dot dot-aurora"></span>
+                  <span>Aurora</span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="emerald" title="Matrix Emerald">
-                  <span class="theme-dot dot-emerald"></span>
-                  <span>Matrix Emerald</span>
+                <button class="theme-pill-btn" data-theme-choice="graphite" title="Graphite Neon">
+                  <span class="theme-dot dot-graphite"></span>
+                  <span>Graphite Neon</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="black" title="Full Black">
+                  <span class="theme-dot dot-black"></span>
+                  <span>Full Black</span>
                 </button>
               </div>
             </div>
@@ -802,7 +815,8 @@
     <!-- Right Column: Mock Coding Problem Page with Draggable & Resizable Floating Widget -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>💻 In-Page Floating Widget Demo (Dock to any corner, resize smaller-ly!)</span>
+        <span>Practice environment</span>
+        <span>Overlay preview</span>
       </div>
 
       <div class="browser-frame mock-webpage" id="mock-page-container">

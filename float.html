@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cosmic">
+<html lang="en" data-theme="sunset">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,6 +40,12 @@
       --text-muted: #64748b;
       --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
       --font-sans: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    .pin-control[aria-pressed="true"] {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 9%, white);
+      border-color: var(--border-active);
     }
 
     [data-theme="cyan"] {
@@ -617,10 +623,295 @@
       #float-position-note { max-width: 120px; }
       .float-btn { padding: 3px 4px; }
     }
+
+    :root,
+    [data-theme="sunset"] {
+      color-scheme: dark;
+      --bg-deep: #17131b;
+      --bg-nebula: none;
+      --bg-surface: #241b26;
+      --bg-surface-elevated: #2e222e;
+      --border-subtle: #48313f;
+      --border-active: #fb795f;
+      --accent-cyan: #fb795f;
+      --accent-purple: #fb795f;
+      --accent-magenta: #e85c83;
+      --accent-lavender: #c084fc;
+      --hero-btn: #fb795f;
+      --hero-text: #241313;
+      --hero-shadow: 0 4px 11px rgba(251, 121, 95, 0.22);
+      --kbd-border: #fb795f;
+      --kbd-color: #fb795f;
+      --alert-text: #ffd6dc;
+      --alert-bg: #3a1c24;
+      --alert-border: #70404b;
+      --text-primary: #f9edf0;
+      --text-secondary: #c8a9b5;
+      --text-muted: #9e8290;
+      --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    [data-theme="warm"] {
+      color-scheme: light;
+      --bg-deep: #f4f0e9;
+      --bg-surface: #fffdf9;
+      --bg-surface-elevated: #f7f1e9;
+      --border-subtle: #e8ded3;
+      --border-active: #f3a46e;
+      --accent-cyan: #e86825;
+      --accent-purple: #e86825;
+      --accent-magenta: #c65337;
+      --accent-lavender: #f97316;
+      --hero-btn: #e86825;
+      --hero-text: #2d1b0e;
+      --hero-shadow: 0 4px 11px rgba(232, 104, 37, 0.2);
+      --kbd-border: #e86825;
+      --kbd-color: #e86825;
+      --alert-text: #8f2938;
+      --alert-bg: #fff0f1;
+      --alert-border: #f3c9ce;
+      --text-primary: #3e332a;
+      --text-secondary: #75685d;
+      --text-muted: #887b70;
+    }
+
+    [data-theme="aurora"] {
+      color-scheme: light;
+      --bg-deep: #eef0fb;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f6f6ff;
+      --border-subtle: #dce0f2;
+      --border-active: #aaa5ed;
+      --accent-cyan: #6758d8;
+      --accent-purple: #6758d8;
+      --accent-magenta: #e55c7c;
+      --accent-lavender: #8b5cf6;
+      --hero-btn: #6758d8;
+      --hero-text: #ffffff;
+      --hero-shadow: 0 4px 11px rgba(103, 88, 216, 0.2);
+      --kbd-border: #6758d8;
+      --kbd-color: #6758d8;
+      --alert-text: #8f2938;
+      --alert-bg: #fff0f1;
+      --alert-border: #f3c9ce;
+      --text-primary: #24294e;
+      --text-secondary: #59617e;
+      --text-muted: #747c98;
+    }
+
+    [data-theme="graphite"] {
+      color-scheme: dark;
+      --bg-deep: #19181e;
+      --bg-surface: #24232b;
+      --bg-surface-elevated: #2d2b35;
+      --border-subtle: #393741;
+      --border-active: #b59aff;
+      --accent-cyan: #c0a3ff;
+      --accent-purple: #9d7de8;
+      --accent-magenta: #f2c65d;
+      --accent-lavender: #c0a3ff;
+      --hero-btn: #8b6ee8;
+      --hero-text: #17121f;
+      --hero-shadow: 0 4px 11px rgba(139, 110, 232, 0.25);
+      --kbd-border: #c0a3ff;
+      --kbd-color: #c0a3ff;
+      --alert-text: #ffd6dc;
+      --alert-bg: #3a1c24;
+      --alert-border: #70404b;
+      --text-primary: #f0eef6;
+      --text-secondary: #b8b3c5;
+      --text-muted: #8b8798;
+    }
+
+    [data-theme="black"] {
+      color-scheme: dark;
+      --bg-deep: #000000;
+      --bg-surface: #080808;
+      --bg-surface-elevated: #111111;
+      --border-subtle: #292929;
+      --border-active: #f5cc55;
+      --accent-cyan: #f5cc55;
+      --accent-purple: #d7ae3e;
+      --accent-magenta: #8eeaff;
+      --accent-lavender: #c4a8ff;
+      --hero-btn: #f5cc55;
+      --hero-text: #17140b;
+      --hero-shadow: 0 4px 14px rgba(245, 204, 85, 0.24);
+      --kbd-border: #f5cc55;
+      --kbd-color: #f5cc55;
+      --alert-text: #ffb4be;
+      --alert-bg: #2b1115;
+      --alert-border: #6a2931;
+      --text-primary: #f5f5f5;
+      --text-secondary: #c8c8c8;
+      --text-muted: #a5a5a5;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+    }
+
+    .horizon-flare { display: none; }
+
+    .float-header {
+      background: var(--bg-surface);
+      border-bottom-color: var(--border-subtle);
+    }
+
+    .float-title { color: var(--accent-cyan); }
+
+    .float-icon {
+      background: var(--accent-cyan);
+      box-shadow: none;
+    }
+
+    .float-btn {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 7px;
+    }
+
+    .float-btn:hover {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-active);
+      transform: none;
+    }
+
+    .float-btn.active {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 16%, var(--bg-surface));
+      border-color: var(--border-active);
+      box-shadow: none;
+    }
+
+    .pin-control[aria-pressed="true"] {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 16%, var(--bg-surface));
+      border-color: var(--border-active);
+    }
+
+    .float-body { padding: 8px 14px 12px; }
+
+    .float-tag {
+      color: var(--text-secondary);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    .float-dial-ticks { stroke: var(--border-subtle); }
+    .float-dial-track { stroke: var(--bg-surface-elevated); }
+
+    .float-mode-badge {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    .float-clock {
+      color: var(--text-primary);
+      text-shadow: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .float-clock small { color: var(--text-secondary); }
+
+    .float-sub-gauge {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    .float-sub-val { color: var(--text-primary); }
+
+    .float-dual-box {
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+    }
+
+    .float-dual-label { color: var(--text-secondary); }
+
+    .float-dual-digits {
+      color: var(--text-primary);
+      text-shadow: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .float-ctrl-btn {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 9px;
+    }
+
+    .float-ctrl-btn:hover {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-active);
+      transform: none;
+    }
+
+    .float-ctrl-primary,
+    .float-ctrl-primary.running {
+      color: var(--hero-text);
+      background: var(--hero-btn);
+      border-color: var(--hero-btn);
+      box-shadow: var(--hero-shadow);
+    }
+
+    .float-ctrl-primary:hover {
+      color: var(--hero-text);
+      background: color-mix(in srgb, var(--hero-btn) 88%, black);
+      box-shadow: var(--hero-shadow);
+    }
+
+    .float-position-row {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-bottom-color: var(--border-subtle);
+    }
+
+    .float-position-row select {
+      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    #float-position-note { color: var(--text-secondary); }
+
+    .float-mini-view {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--bg-deep) 35%, transparent);
+    }
+
+    .mini-clock {
+      color: var(--text-primary);
+      text-shadow: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mini-status { color: var(--text-secondary); }
+
+    .runtime-alert {
+      padding: 8px 12px;
+      color: var(--alert-text);
+      background: var(--alert-bg);
+      border-bottom: 1px solid var(--alert-border);
+      font: 11px/1.45 var(--font-sans);
+    }
+
+    .runtime-alert[hidden] { display: none; }
   </style>
 </head>
 <body data-size="normal" data-view-mode="expanded">
   <div id="float-widget">
+    <div class="runtime-alert" id="float-runtime-error" role="alert" hidden></div>
     <div id="float-mini-view" class="float-mini-view" role="button" tabindex="0" aria-label="Expand AlgoTimer">
       <span class="mini-clock" id="float-mini-clock">00:00</span>
       <span class="mini-status"><span id="float-mini-dot" aria-hidden="true"></span><span id="float-mini-status">READY</span></span>
@@ -646,8 +937,8 @@
         <option value="bottom-left">Bottom left</option>
         <option value="bottom-right">Bottom right</option>
       </select>
-      <button class="float-btn" id="btn-pin-corner" aria-pressed="true">Pinned</button>
-      <span id="float-position-note">Corner pinning does not keep the window above other apps.</span>
+      <button class="float-btn pin-control" id="btn-pin-corner" aria-pressed="false" aria-keyshortcuts="P" title="Pin the timer to the selected screen corner; press P while this window is focused">Pin to corner</button>
+      <span id="float-position-note">Unpinned · drag the header to move. Pinning anchors this window, not above other apps. Press P when focused.</span>
     </div>
 
     <!-- Body -->

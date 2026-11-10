@@ -2,6 +2,22 @@
 // Cyber-Luxury HUD: Dynamic Color Themes, SVG Precision Ring, 3 Sub-Gauges, 4-Corner Snapping, Multi-Size
 
 (function () {
+  const runtimeAlert = document.getElementById('float-runtime-error');
+  window.addEventListener('error', (event) => {
+    console.error('AlgoTimer floating window runtime error:', event.error || event.message);
+    if (runtimeAlert) {
+      runtimeAlert.textContent = `The timer window encountered an error: ${event.message || 'unexpected UI error'}. Your timer state remains saved.`;
+      runtimeAlert.hidden = false;
+    }
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('AlgoTimer floating window operation failed:', event.reason);
+    if (runtimeAlert) {
+      runtimeAlert.textContent = `The timer window could not complete an action: ${event.reason instanceof Error ? event.reason.message : 'operation failed'}. Your timer state remains saved.`;
+      runtimeAlert.hidden = false;
+    }
+  });
+
   let state = {
     mode: 'stopwatch',
     allowDualActive: true,
@@ -17,7 +33,7 @@
   };
   const FLOAT_PREFS_KEY = 'algoTimerFloatWindowPrefs';
   const DEFAULT_PREFS = {
-    corner: 'top-right', pinned: true, left: null, top: null,
+    corner: 'top-right', pinned: false, left: null, top: null,
     width: SIZES.expanded.width, height: SIZES.expanded.height, viewMode: 'expanded'
   };
   let floatPrefs = Object.assign({}, DEFAULT_PREFS);
@@ -57,31 +73,61 @@
   }
 
   function updateNativeBounds(bounds) {
-    const safeBounds = clampBounds(bounds.left, bounds.top, bounds.width, bounds.height);
     programmaticMove = true;
     if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
       chrome.windows.getCurrent((win) => {
         if (win && Number.isInteger(win.id)) {
           currentWindowId = win.id;
-          chrome.windows.update(win.id, safeBounds, () => {
-            if (chrome.runtime.lastError) console.warn('Could not reposition floating timer:', chrome.runtime.lastError.message);
+          const width = Number.isFinite(bounds.width) ? bounds.width : win.width;
+          const height = Number.isFinite(bounds.height) ? bounds.height : win.height;
+          const safeBounds = clampBounds(
+            Number.isFinite(bounds.left) ? bounds.left : win.left,
+            Number.isFinite(bounds.top) ? bounds.top : win.top,
+            width,
+            height
+          );
+          const update = { left: safeBounds.left, top: safeBounds.top };
+          if (Number.isFinite(bounds.width)) update.width = safeBounds.width;
+          if (Number.isFinite(bounds.height)) update.height = safeBounds.height;
+          chrome.windows.update(win.id, update, () => {
+            const error = chrome.runtime.lastError;
             window.setTimeout(() => { programmaticMove = false; }, 120);
+            if (error) {
+              console.error('Could not reposition floating timer:', error.message);
+              if (positionNote) positionNote.textContent = 'Could not change the window position. It remains open where it was.';
+              return;
+            }
+            floatPrefs = Object.assign({}, floatPrefs, safeBounds);
+            persistFloatPrefs();
+            if (positionNote) updatePositionNote();
           });
         } else {
           programmaticMove = false;
+          if (positionNote) positionNote.textContent = 'Could not find the floating window to reposition it.';
         }
       });
     } else {
+      const safeBounds = clampBounds(
+        Number.isFinite(bounds.left) ? bounds.left : window.screenX,
+        Number.isFinite(bounds.top) ? bounds.top : window.screenY,
+        Number.isFinite(bounds.width) ? bounds.width : window.outerWidth,
+        Number.isFinite(bounds.height) ? bounds.height : window.outerHeight
+      );
       try {
-        window.resizeTo(safeBounds.width, safeBounds.height);
-        window.moveTo(safeBounds.left, safeBounds.top);
+        if (Number.isFinite(bounds.width) || Number.isFinite(bounds.height)) {
+          window.resizeTo(safeBounds.width, safeBounds.height);
+        }
+        if (Number.isFinite(bounds.left) || Number.isFinite(bounds.top)) {
+          window.moveTo(safeBounds.left, safeBounds.top);
+        }
       } catch (error) {
-        console.warn('Window positioning is not available in this browser:', error);
+        console.error('Window positioning is not available in this browser:', error);
+        if (positionNote) positionNote.textContent = 'This browser does not allow the timer window to be repositioned.';
       }
       window.setTimeout(() => { programmaticMove = false; }, 120);
+      floatPrefs = Object.assign({}, floatPrefs, safeBounds);
+      persistFloatPrefs();
     }
-    floatPrefs = Object.assign({}, floatPrefs, safeBounds);
-    persistFloatPrefs();
   }
 
   function persistFloatPrefs() {
@@ -122,8 +168,35 @@
   }
 
   function applyCornerPosition() {
-    const size = SIZES[floatPrefs.viewMode];
-    updateNativeBounds(boundsForCorner(floatPrefs.corner, size.width, size.height));
+    const positionWindow = (win) => {
+      const width = win && Number.isFinite(win.width) ? win.width : floatPrefs.width;
+      const height = win && Number.isFinite(win.height) ? win.height : floatPrefs.height;
+      const cornerBounds = boundsForCorner(floatPrefs.corner, width, height);
+      updateNativeBounds({ left: cornerBounds.left, top: cornerBounds.top });
+    };
+    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
+      chrome.windows.getCurrent((win) => {
+        if (win) currentWindowId = win.id;
+        positionWindow(win);
+      });
+    } else {
+      positionWindow(null);
+    }
+  }
+
+  function updatePinControls() {
+    if (pinCornerBtn) {
+      pinCornerBtn.textContent = floatPrefs.pinned ? 'Pinned' : 'Pin to corner';
+      pinCornerBtn.title = floatPrefs.pinned
+        ? 'Unpin to move the timer freely'
+        : 'Pin the timer to the selected screen corner';
+      pinCornerBtn.setAttribute('aria-pressed', String(floatPrefs.pinned));
+    }
+    if (positionNote) {
+      positionNote.textContent = floatPrefs.pinned
+        ? `Pinned to ${floatPrefs.corner.replace('-', ' ')}. The browser may still cover this window.`
+        : 'Unpinned · drag the header to move. Pinning anchors this window, not above other apps.';
+    }
   }
 
   function loadFloatPreferences(callback) {
@@ -140,12 +213,8 @@
           }
           applyViewMode(floatPrefs.viewMode, false);
           const cornerSelect = document.getElementById('float-corner-select');
-          const pinButton = document.getElementById('btn-pin-corner');
           if (cornerSelect) cornerSelect.value = floatPrefs.corner;
-          if (pinButton) {
-            pinButton.textContent = floatPrefs.pinned ? 'Pinned' : 'Unpinned';
-            pinButton.setAttribute('aria-pressed', String(floatPrefs.pinned));
-          }
+          updatePinControls();
           if (!Number.isFinite(floatPrefs.left) || !Number.isFinite(floatPrefs.top) || floatPrefs.pinned) {
             applyCornerPosition();
           } else {
@@ -224,18 +293,27 @@
   if (dialProgress) dialProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
 
   // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
+  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const THEME_LABELS = {
+    sunset: 'Sunset Glass',
+    warm: 'Warm Minimal',
+    aurora: 'Aurora',
+    graphite: 'Graphite Neon',
+    black: 'Full Black'
+  };
+  const LEGACY_THEMES = { cosmic: 'sunset', cyan: 'warm', violet: 'aurora', emerald: 'graphite' };
   const THEME_GRADIENTS = {
-    cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
-    cyan: { stop1: '#22d3ee', stop2: '#00f2fe', stop3: '#38bdf8' },
-    violet: { stop1: '#c084fc', stop2: '#8b5cf6', stop3: '#6366f1' },
-    emerald: { stop1: '#34d399', stop2: '#10b981', stop3: '#059669' }
+    sunset: { stop1: '#ff9a62', stop2: '#fb7185', stop3: '#c084fc' },
+    warm: { stop1: '#f97316', stop2: '#ea580c', stop3: '#fdba74' },
+    aurora: { stop1: '#5b7cfa', stop2: '#8b5cf6', stop3: '#fb7185' },
+    graphite: { stop1: '#b59aff', stop2: '#8b6ee8', stop3: '#f2c65d' },
+    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' }
   };
 
-  let currentTheme = 'cosmic';
+  let currentTheme = 'sunset';
 
   function updateDialThemeGradient(themeName) {
-    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.cosmic;
+    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.sunset;
     const s1 = document.getElementById('grad-stop-1');
     const s2 = document.getElementById('grad-stop-2');
     const s3 = document.getElementById('grad-stop-3');
@@ -245,12 +323,13 @@
   }
 
   function applyTheme(themeName) {
-    if (!THEMES.includes(themeName)) themeName = 'cosmic';
+    themeName = LEGACY_THEMES[themeName] || themeName;
+    if (!THEMES.includes(themeName)) themeName = 'sunset';
     currentTheme = themeName;
     document.documentElement.setAttribute('data-theme', themeName);
 
     if (themeLabel) {
-      themeLabel.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+      themeLabel.textContent = THEME_LABELS[themeName];
     }
 
     updateDialThemeGradient(themeName);
@@ -610,16 +689,16 @@
     cornerSelect.addEventListener('change', () => {
       if (!CORNERS.includes(cornerSelect.value)) return;
       floatPrefs.corner = cornerSelect.value;
-      persistFloatPrefs();
       if (floatPrefs.pinned) applyCornerPosition();
+      else persistFloatPrefs();
+      updatePinControls();
     });
   }
 
   if (pinCornerBtn) {
     pinCornerBtn.addEventListener('click', () => {
       floatPrefs.pinned = !floatPrefs.pinned;
-      pinCornerBtn.textContent = floatPrefs.pinned ? 'Pinned' : 'Unpinned';
-      pinCornerBtn.setAttribute('aria-pressed', String(floatPrefs.pinned));
+      updatePinControls();
       persistFloatPrefs();
       if (floatPrefs.pinned) applyCornerPosition();
     });
@@ -733,7 +812,9 @@
       if (win.id !== currentWindowId || programmaticMove) return;
       if (floatPrefs.pinned) {
         const desired = boundsForCorner(floatPrefs.corner, win.width, win.height);
-        if (win.left !== desired.left || win.top !== desired.top) updateNativeBounds(desired);
+          if (win.left !== desired.left || win.top !== desired.top) {
+            updateNativeBounds({ left: desired.left, top: desired.top });
+          }
       } else {
         floatPrefs.left = win.left;
         floatPrefs.top = win.top;
@@ -761,6 +842,9 @@
       e.preventDefault();
       const nextMode = state.mode === 'stopwatch' ? 'timer' : (state.mode === 'timer' ? 'dual' : 'stopwatch');
       sendMsg({ type: 'SET_MODE', mode: nextMode });
+    } else if (e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      if (pinCornerBtn) pinCornerBtn.click();
     }
   });
 
@@ -777,7 +861,7 @@
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       chrome.storage.local.get(['activeTheme'], (res) => {
         if (res && res.activeTheme) applyTheme(res.activeTheme);
-        else applyTheme('cosmic');
+        else applyTheme('sunset');
       });
       // Listen for storage changes from popup
       chrome.storage.onChanged.addListener((changes, area) => {
@@ -787,10 +871,10 @@
       });
     } else {
       const saved = localStorage.getItem('algotimer_theme');
-      applyTheme(saved || 'cosmic');
+      applyTheme(saved || 'sunset');
     }
   } catch (e) {
-    applyTheme('cosmic');
+    applyTheme('sunset');
   }
 
   // Listen for broadcast messages from background / popup
@@ -811,10 +895,7 @@
         floatPrefs = Object.assign({}, DEFAULT_PREFS, changes[FLOAT_PREFS_KEY].newValue);
         applyViewMode(floatPrefs.viewMode, false, false);
         if (cornerSelect) cornerSelect.value = floatPrefs.corner;
-        if (pinCornerBtn) {
-          pinCornerBtn.textContent = floatPrefs.pinned ? 'Pinned' : 'Unpinned';
-          pinCornerBtn.setAttribute('aria-pressed', String(floatPrefs.pinned));
-        }
+        updatePinControls();
       }
     });
   }

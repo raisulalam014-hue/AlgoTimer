@@ -2,6 +2,22 @@
 // Supports: Resizable Anywhere Pop-Up Screen, Compact Mode, Concurrent Dual Timers, Milestones & Safe Audio
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const runtimeAlert = document.getElementById('runtime-alert');
+  const reportRuntimeError = (message) => {
+    if (runtimeAlert) {
+      runtimeAlert.textContent = `AlgoTimer could not finish loading: ${message}. Reload the extension and reopen the timer.`;
+      runtimeAlert.hidden = false;
+    }
+  };
+  window.addEventListener('error', (event) => {
+    console.error('AlgoTimer popup runtime error:', event.error || event.message);
+    reportRuntimeError(event.message || 'unexpected UI error');
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('AlgoTimer popup operation failed:', event.reason);
+    reportRuntimeError(event.reason instanceof Error ? event.reason.message : 'timer operation failed');
+  });
+
   // DOM Elements - Navigation & Header
   const navTabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
@@ -461,18 +477,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
 
     // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
+  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const THEME_LABELS = {
+    sunset: 'Sunset Glass',
+    warm: 'Warm Minimal',
+    aurora: 'Aurora',
+    graphite: 'Graphite Neon',
+    black: 'Full Black'
+  };
+  const LEGACY_THEMES = { cosmic: 'sunset', cyan: 'warm', violet: 'aurora', emerald: 'graphite' };
   const THEME_GRADIENTS = {
-    cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
-    cyan: { stop1: '#22d3ee', stop2: '#00f2fe', stop3: '#38bdf8' },
-    violet: { stop1: '#c084fc', stop2: '#8b5cf6', stop3: '#6366f1' },
-    emerald: { stop1: '#34d399', stop2: '#10b981', stop3: '#059669' }
+    sunset: { stop1: '#ff9a62', stop2: '#fb7185', stop3: '#c084fc' },
+    warm: { stop1: '#f97316', stop2: '#ea580c', stop3: '#fdba74' },
+    aurora: { stop1: '#5b7cfa', stop2: '#8b5cf6', stop3: '#fb7185' },
+    graphite: { stop1: '#b59aff', stop2: '#8b6ee8', stop3: '#f2c65d' },
+    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' }
   };
 
-  let currentTheme = 'cosmic';
+  let currentTheme = 'sunset';
 
   function updateDialThemeGradient(themeName) {
-    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.cosmic;
+    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.sunset;
     const s1 = document.getElementById('grad-stop-1');
     const s2 = document.getElementById('grad-stop-2');
     const s3 = document.getElementById('grad-stop-3');
@@ -482,13 +507,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function applyTheme(themeName) {
-    if (!THEMES.includes(themeName)) themeName = 'cosmic';
+    themeName = LEGACY_THEMES[themeName] || themeName;
+    if (!THEMES.includes(themeName)) themeName = 'sunset';
     currentTheme = themeName;
     document.documentElement.setAttribute('data-theme', themeName);
 
     const themeLabel = document.getElementById('header-theme-label');
     if (themeLabel) {
-      themeLabel.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+      themeLabel.textContent = THEME_LABELS[themeName];
     }
 
     document.querySelectorAll('.theme-pill-btn').forEach(b => {
@@ -528,14 +554,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isExtension && chrome.storage && chrome.storage.local) {
       chrome.storage.local.get(['activeTheme'], (res) => {
         if (res && res.activeTheme) applyTheme(res.activeTheme);
-        else applyTheme('cosmic');
+        else applyTheme('sunset');
       });
     } else {
       const savedTheme = localStorage.getItem('algotimer_theme');
-      applyTheme(savedTheme || 'cosmic');
+      applyTheme(savedTheme || 'sunset');
     }
   } catch (e) {
-    applyTheme('cosmic');
+    applyTheme('sunset');
   }
 
   // ================= MAIN RENDER LOOP =================
@@ -1227,6 +1253,66 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const btnOpenShortcuts = document.getElementById('btn-open-shortcuts');
+  const companionSettings = document.getElementById('windows-companion-settings');
+  const companionStatusLabel = document.getElementById('companion-status');
+  const companionHotkeys = document.getElementById('companion-hotkeys');
+  const btnShowCompanion = document.getElementById('btn-show-companion');
+  const btnReconnectCompanion = document.getElementById('btn-reconnect-companion');
+  const companionCommandLabels = {
+    'start-timer': 'Start / Resume',
+    'pause-timer': 'Pause',
+    'record-lap': 'Lap',
+    'reset-timer': 'Reset',
+    'toggle-window': 'Show / Hide'
+  };
+
+  function renderCompanionStatus(companion) {
+    if (!companionSettings || !companion) return;
+    companionStatusLabel.textContent = companion.message || companion.status || 'Companion status unavailable';
+    companionStatusLabel.dataset.status = companion.status || 'unknown';
+    companionHotkeys.replaceChildren();
+    Object.entries(companionCommandLabels).forEach(([command, label]) => {
+      const row = document.createElement('div');
+      row.className = 'companion-hotkey-row';
+      const name = document.createElement('span');
+      name.textContent = label;
+      const binding = document.createElement('kbd');
+      binding.textContent = companion.hotkeys?.[command] || 'Not configured';
+      const availability = document.createElement('span');
+      availability.className = 'companion-hotkey-state';
+      availability.textContent = companion.status !== 'connected'
+        ? 'Offline'
+        : (companion.registered?.[command] === false ? 'Conflict' : 'Ready');
+      row.append(name, binding, availability);
+      companionHotkeys.append(row);
+    });
+  }
+
+  if (!isExtension && companionSettings) companionSettings.hidden = true;
+  if (btnShowCompanion) {
+    btnShowCompanion.addEventListener('click', async () => {
+      const response = await sendMessage({ type: 'SHOW_COMPANION_WINDOW' });
+      if (!response.success && companionStatusLabel) {
+        companionStatusLabel.textContent = response.error || 'Connect the Windows companion first.';
+      }
+    });
+  }
+  if (btnReconnectCompanion) {
+    btnReconnectCompanion.addEventListener('click', async () => {
+      const response = await sendMessage({ type: 'RECONNECT_COMPANION' });
+      if (response.companion) renderCompanionStatus(response.companion);
+      else if (companionStatusLabel) companionStatusLabel.textContent = 'Could not reconnect to the Windows companion.';
+    });
+  }
+  if (isExtension && companionSettings) {
+    sendMessage({ type: 'GET_COMPANION_STATUS' }).then((response) => renderCompanionStatus(response.companion));
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.algoTimerCompanionStatus) {
+        renderCompanionStatus(changes.algoTimerCompanionStatus.newValue);
+      }
+    });
+  }
+
   if (typeof chrome !== 'undefined' && chrome.commands && chrome.commands.getAll) {
     chrome.commands.getAll((commands) => {
       if (chrome.runtime.lastError) {
