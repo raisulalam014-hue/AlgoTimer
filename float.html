@@ -14,8 +14,8 @@
     [data-theme="cosmic"] {
       --bg-deep: #060713;
       --bg-nebula: radial-gradient(circle at 50% 25%, rgba(124, 58, 237, 0.35) 0%, rgba(6, 182, 212, 0.14) 42%, rgba(6, 7, 19, 0.98) 82%);
-      --bg-surface: rgba(16, 19, 38, 0.82);
-      --bg-surface-elevated: rgba(24, 28, 56, 0.8);
+      --bg-surface: rgba(16, 19, 38, 0.85);
+      --bg-surface-elevated: rgba(24, 28, 56, 0.82);
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-active: rgba(0, 242, 254, 0.45);
 
@@ -25,7 +25,7 @@
       --accent-lavender: #c084fc;
 
       --hero-btn: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #00f2fe 100%);
-      --hero-shadow: 0 4px 20px rgba(124, 58, 237, 0.55), 0 0 14px rgba(0, 242, 254, 0.35);
+      --hero-shadow: 0 4px 18px rgba(124, 58, 237, 0.55), 0 0 14px rgba(0, 242, 254, 0.35);
 
       --kbd-border: rgba(0, 242, 254, 0.5);
       --kbd-color: #00f2fe;
@@ -45,15 +45,15 @@
     [data-theme="cyan"] {
       --bg-deep: #040914;
       --bg-nebula: radial-gradient(circle at 50% 25%, rgba(2, 132, 199, 0.35) 0%, rgba(0, 242, 254, 0.16) 45%, rgba(4, 9, 20, 0.98) 82%);
-      --bg-surface: rgba(10, 24, 42, 0.85);
-      --bg-surface-elevated: rgba(14, 34, 58, 0.82);
+      --bg-surface: rgba(10, 24, 42, 0.88);
+      --bg-surface-elevated: rgba(14, 34, 58, 0.85);
       --border-active: rgba(0, 242, 254, 0.6);
       --accent-cyan: #00f2fe;
       --accent-purple: #0284c7;
       --accent-magenta: #f59e0b;
       --accent-lavender: #7dd3fc;
       --hero-btn: linear-gradient(135deg, #0284c7 0%, #00f2fe 100%);
-      --hero-shadow: 0 4px 20px rgba(2, 132, 199, 0.55), 0 0 16px rgba(0, 242, 254, 0.45);
+      --hero-shadow: 0 4px 18px rgba(2, 132, 199, 0.55), 0 0 16px rgba(0, 242, 254, 0.45);
       --kbd-border: rgba(0, 242, 254, 0.65);
       --kbd-color: #00f2fe;
       --horizon-start: #f59e0b;
@@ -65,15 +65,15 @@
     [data-theme="violet"] {
       --bg-deep: #080616;
       --bg-nebula: radial-gradient(circle at 50% 25%, rgba(139, 92, 246, 0.4) 0%, rgba(192, 132, 252, 0.15) 45%, rgba(8, 6, 22, 0.98) 82%);
-      --bg-surface: rgba(22, 16, 44, 0.85);
-      --bg-surface-elevated: rgba(32, 24, 62, 0.82);
+      --bg-surface: rgba(22, 16, 44, 0.88);
+      --bg-surface-elevated: rgba(32, 24, 62, 0.85);
       --border-active: rgba(192, 132, 252, 0.6);
       --accent-cyan: #c084fc;
       --accent-purple: #a855f7;
       --accent-magenta: #ec4899;
       --accent-lavender: #f0abfc;
       --hero-btn: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
-      --hero-shadow: 0 4px 20px rgba(124, 58, 237, 0.55), 0 0 16px rgba(192, 132, 252, 0.45);
+      --hero-shadow: 0 4px 18px rgba(124, 58, 237, 0.55), 0 0 16px rgba(192, 132, 252, 0.45);
       --kbd-border: rgba(192, 132, 252, 0.6);
       --kbd-color: #f0abfc;
       --horizon-start: #ec4899;
@@ -85,15 +85,15 @@
     [data-theme="emerald"] {
       --bg-deep: #040e0b;
       --bg-nebula: radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.35) 0%, rgba(52, 211, 153, 0.15) 45%, rgba(4, 14, 11, 0.98) 82%);
-      --bg-surface: rgba(10, 30, 24, 0.85);
-      --bg-surface-elevated: rgba(16, 44, 34, 0.82);
+      --bg-surface: rgba(10, 30, 24, 0.88);
+      --bg-surface-elevated: rgba(16, 44, 34, 0.85);
       --border-active: rgba(52, 211, 153, 0.6);
       --accent-cyan: #34d399;
       --accent-purple: #10b981;
       --accent-magenta: #06b6d4;
       --accent-lavender: #a7f3d0;
       --hero-btn: linear-gradient(135deg, #059669 0%, #34d399 100%);
-      --hero-shadow: 0 4px 20px rgba(5, 150, 105, 0.55), 0 0 16px rgba(52, 211, 153, 0.45);
+      --hero-shadow: 0 4px 18px rgba(5, 150, 105, 0.55), 0 0 16px rgba(52, 211, 153, 0.45);
       --kbd-border: rgba(52, 211, 153, 0.6);
       --kbd-color: #6ee7b7;
       --horizon-start: #10b981;
@@ -134,12 +134,12 @@
       overflow: hidden;
     }
 
-    /* Bottom Horizon Flare (Image 4) */
+    /* Bottom Horizon Flare */
     .horizon-flare {
       position: absolute;
       bottom: 0;
-      left: 6%;
-      right: 6%;
+      left: 8%;
+      right: 8%;
       height: 2px;
       background: linear-gradient(90deg, transparent 0%, var(--horizon-start) 20%, var(--horizon-mid) 50%, var(--horizon-end) 80%, transparent 100%);
       box-shadow: var(--horizon-shadow);
@@ -150,10 +150,12 @@
 
     /* Header */
     .float-header {
+      height: 38px;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 7px 12px;
+      padding: 0 10px;
       background: rgba(16, 19, 38, 0.75);
       border-bottom: 1px solid var(--border-subtle);
       gap: 6px;
@@ -163,17 +165,18 @@
     .float-title {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 11px;
       font-weight: 800;
       color: var(--accent-cyan);
       text-transform: uppercase;
       letter-spacing: 0.6px;
+      white-space: nowrap;
     }
 
     .float-icon {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
       box-shadow: 0 0 8px var(--accent-cyan);
@@ -184,6 +187,7 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      flex-shrink: 0;
       -webkit-app-region: no-drag;
     }
 
@@ -193,12 +197,13 @@
       color: var(--text-secondary);
       font-size: 10px;
       font-weight: 700;
-      padding: 3px 7px;
+      padding: 3px 6px;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 3px;
+      white-space: nowrap;
       transition: all 0.15s ease;
     }
 
@@ -216,41 +221,56 @@
       box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
     }
 
-    /* Main Body Area */
+    /* Main Body */
     .float-body {
       flex: 1;
+      min-height: 0; /* Critical for child flex scaling! */
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       padding: 6px 12px 10px;
-      gap: 6px;
+      gap: 4px;
       text-align: center;
       position: relative;
+      overflow: hidden;
     }
 
     .float-tag {
-      font-size: 10px;
+      font-size: 9px;
       color: #94a3b8;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
-      padding: 2px 10px;
+      padding: 2px 8px;
       border-radius: 12px;
       max-width: 90%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex-shrink: 0;
     }
 
-    /* Dial Display (Image 1 & 2) */
+    /* Single View & Dial Area */
+    #float-single-view {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .float-dial-wrapper {
       position: relative;
-      width: 170px;
-      height: 170px;
+      width: min(150px, 36vh, 55vw);
+      height: min(150px, 36vh, 55vw);
+      max-width: 160px;
+      max-height: 160px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 1;
     }
 
     .float-dial-svg {
@@ -271,7 +291,7 @@
     }
 
     .float-dial-progress {
-      stroke-dasharray: 439.82; /* 2 * PI * 70 */
+      stroke-dasharray: 439.82;
       stroke-dashoffset: 439.82;
       transition: stroke-dashoffset 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -283,32 +303,32 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 2px;
     }
 
     .float-mode-badge {
-      font-size: 9px;
+      font-size: 8px;
       color: var(--accent-cyan);
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       font-weight: 800;
       text-transform: uppercase;
       background: rgba(255, 255, 255, 0.06);
-      padding: 1px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
       border: 1px solid var(--border-subtle);
     }
 
     .float-clock {
       font-family: var(--font-mono);
-      font-size: 26px;
+      font-size: clamp(20px, 6vh, 26px);
       font-weight: 800;
       color: #ffffff;
-      text-shadow: 0 0 16px rgba(0, 242, 254, 0.35);
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
       line-height: 1.1;
     }
 
     .float-clock small {
-      font-size: 15px;
+      font-size: clamp(12px, 3.5vh, 15px);
       color: var(--accent-cyan);
       margin-left: 2px;
     }
@@ -318,10 +338,10 @@
       text-shadow: 0 0 16px rgba(244, 63, 94, 0.6);
     }
 
-    /* Sub-Gauges (Image 1) */
+    /* Sub-Gauges (LAPS, SPLIT, STATUS) */
     .float-sub-gauges {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       margin-top: 2px;
     }
 
@@ -329,8 +349,8 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
       border-radius: 6px;
-      padding: 2px 5px;
-      min-width: 36px;
+      padding: 2px 4px;
+      min-width: 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -338,13 +358,13 @@
 
     .float-sub-val {
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
       color: var(--text-primary);
     }
 
     .float-sub-lbl {
-      font-size: 7px;
+      font-size: 6px;
       font-weight: 700;
       letter-spacing: 0.4px;
       color: var(--text-muted);
@@ -354,12 +374,12 @@
     .float-dual-box {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       width: 100%;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 8px 12px;
+      border-radius: 10px;
+      padding: 6px 10px;
     }
 
     .float-dual-row {
@@ -370,14 +390,14 @@
     }
 
     .float-dual-label {
-      font-size: 11px;
+      font-size: 10px;
       color: #94a3b8;
       font-weight: 700;
     }
 
     .float-dual-digits {
       font-family: var(--font-mono);
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       color: #ffffff;
       text-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
@@ -389,12 +409,13 @@
 
     /* Controls Row */
     .float-controls {
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .float-ctrl-btn {
@@ -402,7 +423,7 @@
       border: 1px solid var(--border-subtle);
       color: #ffffff;
       border-radius: 10px;
-      padding: 6px 12px;
+      padding: 6px 10px;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
@@ -420,11 +441,11 @@
     }
 
     .float-ctrl-primary {
-      flex: 1.3;
+      flex: 1.4;
       background: var(--hero-btn);
       border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 12px;
       box-shadow: var(--hero-shadow);
       font-size: 12px;
@@ -432,8 +453,8 @@
     }
 
     .float-ctrl-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 26px rgba(124, 58, 237, 0.7), 0 0 18px rgba(0, 242, 254, 0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(124, 58, 237, 0.7), 0 0 16px rgba(0, 242, 254, 0.5);
     }
 
     .float-ctrl-primary.running {
@@ -446,11 +467,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 18px;
-      height: 16px;
-      padding: 0 4px;
+      min-width: 16px;
+      height: 15px;
+      padding: 0 3px;
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 800;
       color: var(--kbd-color);
       background: rgba(0, 0, 0, 0.35);
@@ -465,79 +486,69 @@
       background: rgba(0, 0, 0, 0.25);
     }
 
-    /* Always on top tip banner */
-    .float-ontop-banner {
-      background: rgba(6, 182, 212, 0.1);
-      border-top: 1px solid rgba(6, 182, 212, 0.25);
-      padding: 4px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 10px;
-      color: #bae6fd;
+    /* ================= RESPONSIVE ADAPTATIONS ================= */
+    /* COMPACT MODE (Height < 330px or Width < 290px) */
+    @media (max-height: 330px), (max-width: 290px) {
+      .float-tag,
+      .float-sub-gauges,
+      .btn-lbl {
+        display: none !important;
+      }
+      .float-dial-wrapper {
+        width: min(105px, 34vh);
+        height: min(105px, 34vh);
+      }
+      .float-clock {
+        font-size: 19px;
+      }
+      .float-clock small {
+        font-size: 12px;
+      }
+      .float-body {
+        padding: 4px 8px 6px;
+        gap: 3px;
+      }
+      .float-ctrl-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+      .float-ctrl-primary {
+        padding: 5px 12px;
+        font-size: 11px;
+      }
     }
 
-    .float-ontop-banner button {
-      background: linear-gradient(135deg, #7c3aed 0%, #00f2fe 100%);
-      color: #ffffff;
-      border: none;
-      padding: 3px 8px;
-      border-radius: 5px;
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* COMPACT SIZE MODE */
-    body[data-size="compact"] .float-tag,
-    body[data-size="compact"] .float-sub-gauges,
-    body[data-size="compact"] .float-ontop-banner {
-      display: none;
-    }
-
-    body[data-size="compact"] .float-dial-wrapper {
-      width: 130px;
-      height: 130px;
-    }
-
-    body[data-size="compact"] .float-clock {
-      font-size: 20px;
-    }
-
-    body[data-size="compact"] .float-clock small {
-      font-size: 12px;
-    }
-
-    body[data-size="compact"] .float-ctrl-btn {
-      padding: 4px 8px;
-      font-size: 10px;
-    }
-
-    /* MINI SIZE MODE */
-    body[data-size="mini"] .float-tag,
-    body[data-size="mini"] .float-sub-gauges,
-    body[data-size="mini"] .float-mode-badge,
-    body[data-size="mini"] .float-ontop-banner,
-    body[data-size="mini"] .float-dial-svg {
-      display: none;
-    }
-
-    body[data-size="mini"] .float-header {
-      padding: 3px 6px;
-    }
-
-    body[data-size="mini"] .float-dial-wrapper {
-      width: auto;
-      height: auto;
-    }
-
-    body[data-size="mini"] .float-clock {
-      font-size: 18px;
-    }
-
-    body[data-size="mini"] .float-ctrl-btn {
-      padding: 2px 6px;
-      font-size: 9px;
+    /* MINI / MICRO MODE (Height < 210px) */
+    @media (max-height: 210px) {
+      .float-tag,
+      .float-sub-gauges,
+      .float-dial-svg,
+      .btn-lbl {
+        display: none !important;
+      }
+      .float-dial-wrapper {
+        width: 100%;
+        height: auto;
+        margin: 0;
+      }
+      .float-clock {
+        font-size: 21px;
+      }
+      .float-clock small {
+        font-size: 13px;
+      }
+      .float-body {
+        padding: 2px 8px 4px;
+        justify-content: center;
+        gap: 4px;
+      }
+      .float-controls {
+        margin-top: 0;
+      }
+      .float-ctrl-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+      }
     }
   </style>
 </head>
@@ -554,23 +565,23 @@
       </div>
       <div class="float-actions">
         <!-- Quick Theme Cycler Button -->
-        <button class="float-btn" id="btn-float-theme" title="Switch Dynamic Color Palette">
-          🎨 <span id="float-theme-label">Cosmic</span>
+        <button class="float-btn" id="btn-float-theme" title="Dynamic Palette (Cosmic, Cyan, Violet, Emerald)">
+          🎨 <span class="btn-lbl" id="float-theme-label">Cosmic</span>
         </button>
 
         <!-- Always on Top PiP -->
-        <button class="float-btn" id="btn-pip-always-ontop" title="Pin Always-On-Top over VS Code & other apps">
-          📌 <span id="btn-pip-text">Always on Top</span>
+        <button class="float-btn" id="btn-pip-always-ontop" title="Always on Top (Floats over all apps)">
+          📌 <span class="btn-lbl" id="btn-pip-text">Pin</span>
         </button>
 
         <!-- Corner cycler -->
-        <button class="float-btn" id="btn-corner-cycle" title="Dock window to screen corners (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
-          <span id="corner-label">↗ TR</span>
+        <button class="float-btn" id="btn-corner-cycle" title="Dock to Screen Corners (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
+          ↗ <span id="corner-label">TR</span>
         </button>
 
         <!-- Size toggle -->
-        <button class="float-btn" id="btn-size-cycle" title="Resize window (Normal -> Compact -> Mini)">
-          🗜️ <span id="size-label">Size</span>
+        <button class="float-btn" id="btn-size-cycle" title="Toggle Size Mode (Normal, Compact, Mini)">
+          🗜️
         </button>
       </div>
     </div>
@@ -597,7 +608,7 @@
                 </feMerge>
               </filter>
             </defs>
-            <!-- Outer Precision Ticks (Cyan & Violet Dotted Track) -->
+            <!-- Outer Precision Ticks -->
             <circle class="float-dial-ticks" cx="80" cy="80" r="74" stroke="rgba(255, 255, 255, 0.16)" stroke-dasharray="2 5" stroke-width="2" fill="none" />
             <!-- Base Track -->
             <circle class="float-dial-track" cx="80" cy="80" r="70" stroke="rgba(255, 255, 255, 0.06)" stroke-width="6" fill="none"></circle>
@@ -609,7 +620,7 @@
             <div class="float-mode-badge" id="float-mode-badge">STOPWATCH</div>
             <div class="float-clock" id="float-clock-single">00:00<small id="float-millis">.0</small></div>
 
-            <!-- 3 Mini Sub-Gauges (Image 1) -->
+            <!-- 3 Mini Sub-Indicators -->
             <div class="float-sub-gauges">
               <div class="float-sub-gauge" title="Total Laps">
                 <span class="float-sub-val" id="float-sub-laps">0</span>
@@ -652,12 +663,6 @@
           ↺ <kbd class="float-key">R</kbd>
         </button>
       </div>
-    </div>
-
-    <!-- Banner -->
-    <div class="float-ontop-banner" id="banner-pip-tip">
-      <span>Float over VS Code, Discord, & all desktop apps</span>
-      <button id="btn-banner-pip">📌 Pop Over Apps</button>
     </div>
   </div>
 

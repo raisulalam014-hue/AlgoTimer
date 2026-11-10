@@ -12,14 +12,49 @@
 
   const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left'];
   const SIZES = [
-    { name: 'normal', width: 320, height: 380 },
-    { name: 'compact', width: 260, height: 210 },
-    { name: 'mini', width: 200, height: 110 }
+    { name: 'normal', width: 340, height: 440 },
+    { name: 'compact', width: 280, height: 260 },
+    { name: 'mini', width: 220, height: 130 }
   ];
 
   let currentCornerIdx = 0;
   let currentSizeIdx = 0;
   let activePipWindow = null;
+
+  
+  // Auto-resize window to optimal dimensions on launch
+  function ensureOptimalWindowSize() {
+    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
+      chrome.windows.getCurrent((win) => {
+        if (win && (win.height < 400 || win.width < 320)) {
+          chrome.windows.update(win.id, {
+            width: 340,
+            height: 440
+          });
+        }
+      });
+    } else {
+      if (window.outerHeight < 400 || window.outerWidth < 320) {
+        try { window.resizeTo(340, 440); } catch (e) {}
+      }
+    }
+  }
+
+  function handleAutoLayout() {
+    const h = window.innerHeight;
+    const w = window.innerWidth;
+    if (h < 210) {
+      document.body.setAttribute('data-size', 'mini');
+    } else if (h < 330 || w < 290) {
+      document.body.setAttribute('data-size', 'compact');
+    } else {
+      document.body.setAttribute('data-size', 'normal');
+    }
+  }
+
+  window.addEventListener('resize', handleAutoLayout);
+  ensureOptimalWindowSize();
+  handleAutoLayout();
 
   // DOM Elements
   const singleView = document.getElementById('float-single-view');

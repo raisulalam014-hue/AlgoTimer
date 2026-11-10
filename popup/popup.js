@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return s;
   }
 
-  // Local storage persistence for standalone browser view (zero server / zero localhost)
+  // Local storage persistence for standalone browser view (zero server / zero network)
   function saveMockState(s) {
     try {
       if (typeof localStorage !== 'undefined') {
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           resolve(handleMockMessage(msg));
         }
       } else {
-        // Standalone browser mode: 100% client-side, zero servers, zero localhost!
+        // Standalone browser mode: 100% client-side, zero servers, zero network!
         resolve(handleMockMessage(msg));
       }
     });
@@ -496,12 +496,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.windows.create({
         url: chrome.runtime.getURL("float.html"),
         type: 'popup',
-        width: 280,
-        height: 180,
+        width: 340,
+        height: 440,
         focused: true
       });
     } else {
-      window.open("float.html", "AlgoTimerFloat", "width=320,height=380,resizable=yes");
+      window.open("float.html", "AlgoTimerFloat", "width=340,height=440,resizable=yes");
     }
   }
 
