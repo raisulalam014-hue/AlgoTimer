@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer - Always-on-Top Floating HUD</title>
+  <title>AlgoTimer - Persistent Floating Timer</title>
   <style>
     /* ==========================================================================
        AlgoTimer - Dynamic Cyber-Luxury Floating Screen
@@ -159,7 +159,6 @@
       background: rgba(16, 19, 38, 0.75);
       border-bottom: 1px solid var(--border-subtle);
       gap: 6px;
-      -webkit-app-region: drag;
     }
 
     .float-title {
@@ -550,40 +549,105 @@
         font-size: 9px;
       }
     }
+    .float-position-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(8, 10, 22, 0.72);
+      color: var(--text-secondary);
+      font-size: 10px;
+    }
+    .float-position-row select {
+      min-width: 98px;
+      padding: 4px 6px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      background: #101326;
+      color: var(--text-primary);
+      font: inherit;
+    }
+    #float-position-note {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 9px;
+      text-align: right;
+    }
+    .float-mini-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: #080a12;
+      border: 1px solid var(--border-active);
+      border-radius: 12px;
+      box-shadow: 0 0 18px rgba(0, 242, 254, 0.14);
+    }
+    .mini-clock {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
+    }
+    .mini-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+    #float-mini-dot { width: 6px; height: 6px; border-radius: 50%; background: #64748b; }
+    body[data-view-mode="mini"] #float-mini-view { display: flex; }
+    body[data-view-mode="mini"] .float-header,
+    body[data-view-mode="mini"] .float-position-row,
+    body[data-view-mode="mini"] .float-body,
+    body[data-view-mode="mini"] .horizon-flare { display: none !important; }
+    body[data-view-mode="mini"] #float-widget { padding: 5px; }
+    @media (max-width: 360px) {
+      .float-position-row { gap: 4px; padding: 4px 6px; }
+      #float-position-note { max-width: 120px; }
+      .float-btn { padding: 3px 4px; }
+    }
   </style>
 </head>
-<body data-size="normal">
+<body data-size="normal" data-view-mode="expanded">
   <div id="float-widget">
+    <div id="float-mini-view" class="float-mini-view" role="button" tabindex="0" aria-label="Expand AlgoTimer">
+      <span class="mini-clock" id="float-mini-clock">00:00</span>
+      <span class="mini-status"><span id="float-mini-dot" aria-hidden="true"></span><span id="float-mini-status">READY</span></span>
+    </div>
     <!-- Ambient Horizon Light Flare -->
     <div class="horizon-flare" aria-hidden="true"></div>
 
     <!-- Header -->
     <div class="float-header">
-      <div class="float-title">
-        <span class="float-icon"></span>
-        <span>AlgoTimer</span>
-      </div>
+      <div class="float-title"><span class="float-icon"></span><span>AlgoTimer</span></div>
       <div class="float-actions">
-        <!-- Quick Theme Cycler Button -->
-        <button class="float-btn" id="btn-float-theme" title="Dynamic Palette (Cosmic, Cyan, Violet, Emerald)">
-          🎨 <span class="btn-lbl" id="float-theme-label">Cosmic</span>
-        </button>
-
-        <!-- Always on Top PiP -->
-        <button class="float-btn" id="btn-pip-always-ontop" title="Always on Top (Floats over all apps)">
-          📌 <span class="btn-lbl" id="btn-pip-text">Pin</span>
-        </button>
-
-        <!-- Corner cycler -->
-        <button class="float-btn" id="btn-corner-cycle" title="Dock to Screen Corners (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
-          ↗ <span id="corner-label">TR</span>
-        </button>
-
-        <!-- Size toggle -->
-        <button class="float-btn" id="btn-size-cycle" title="Toggle Size Mode (Normal, Compact, Mini)">
-          🗜️
-        </button>
+        <button class="float-btn" id="btn-float-theme" title="Change color theme">Theme <span class="btn-lbl" id="float-theme-label">Cosmic</span></button>
+        <button class="float-btn" id="btn-pip-always-ontop" title="Open browser-managed picture-in-picture; the browser controls its position">PiP <span class="btn-lbl" id="btn-pip-text">Topmost</span></button>
+        <button class="float-btn" id="btn-size-cycle" title="Minimize to mini timer"><span id="size-label">Mini</span></button>
+        <button class="float-btn" id="btn-close-float" title="Close floating timer" aria-label="Close floating timer">x</button>
       </div>
+    </div>
+    <div class="float-position-row" id="float-position-row">
+      <label for="float-corner-select">Position</label>
+      <select id="float-corner-select" aria-label="Floating timer corner">
+        <option value="top-left">Top left</option>
+        <option value="top-right">Top right</option>
+        <option value="bottom-left">Bottom left</option>
+        <option value="bottom-right">Bottom right</option>
+      </select>
+      <button class="float-btn" id="btn-pin-corner" aria-pressed="true">Pinned</button>
+      <span id="float-position-note">Corner pinning does not keep the window above other apps.</span>
     </div>
 
     <!-- Body -->

@@ -41,15 +41,15 @@
           <span class="btn-text">Compact</span>
         </button>
 
-        <!-- Pop Up Screen Buttons (Always-On-Top PiP & Resizable Standalone Window) -->
-        <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over VS Code, Discord, or any app on your display">
+        <!-- Persistent floating window -->
+        <button class="header-btn" id="btn-popout-pip" title="Open the persistent floating timer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
             <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
             <polyline points="15 11 18 11 18 14"></polyline>
             <line x1="14" y1="15" x2="18" y2="11"></line>
           </svg>
-          <span class="btn-text">Pop Up</span>
+          <span class="btn-text">Float</span>
         </button>
         <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Resizable Window (Move anywhere on screen)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -428,14 +428,14 @@
       </div>
 
       <div class="settings-group">
-        <h4>Pop Up Screen Options</h4>
+        <h4>Floating Timer Options</h4>
         <div class="setting-action-card">
           <div class="setting-info">
-            <span class="setting-title">Always-On-Top Floating Screen</span>
-            <span class="setting-desc">Pops out the timer into an OS-level window that you can resize and put anywhere on any display over VS Code, Discord, or any desktop app!</span>
+            <span class="setting-title">Persistent Floating Timer</span>
+            <span class="setting-desc">Opens a persistent timer window. Use Picture-in-Picture inside it for browser-managed always-on-top behavior where available.</span>
           </div>
           <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-            🗗 Launch Pop Up Float
+            🗗 Open Floating Timer
           </button>
         </div>
       </div>
@@ -443,26 +443,12 @@
       <div class="settings-group">
         <h4>Keyboard Shortcuts</h4>
         <div class="shortcut-list">
-          <div class="shortcut-item">
-            <span>Start / Pause</span>
-            <kbd class="key-badge">Space</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Record Lap / Split</span>
-            <kbd class="key-badge">L</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Reset Stopwatch</span>
-            <kbd class="key-badge">R</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Toggle Mode</span>
-            <kbd class="key-badge">M</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Launch Float Pop-up</span>
-            <kbd class="key-badge">Alt + T</kbd>
-          </div>
+          <div class="shortcut-item"><span>Start / Resume / Pause</span><kbd class="key-badge" id="shortcut-toggle-timer">Alt + Shift + 1</kbd></div>
+          <div class="shortcut-item"><span>Record Lap</span><kbd class="key-badge" id="shortcut-record-lap">Alt + Shift + 2</kbd></div>
+          <div class="shortcut-item"><span>Reset Active Timer</span><kbd class="key-badge" id="shortcut-reset-timer">Alt + Shift + 3</kbd></div>
+          <div class="shortcut-item"><span>Show / Minimize Floating Timer</span><kbd class="key-badge" id="shortcut-toggle-floating-window">Alt + Shift + 4</kbd></div>
+          <p class="setting-desc">Global shortcuts work where your browser/OS permits. Customize them in Chrome's Extensions shortcuts.</p>
+          <button class="btn-xs" id="btn-open-shortcuts">Customize shortcuts</button>
         </div>
       </div>
 

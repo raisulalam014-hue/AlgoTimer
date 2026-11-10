@@ -235,7 +235,7 @@
         </button>
 
         <!-- Pop Out Window / PiP -->
-        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-on-top PiP Float Screen">
+        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Open persistent floating timer window">
           ⤢
         </button>
 
@@ -540,7 +540,7 @@
     } catch (err) {}
   });
 
-  // Pop Up Screen (Opens dedicated Always-on-Top Floating window outside browser over other apps)
+  // Open the persistent extension window; browser Picture-in-Picture is available from that window.
   pipBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     safeSendMessage({ type: 'OPEN_FLOAT_WINDOW' });

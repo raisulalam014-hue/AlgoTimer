@@ -100,6 +100,140 @@ function syncLegacyProperties(state) {
   state.targetDurationMs = state.targetTimer.targetDurationMs;
 }
 
+const FLOAT_WINDOW_ID_KEY = 'algoTimerFloatWindowId';
+const FLOAT_WINDOW_PREFS_KEY = 'algoTimerFloatWindowPrefs';
+const FLOAT_WINDOW_DEFAULTS = {
+  corner: 'top-right',
+  pinned: true,
+  left: null,
+  top: null,
+  width: 380,
+  height: 470,
+  viewMode: 'expanded'
+};
+
+let floatWindowOperation = null;
+
+async function openFloatWindow(toggleVisibility = false) {
+  if (floatWindowOperation) return floatWindowOperation;
+  floatWindowOperation = (async () => {
+  const saved = await chrome.storage.local.get([FLOAT_WINDOW_ID_KEY, FLOAT_WINDOW_PREFS_KEY]);
+  const prefs = Object.assign({}, FLOAT_WINDOW_DEFAULTS, saved[FLOAT_WINDOW_PREFS_KEY] || {});
+  const windowId = saved[FLOAT_WINDOW_ID_KEY];
+
+  if (windowId !== undefined) {
+    let existing = null;
+    try {
+      existing = await chrome.windows.get(windowId);
+    } catch (error) {
+      await chrome.storage.local.remove(FLOAT_WINDOW_ID_KEY);
+    }
+    if (existing) {
+      if (toggleVisibility && existing.state !== 'minimized') {
+        await chrome.windows.update(windowId, { state: 'minimized' });
+      } else {
+        await chrome.windows.update(windowId, {
+          focused: true,
+          state: existing.state === 'minimized' ? 'normal' : existing.state
+        });
+      }
+      return;
+    }
+  }
+
+  const options = {
+    url: chrome.runtime.getURL('float.html'),
+    type: 'popup',
+    width: Math.max(220, Number(prefs.width) || FLOAT_WINDOW_DEFAULTS.width),
+    height: Math.max(112, Number(prefs.height) || FLOAT_WINDOW_DEFAULTS.height),
+    focused: true
+  };
+  if (Number.isFinite(prefs.left)) options.left = prefs.left;
+  if (Number.isFinite(prefs.top)) options.top = prefs.top;
+  const created = await chrome.windows.create(options);
+  if (created && Number.isInteger(created.id)) {
+    await chrome.storage.local.set({ [FLOAT_WINDOW_ID_KEY]: created.id });
+  }
+  })();
+  try {
+    await floatWindowOperation;
+  } finally {
+    floatWindowOperation = null;
+  }
+}
+
+async function runGlobalCommand(command) {
+  if (command === 'toggle-floating-window') {
+    await openFloatWindow(true);
+    return;
+  }
+
+  const data = await chrome.storage.local.get(['algoTimerState']);
+  const state = normalizeState(data.algoTimerState);
+  const target = state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch');
+
+  if (command === 'toggle-timer') {
+    const isRunning = target === 'both'
+      ? state.stopwatch.status === 'running' && state.targetTimer.status === 'running'
+      : (target === 'timer' ? state.targetTimer.status === 'running' : state.stopwatch.status === 'running');
+    const now = Date.now();
+    const timers = target === 'both' ? ['stopwatch', 'timer'] : [target === 'timer' ? 'targetTimer' : 'stopwatch'];
+    for (const key of timers) {
+      const timer = key === 'timer' ? state.targetTimer : state[key];
+      if (isRunning) {
+        timer.elapsedBeforePause += now - timer.startTime;
+        timer.startTime = null;
+        timer.status = 'paused';
+      } else if (timer.status !== 'running') {
+        if (timer.status === 'finished') timer.elapsedBeforePause = 0;
+        timer.startTime = now;
+        timer.status = 'running';
+      }
+    }
+  } else if (command === 'reset-timer') {
+    const timers = target === 'both' ? [state.stopwatch, state.targetTimer] : [target === 'timer' ? state.targetTimer : state.stopwatch];
+    for (const timer of timers) {
+      timer.status = 'stopped';
+      timer.startTime = null;
+      timer.elapsedBeforePause = 0;
+    }
+    if (target !== 'timer') state.laps = [];
+  } else if (command === 'record-lap') {
+    const elapsed = state.stopwatch.elapsedBeforePause +
+      (state.stopwatch.status === 'running' && state.stopwatch.startTime ? Date.now() - state.stopwatch.startTime : 0);
+    if (elapsed === 0) return;
+    const previous = state.laps.length ? state.laps[0].totalMs : 0;
+    state.laps.unshift({
+      id: state.laps.length + 1,
+      label: 'Phase ' + (state.laps.length + 1),
+      totalMs: elapsed,
+      splitMs: Math.max(0, elapsed - previous),
+      timestamp: Date.now()
+    });
+  } else {
+    return;
+  }
+
+  syncLegacyProperties(state);
+  await chrome.storage.local.set({ algoTimerState: state });
+  updateBadge(state);
+  broadcastState(state);
+}
+
+chrome.commands.onCommand.addListener((command) => {
+  runGlobalCommand(command).catch((error) => {
+    console.error('Global timer command failed:', error);
+  });
+});
+
+chrome.windows.onRemoved.addListener((windowId) => {
+  chrome.storage.local.get([FLOAT_WINDOW_ID_KEY], (data) => {
+    if (data[FLOAT_WINDOW_ID_KEY] === windowId) {
+      chrome.storage.local.remove(FLOAT_WINDOW_ID_KEY);
+    }
+  });
+});
+
 // Initialize default state
 chrome.runtime.onInstalled.addListener(async () => {
   try {
@@ -434,17 +568,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'OPEN_FLOAT_WINDOW':
         case 'OPEN_POPUP_WINDOW': {
-          if (chrome.windows && chrome.windows.create) {
-            chrome.windows.create({
-              url: chrome.runtime.getURL('float.html'),
-              type: 'popup',
-              width: 280,
-              height: 180,
-              top: 40,
-              left: 100,
-              focused: true
-            });
-          }
+          await openFloatWindow(false);
           sendResponse({ success: true });
           break;
         }

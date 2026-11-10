@@ -427,14 +427,14 @@
                 </svg>
                 <span class="btn-text">Compact</span>
               </button>
-              <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over other apps">
+              <button class="header-btn" id="btn-popout-pip" title="Open persistent floating timer window">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                   <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
                   <polyline points="15 11 18 11 18 14"></polyline>
                   <line x1="14" y1="15" x2="18" y2="11"></line>
                 </svg>
-                <span class="btn-text">Pop Up</span>
+                <span class="btn-text">Float</span>
               </button>
               <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Window">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -783,14 +783,14 @@
             </div>
 
             <div class="settings-group">
-              <h4>Pop Up Screen Options</h4>
+              <h4>Floating Timer Options</h4>
               <div class="setting-action-card">
                 <div class="setting-info">
-                  <span class="setting-title">Always-On-Top Floating Screen</span>
-                  <span class="setting-desc">Pops out the timer into an OS-level Picture-in-Picture window that floats on top of VS Code, Terminal, Discord, and any desktop app!</span>
+                  <span class="setting-title">Persistent Floating Timer Window</span>
+                  <span class="setting-desc">Opens a persistent timer window. Browser Picture-in-Picture can keep it above other windows where supported; the browser controls its position.</span>
                 </div>
                 <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-                  ⤢ Launch Pop Up Float
+                  ⤢ Open Floating Timer
                 </button>
               </div>
             </div>
@@ -868,7 +868,7 @@
                   🗜️
                 </button>
                 <!-- Pop Out Window / PiP -->
-                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-On-Top Pop Up Screen">
+                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Browser Picture-in-Picture window">
                   ⤢
                 </button>
                 <!-- Hide / Close -->
@@ -949,8 +949,8 @@
     <div class="tip-item">
       <div class="tip-icon">🪟</div>
       <div class="tip-text">
-        <h4>Always-On-Top Pop Up</h4>
-        <p>Pops out an OS-level window that can be moved anywhere on any display and floats over VS Code and other desktop apps.</p>
+        <h4>Picture-in-Picture Window</h4>
+        <p>Picture-in-Picture can stay above other windows where supported. The browser controls its position; a regular extension window may be covered by other apps.</p>
       </div>
     </div>
   </footer>

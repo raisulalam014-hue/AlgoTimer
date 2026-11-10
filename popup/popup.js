@@ -447,70 +447,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ================= POP UP SCREEN SYSTEM (PiP & RESIZABLE WINDOW) =================
-  async function triggerPopoutPiP() {
-    if ('documentPictureInPicture' in window) {
-      try {
-        if (window._pipWindow) {
-          window._pipWindow.close();
-          return;
-        }
-
-        // Request native OS Always-On-Top window
-        const pipWindow = await window.documentPictureInPicture.requestWindow({
-          width: 360,
-          height: 580
-        });
-        window._pipWindow = pipWindow;
-
-        // Copy styles
-        [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
-          pipWindow.document.head.appendChild(el.cloneNode(true));
-        });
-
-        pipWindow.document.title = 'AlgoTimer - Always-on-Top Floating Screen';
-
-        const appContainer = document.querySelector('.app-container');
-        pipWindow.document.body.appendChild(appContainer);
-        pipWindow.document.body.classList.add('is-pip');
-        document.body.classList.add('is-pip');
-
-        pipWindow.addEventListener('pagehide', () => {
-          document.body.appendChild(appContainer);
-          document.body.classList.remove('is-pip');
-          window._pipWindow = null;
-        });
-
-        return;
-      } catch (err) {
-        console.warn('Document Picture-in-Picture failed, falling back to standalone window:', err);
-      }
-    }
-
-    // Fallback: standalone resizable window
-    triggerPopoutWindow();
-  }
-
+  // ================= PERSISTENT FLOATING WINDOW =================
   function triggerPopoutWindow() {
-    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.create) {
-      chrome.windows.create({
-        url: chrome.runtime.getURL("float.html"),
-        type: 'popup',
-        width: 340,
-        height: 440,
-        focused: true
-      });
+    if (isExtension && chrome.runtime && chrome.runtime.sendMessage) {
+      sendMessage({ type: 'OPEN_FLOAT_WINDOW' });
     } else {
-      window.open("float.html", "AlgoTimerFloat", "width=340,height=440,resizable=yes");
+      window.open('float.html', 'AlgoTimerFloat', 'width=380,height=470,resizable=yes');
     }
   }
 
-  if (btnPopoutPip) btnPopoutPip.addEventListener("click", triggerPopoutWindow);
-  if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener("click", triggerPopoutWindow);
+  if (btnPopoutPip) btnPopoutPip.addEventListener('click', triggerPopoutWindow);
+  if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener('click', triggerPopoutWindow);
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
 
-  
-  // ================= DYNAMIC THEME ENGINE =================
+    // ================= DYNAMIC THEME ENGINE =================
   const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
   const THEME_GRADIENTS = {
     cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
@@ -1276,6 +1226,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  const btnOpenShortcuts = document.getElementById('btn-open-shortcuts');
+  if (typeof chrome !== 'undefined' && chrome.commands && chrome.commands.getAll) {
+    chrome.commands.getAll((commands) => {
+      if (chrome.runtime.lastError) {
+        console.warn('Could not read keyboard shortcuts:', chrome.runtime.lastError.message);
+        return;
+      }
+      commands.forEach((command) => {
+        const label = document.getElementById(`shortcut-${command.name}`);
+        if (label) label.textContent = command.shortcut || 'Not set';
+      });
+    });
+  }
+
+  if (btnOpenShortcuts && typeof chrome !== 'undefined' && chrome.tabs) {
+    btnOpenShortcuts.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }, () => {
+        if (chrome.runtime.lastError) console.warn('Could not open shortcut settings:', chrome.runtime.lastError.message);
+      });
+    });
+  }
+
   // Tab Navigation
   navTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1294,7 +1266,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    if (['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) {
+    const activeElement = document.activeElement;
+    if (activeElement?.isContentEditable || ['input', 'textarea', 'select'].includes(activeElement?.tagName?.toLowerCase())) {
       return;
     }
 

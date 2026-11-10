@@ -21,11 +21,12 @@
 - **Precision HUD Dial & Sub-Gauges**: Outer dotted perimeter tick track, glowing SVG progress ring, and 3 mini precision sub-gauges (`LAPS`, `SPLIT`, `STATUS`).
 - **Luminous Horizon Flare**: Neon crescent horizon flare across the bottom edge inspired by futuristic cockpit displays.
 
-### 2. 🗗 Always-On-Top Floating HUD Screen (Floats Over VS Code & Other Apps)
-- **Float Over Any Desktop App**: Pop out the timer into an always-on-top window using native **Document Picture-in-Picture** (`window.documentPictureInPicture`) or standalone popup window (`float.html`).
-- **Never Loses Focus**: Stays pinned **Always-On-Top** directly over VS Code, Discord, terminal, or full-screen coding platforms.
-- **4-Corner Dock Snapping**: One-click corner cycling (`↗ Top-Right`, `↘ Bottom-Right`, `↙ Bottom-Left`, `↖ Top-Left`).
-- **Multi-Size Scaling**: Cycle between **Normal** (320x380 full precision dial), **Compact** (260x210 streamlined), and **Mini** (200x110 micro widget).
+### 2. Persistent Floating Timer
+- **Persistent Extension Window**: The timer stays open when focus changes or browser tabs switch. Other applications can cover it unless Picture-in-Picture is available and enabled.
+- **Browser Picture-in-Picture**: Use the PiP control in the floating window for browser-managed always-on-top behavior where supported. The browser controls the PiP window position.
+- **Four-corner positioning**: Pin the window to a selected corner, or unpin it to drag and snap near screen edges.
+- **Mini and expanded modes**: Switch between a compact click-to-expand timer and the full timer controls without starting another timer.
+- **Persistent layout**: Corner, pin state, free position, and view mode are restored when the floating timer is reopened.
 
 ### 3. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
 - **Stopwatch & Target Countdown Together**: Measure total elapsed problem time while simultaneously tracking remaining countdown time.
@@ -52,17 +53,18 @@
 
 ---
 
-## ⌨️ High-Contrast Keyboard Shortcuts
+## Keyboard Shortcuts
 
-| Shortcut | Action | Scope |
-| :---: | :--- | :--- |
-| <kbd>Space</kbd> | **Start / Pause** Active Timer | Popup, Floating Window & Webpages |
-| <kbd>L</kbd> | Record **Lap / Checkpoint Split** | Popup & Floating Window |
-| <kbd>R</kbd> | **Reset** Active Timer | Popup & Floating Window |
-| <kbd>M</kbd> | **Cycle Mode** (Stopwatch → Target → Dual) | Popup & Floating Window |
-| <kbd>Alt</kbd> + <kbd>T</kbd> | **Launch Pop Up Floating Screen** | Any Chrome Tab |
+The extension registers four global Chrome commands (the supported command slots). The timer shortcut toggles Start/Resume and Pause based on the active timer state. Defaults can be customized at chrome://extensions/shortcuts.
 
----
+| Shortcut | Action |
+| :---: | :--- |
+| <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>1</kbd> | Start / Resume / Pause active timer |
+| <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>2</kbd> | Record a lap |
+| <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>3</kbd> | Reset active timer |
+| <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd> | Show or minimize floating timer |
+
+Chrome and operating-system shortcut conflicts may prevent a suggested default from being assigned. Global shortcut availability varies by platform; customize an available combination in Chrome's shortcut settings.
 
 ## 📦 How to Install in Google Chrome (100% Free & Offline)
 
@@ -99,7 +101,7 @@ AlgoTimer/
 ├── manifest.json              # Chrome Manifest V3 extension configuration
 ├── index.html                 # 100% standalone zero-server interactive studio
 ├── preview.html               # Live preview studio with split popup & in-page HUD
-├── float.html                 # Always-on-Top floating screen window
+├── float.html                 # Persistent floating timer window
 ├── float.js                   # Floating window controller with dynamic themes & snapping
 ├── popup/
 │   ├── popup.html             # Extension popup interface with dynamic themes & dial
