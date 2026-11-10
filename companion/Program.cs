@@ -41,6 +41,7 @@ internal sealed class CompanionContext : ApplicationContext
         _window.SettingsChanged += SaveSettings;
 
         _registeredHotkeys = _hotkeys.Register(_settings.Hotkeys);
+        _window.SetHotkeyRegistrationStatus(_registeredHotkeys);
         WriteStatus();
         _window.SetConnectionMessage("Connected to AlgoTimer · timer state syncs from Chrome");
 
@@ -132,6 +133,7 @@ internal sealed class CompanionContext : ApplicationContext
         _settings.Hotkeys = configured;
         _settings.Save();
         _registeredHotkeys = _hotkeys.Register(_settings.Hotkeys);
+        _window.SetHotkeyRegistrationStatus(_registeredHotkeys);
         WriteStatus("System-wide shortcuts saved.");
         _window.SetConnectionMessage("Global shortcuts saved · timer state syncs from Chrome");
     }
