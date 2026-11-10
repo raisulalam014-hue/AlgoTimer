@@ -9,6 +9,23 @@
 
 ---
 
+## ✨ What's new: optional Windows companion
+
+Download the prebuilt [Windows companion from GitHub Releases](https://github.com/raisulalam014-hue/AlgoTimer/releases/latest) for a genuine always-on-top timer window and system-wide hotkeys. The companion is optional: the Chrome extension remains independently usable without it, and its timer state continues to be the source of truth.
+
+### Download and install
+
+1. Open the [latest AlgoTimer release](https://github.com/raisulalam014-hue/AlgoTimer/releases/latest) and download `AlgoTimer-Companion-windows-x64.zip` under **Assets**.
+2. In Chrome, open `chrome://extensions`, install or locate AlgoTimer, and copy its 32-character extension ID.
+3. Extract the ZIP to a folder you will keep. Open PowerShell in that folder and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1`.
+4. Enter the extension ID when prompted, then reload AlgoTimer in Chrome.
+
+No .NET SDK or administrator access is required. The installer registers the native messaging host for your current Windows user. Chrome launches the companion when the extension connects; it is not a standalone always-running app, Windows service, or startup task. The native window and global hotkeys work only while the companion is connected and running.
+
+To uninstall, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall.ps1` from the same extracted folder and confirm. This removes the current-user registration and the package-generated manifest, but leaves the executable and other files in place. The extension continues to work normally without the companion.
+
+---
+
 ## 🚀 Key Highlights & Features
 
 ### 1. 🎨 Five Complete Timer Designs
@@ -34,14 +51,7 @@
 - If the companion is missing or disconnected, the Chrome extension remains usable and the popup reports the companion status.
 
 #### Install the companion
-The companion is an optional download; the Chrome extension works without it. To get the prebuilt Windows x64 package, open this repository's **Actions → Package Windows Companion**, choose **Run workflow**, and download the `AlgoTimer-Companion-windows-x64` artifact from the completed run. The artifact is a ZIP containing the companion and install/uninstall instructions; it expires after 30 days. This workflow does not publish a GitHub Release.
-
-1. Install the AlgoTimer extension in Chrome and copy its 32-character ID from `chrome://extensions`.
-2. Extract the ZIP to a folder where it can stay; do not move or delete the folder after installation.
-3. Open PowerShell in that folder and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1`. Enter the extension ID when prompted. No administrator access or .NET SDK is required.
-4. Reload AlgoTimer in Chrome, open **Settings → Windows Companion**, and check that it reports a connection.
-
-Chrome launches the companion when the extension connects; it is not a standalone always-running app, Windows service, or startup task. The native window remains topmost and global hotkeys work only while the companion is connected and running. To uninstall, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall.ps1` from the same package folder and confirm. This removes the current-user native-messaging registration and only the package-generated manifest; it leaves the executable and other files in place. The extension remains usable without the companion.
+Get the prebuilt package from [GitHub Releases](https://github.com/raisulalam014-hue/AlgoTimer/releases/latest) and follow the [download and install steps above](#download-and-install). Keep the extracted folder in place after installation. The extension remains usable on its own if the companion is not installed or connected.
 
 To build the companion from source instead, install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), run `.\build.ps1` from the `companion` folder, and then run `.\install.ps1`.
 
