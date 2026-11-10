@@ -9,98 +9,86 @@
 
 ---
 
-## 🚀 Key Highlights & New Features
+## 🚀 Key Highlights & Features
 
-### 1. 🗗 Always-On-Top Pop-Up Screen System (PiP & Detachable Window)
-- **Float Over Any Desktop App**: Pop out the timer from your browser into a floating mini window using native **Document Picture-in-Picture** (`window.documentPictureInPicture`).
-- **Never Loses Focus**: Stays pinned **Always-On-Top** directly over your code editor (**VS Code**, Neovim, IntelliJ), terminal, Discord, or desktop notes!
-- **Standalone Window Fallback**: 1-click fallback to a dedicated, resizable standalone popup window that won't auto-dismiss when clicking outside.
-- **In-Page Widget Integration**: Direct Pop-Out button embedded inside the LeetCode/Codeforces overlay widget.
+### 1. 🎨 Dynamic Cyber-Luxury Theme Engine (No AI Slop)
+- **Deep Obsidian & Cosmic Violet Glow**: Deep space backdrop (`#060713`) infused with ambient violet nebula lighting.
+- **4 Live Dynamic Color Palettes**:
+  - 🌌 **Cosmic Neon (Default)**: Multi-stop gradient (`#00f2fe` Electric Cyan → `#8b5cf6` Radiant Purple → `#ec4899` Horizon Magenta).
+  - ⚡ **Cyber Cyan**: Pure sci-fi HUD turquoise with luminous neon glow.
+  - 🔮 **Nebula Violet**: Deep velvet violet and lavender bloom.
+  - 🌲 **Matrix Emerald**: Sleek terminal mint and dark emerald.
+- **Precision HUD Dial & Sub-Gauges**: Outer dotted perimeter tick track, glowing SVG progress ring, and 3 mini precision sub-gauges (`LAPS`, `SPLIT`, `STATUS`).
+- **Luminous Horizon Flare**: Neon crescent horizon flare across the bottom edge inspired by futuristic cockpit displays.
 
-### 2. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
-- **Stopwatch & Target Timer Run Together**: Solve problems with a target countdown deadline while simultaneously measuring total elapsed solve time and milestone splits.
-- **No More Auto-Stop**: Starting or switching between Target Timer and Stopwatch never pauses or resets the other timer. Both engines run concurrently in the background!
-- **Master Synchronization**: One-click **⚡ Start Both Together**, **⏸ Pause Both**, and **↺ Reset Both** controls.
-- **Real-Time Concurrent Banners**: When viewing one mode, an interactive glassmorphic banner displays the background timer's live status with instant **Pause** and **View/Switch** actions.
-- **Dedicated Dual View**: Side-by-side / stacked HUD showing both stopwatch count-up (with milliseconds) and target countdown (with animated progress bar and warning chimes).
+### 2. 🗗 Always-On-Top Floating HUD Screen (Floats Over VS Code & Other Apps)
+- **Float Over Any Desktop App**: Pop out the timer into an always-on-top window using native **Document Picture-in-Picture** (`window.documentPictureInPicture`) or standalone popup window (`float.html`).
+- **Never Loses Focus**: Stays pinned **Always-On-Top** directly over VS Code, Discord, terminal, or full-screen coding platforms.
+- **4-Corner Dock Snapping**: One-click corner cycling (`↗ Top-Right`, `↘ Bottom-Right`, `↙ Bottom-Left`, `↖ Top-Left`).
+- **Multi-Size Scaling**: Cycle between **Normal** (320x380 full precision dial), **Compact** (260x210 streamlined), and **Mini** (200x110 micro widget).
 
-### 3. 🎯 Problem-Solving Presets & Custom Duration
-- `5m` — Rapid-fire sanity checks & logic verification
-- `15m Easy` — LeetCode Easy targets
-- `30m Medium` — Standard technical interview difficulty
-- `45m Hard` — Complex algorithmic challenges & contest rounds
-- `60m Mock` — Full interview simulation
-- `Custom...` — Custom hours, minutes, and seconds
+### 3. ⚡ Dynamic Concurrent Dual Timers (Both Active Simultaneously)
+- **Stopwatch & Target Countdown Together**: Measure total elapsed problem time while simultaneously tracking remaining countdown time.
+- **Master Controls**: Start, pause, or reset both timers together in lockstep with zero drift.
 
-### 4. 💻 Floating In-Page Overlay & Dynamic Edge Pill (v1.3.0)
-- **Smart Visibility Control (No More Unwanted New-Tab Popups!)**:
-  - **Coding Sites Only (Default)**: Automatically activates exclusively on coding platforms (**LeetCode**, **Codeforces**, **HackerRank**, **NeetCode**, **GeeksforGeeks**, **CodeChef**, **AtCoder**, **CSES**, etc.) — won't clutter everyday browsing, Google Search, or YouTube.
-  - **Only When Running Mode**: Keep the widget completely hidden until you actively start a countdown or stopwatch.
-  - **All Webpages Mode**: Available for general browsing & mock interviews.
-- **Dynamic Dismissal & Close Menu**:
-  - Click `✕` to reveal instant controls:
-    - 🗜️ **Minimize to Edge Pill**: Folds the timer into an ultra-discreet, glowing edge tab (`⏱️ 12:34`) that expands smoothly on click.
-    - 🌐 **Hide on this website**: Remembers your preference per-domain across all tabs and sessions.
-    - ✕ **Close for this tab**: Closes the overlay for the active tab without affecting other tabs.
-    - 🚫 **Turn off everywhere**: One-click global disable directly from the in-page widget.
-- **Difficulty & Problem Detection**:
-  - Automatically extracts problem titles and tags difficulty levels (**Easy** 🟢, **Medium** 🟡, **Hard** 🔴) on LeetCode.
+### 4. 🎯 Problem-Solving Presets & Custom Duration
+- Quick one-click time targets: `5m`, `15m (Easy)`, `30m (Medium)`, `45m (Hard)`, `60m (Mock Interview)`.
+- Custom hour / minute / second target input with smart persistence.
 
-### 5. 🏁 Interview Phase Milestones (Laps)
-- 📖 **Understand**: Problem comprehension & reading edge cases
-- 💡 **Approach**: Algorithm formulation & complexity analysis
-- 💻 **Code**: Writing clean, robust implementation
-- 🧪 **Debug**: Testing sample & custom test cases
+### 5. 💻 Floating In-Page Overlay on Coding Sites
+- Works seamlessly directly on LeetCode, HackerRank, Codeforces, NeetCode, CodeChef.
+- Draggable and resizable corner dock with non-intrusive HUD styling.
 
-### 6. ⏱️ Zero-Drift Background Engine
-- Calculates elapsed time from system timestamps rather than throttled intervals, ensuring exact accuracy even when switching tabs or locking your screen.
-- Live elapsed time / countdown displayed directly on your Chrome extension toolbar icon badge!
+### 6. 🏁 Interview Phase Milestones (Laps)
+- One-click phase recording: `📖 Understand`, `💡 Approach`, `💻 Code`, `🧪 Debug`.
+- Real-time lap splits and pace comparison.
 
-### 7. 📊 Session Logger & CSV Exporter
-- Record problem name, platform, difficulty, and outcome (Solved / Upsolved / Need Review).
-- Export all practice logs to **CSV** in 1 click for Notion or Google Sheets progress tracking.
+### 7. ⏱️ Zero-Drift Background Engine
+- Runs on Chrome Manifest V3 Service Worker with `chrome.alarms` and high-resolution timestamps. Keeps ticking even when popup is closed!
 
-### 8. 🔔 Procedural Audio Alerts
-- Pleasant chimes for start, lap splits, 5-minute warnings, and target completion (synthesized using Web Audio API — 100% offline, zero external dependencies).
+### 8. 📊 Session Logger & CSV Exporter
+- Log problem title, platform, difficulty, outcome (`Solved`, `Upsolved`, `Need Review`), and takeaway notes.
+- Export all your practice history to clean CSV for Notion, Google Sheets, or Excel.
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## ⌨️ High-Contrast Keyboard Shortcuts
 
-| Shortcut | Action |
-| :--- | :--- |
-| <kbd>Space</kbd> | Start / Pause timer (or both in Dual Mode) |
-| <kbd>L</kbd> | Record Lap / Stage Split |
-| <kbd>R</kbd> | Reset Stopwatch (or both in Dual Mode) |
-| <kbd>M</kbd> | Toggle between Stopwatch, Target Timer & Dual Mode |
+| Shortcut | Action | Scope |
+| :---: | :--- | :--- |
+| <kbd>Space</kbd> | **Start / Pause** Active Timer | Popup, Floating Window & Webpages |
+| <kbd>L</kbd> | Record **Lap / Checkpoint Split** | Popup & Floating Window |
+| <kbd>R</kbd> | **Reset** Active Timer | Popup & Floating Window |
+| <kbd>M</kbd> | **Cycle Mode** (Stopwatch → Target → Dual) | Popup & Floating Window |
+| <kbd>Alt</kbd> + <kbd>T</kbd> | **Launch Pop Up Floating Screen** | Any Chrome Tab |
 
 ---
 
-## 📦 How to Install in Google Chrome
+## 📦 How to Install in Google Chrome (100% Free & Offline)
 
-1. Clone or download this repository to your computer:
+1. **Download or Clone this repository**:
    ```bash
    git clone https://github.com/raisulalam014-hue/AlgoTimer.git
    ```
-2. Open Google Chrome and navigate to:
+   *(Or click **Code → Download ZIP** on GitHub and extract the folder).*
+2. Open Google Chrome and go to:
    ```text
-   chrome://extensions/
+   chrome://extensions
    ```
-3. Enable **Developer mode** using the toggle switch in the top-right corner.
-4. Click the **Load unpacked** button in the top-left corner.
-5. Select the `AlgoTimer` directory.
-6. **Done!** Pin the ⏱️ **AlgoTimer** icon to your Chrome toolbar for instant access.
+3. Turn **ON** the **Developer mode** toggle in the top-right corner.
+4. Click **Load unpacked** in the top-left corner.
+5. Select the extracted `AlgoTimer` folder.
+6. **Done!** Pin ⏱️ **AlgoTimer** to your Chrome toolbar for instant access!
 
 ---
 
-## 🌐 Live Standalone Preview
+## 🌐 Instant Standalone Browser Preview (Zero Server Required!)
 
-Want to test the UI, dual timers, and pop-up float without installing the extension?
-1. Run the local preview server:
-   ```bash
-   node server.js
-   ```
-2. Visit `http://127.0.0.1:3456/` in any browser!
+Want to test the UI, dynamic color combinations, dual timers, and floating HUD **instantly without installing the extension and with zero server/Node dependencies**?
+
+- **Simply double-click `index.html` or `preview.html`** in your file manager to open it in Chrome, Edge, Brave, or Firefox!
+- **100% Offline & Pure Client-Side**: No `node server.js`, no `localhost`, and no background server needed. Everything runs directly in your browser.
+- **GitHub Pages Ready**: Can be hosted directly on GitHub Pages with zero build step.
 
 ---
 
@@ -108,51 +96,41 @@ Want to test the UI, dual timers, and pop-up float without installing the extens
 
 ```text
 AlgoTimer/
-├── manifest.json              # Chrome Manifest V3 configuration (v1.1.0)
+├── manifest.json              # Chrome Manifest V3 extension configuration
+├── index.html                 # 100% standalone zero-server interactive studio
+├── preview.html               # Live preview studio with split popup & in-page HUD
+├── float.html                 # Always-on-Top floating screen window
+├── float.js                   # Floating window controller with dynamic themes & snapping
 ├── popup/
-│   ├── popup.html             # Extension popup interface with Dual Mode & Pop-Up PiP
-│   ├── popup.css              # Dark glassmorphic styling & responsive PiP adaptations
-│   ├── popup.js               # Dual independent timer engines, PiP popout & laps logic
-│   └── audio.js               # Web Audio API procedural sound engine
+│   ├── popup.html             # Extension popup interface with dynamic themes & dial
+│   ├── popup.css              # Cyber-luxury styling, nebula glow, horizon flare
+│   ├── popup.js               # Dual timer logic, storage persistence & shortcuts
+│   └── audio.js               # Procedural audio chime synthesizer
 ├── background/
-│   └── service-worker.js      # Zero-drift background engine, alarms & badge updater
+│   └── service-worker.js      # Zero-drift background engine & badge updater
 ├── content/
-│   ├── content.js             # Draggable in-page floating widget script with PiP
-│   └── content.css            # Floating widget styles & dual timer HUD
+│   ├── content.js             # In-page floating overlay on coding platforms
+│   └── content.css            # In-page widget styles & HUD
 ├── icons/
 │   ├── icon16.png
 │   ├── icon32.png
 │   ├── icon48.png
 │   ├── icon128.png
 │   └── icon.svg               # Vector brand logo
-├── preview.html               # Standalone browser preview & testing studio
-├── server.js                  # Local preview server
 ├── LICENSE                    # MIT License
 └── README.md                  # Documentation
 ```
 
 ---
 
-## 🌟 Live Repository & Profile Showcase
-
-This repository is published and active at:
-🔗 **[https://github.com/raisulalam014-hue/AlgoTimer](https://github.com/raisulalam014-hue/AlgoTimer)**
-
-### To feature it prominently on your GitHub profile:
-1. Go to your GitHub profile: [github.com/raisulalam014-hue](https://github.com/raisulalam014-hue)
-2. Scroll to the **Pinned** section and click **Customize your pins** (or **Pin a repository**).
-3. Select **AlgoTimer** and click **Save pins**!
-
----
-
 ## 👨‍💻 Author
 
-- **Raisul Alam**
-- Email: mohammadraisulalam014@gmail.com
-- GitHub: [@raisulalam014-hue](https://github.com/raisulalam014-hue)
+Crafted by **[Raisul Alam](https://github.com/raisulalam014-hue)** for algorithm enthusiasts and competitive coders worldwide.
+
+⭐ **If you find AlgoTimer helpful, star the repository on GitHub!**
 
 ---
 
 ## 📄 License
 
-This project is open-source and licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).

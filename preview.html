@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="cosmic">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +16,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0a0f1d 50%, #030712 100%);
+      background-color: #060713;
+      background-image: radial-gradient(circle at 50% 15%, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.12) 40%, rgba(6, 7, 19, 0.98) 75%);
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -399,6 +400,7 @@
         </div>
 
         <div class="app-container" style="min-height: 570px;">
+          <div class="horizon-flare" aria-hidden="true"></div>
           <!-- Top Header -->
           <header class="app-header">
             <div class="brand">
@@ -412,6 +414,10 @@
               <span class="brand-name">AlgoTimer</span>
             </div>
             <div class="header-badges">
+              <button class="header-btn" id="btn-quick-theme" title="Switch Dynamic Color Combination">
+                <span class="theme-quick-dot"></span>
+                <span class="btn-text" id="header-theme-label">Cosmic</span>
+              </button>
               <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact HUD Mode">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="4 14 10 14 10 20"></polyline>
@@ -526,17 +532,54 @@
                 </div>
               </div>
 
-              <!-- Main Dial & Progress Ring -->
+              <!-- Main Dial & Precision Ring -->
               <div class="dial-wrapper">
                 <svg class="dial-svg" viewBox="0 0 200 200">
-                  <circle class="dial-track" cx="100" cy="100" r="86"></circle>
-                  <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="86"></circle>
+                  <defs>
+                    <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#00f2fe" id="grad-stop-1" />
+                      <stop offset="50%" stop-color="#8b5cf6" id="grad-stop-2" />
+                      <stop offset="100%" stop-color="#ec4899" id="grad-stop-3" />
+                    </linearGradient>
+                    <filter id="timerGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3.5" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <!-- Outer Precision Ticks -->
+                  <circle class="dial-outer-ticks" cx="100" cy="100" r="92" stroke="rgba(255, 255, 255, 0.16)" stroke-dasharray="2 6" stroke-width="2.5" fill="none" />
+                  <!-- Base Track -->
+                  <circle class="dial-track" cx="100" cy="100" r="84" stroke="rgba(255, 255, 255, 0.06)" stroke-width="8" fill="none"></circle>
+                  <!-- Active Progress Arc -->
+                  <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="84" stroke="url(#timerGrad)" filter="url(#timerGlow)" stroke-width="8" stroke-linecap="round" fill="none"></circle>
                 </svg>
 
                 <div class="dial-center-content">
-                  <div class="dial-status-label" id="dial-status-label">STOPWATCH</div>
+                  <div class="dial-badge-pill" id="dial-status-pill">
+                    <span class="status-pulse-dot"></span>
+                    <span id="dial-status-label">STOPWATCH</span>
+                  </div>
                   <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
                   <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
+
+                  <!-- 3 Mini Sub-Indicators -->
+                  <div class="dial-sub-gauges">
+                    <div class="sub-gauge" id="sub-gauge-laps" title="Total Laps">
+                      <span class="sub-gauge-val" id="sub-laps-val">0</span>
+                      <span class="sub-gauge-lbl">LAPS</span>
+                    </div>
+                    <div class="sub-gauge" id="sub-gauge-split" title="Current Split">
+                      <span class="sub-gauge-val" id="sub-split-val">00:00</span>
+                      <span class="sub-gauge-lbl">SPLIT</span>
+                    </div>
+                    <div class="sub-gauge" id="sub-gauge-state" title="Timer State">
+                      <span class="sub-gauge-val" id="sub-state-val">READY</span>
+                      <span class="sub-gauge-lbl">STATUS</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -548,6 +591,7 @@
                     <path d="M3 3v5h5"></path>
                   </svg>
                   <span>Reset</span>
+                  <kbd class="key-badge">R</kbd>
                 </button>
 
                 <button class="btn btn-primary-hero" id="btn-toggle-run" title="Space to toggle">
@@ -555,6 +599,7 @@
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
                   <span id="btn-toggle-text">Start</span>
+                  <kbd class="key-badge key-badge-hero">Space</kbd>
                 </button>
 
                 <button class="btn btn-secondary" id="btn-lap" title="Split Lap (L)">
@@ -563,6 +608,7 @@
                     <line x1="4" y1="22" x2="4" y2="15"></line>
                   </svg>
                   <span>Lap</span>
+                  <kbd class="key-badge">L</kbd>
                 </button>
               </div>
             </div>
@@ -687,6 +733,30 @@
 
           <!-- TAB 4: SETTINGS -->
           <section class="tab-content" id="tab-settings">
+                        <!-- Dynamic Theme Settings -->
+            <div class="settings-group">
+              <h4>Dynamic Color Theme</h4>
+              <p class="setting-desc" style="margin-bottom: 8px;">Select your preferred dynamic neon palette:</p>
+              <div class="theme-palette-row">
+                <button class="theme-pill-btn active" data-theme-choice="cosmic" title="Cosmic Neon">
+                  <span class="theme-dot dot-cosmic"></span>
+                  <span>Cosmic Neon</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="cyan" title="Cyber Cyan">
+                  <span class="theme-dot dot-cyan"></span>
+                  <span>Cyber Cyan</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="violet" title="Nebula Violet">
+                  <span class="theme-dot dot-violet"></span>
+                  <span>Nebula Violet</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="emerald" title="Matrix Emerald">
+                  <span class="theme-dot dot-emerald"></span>
+                  <span>Matrix Emerald</span>
+                </button>
+              </div>
+            </div>
+
             <div class="settings-group">
               <h4>General Options</h4>
               <label class="setting-row">

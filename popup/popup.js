@@ -185,20 +185,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     return s;
   }
 
-  // Safe Chrome message wrapper
-  const isExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage;
+  // Local storage persistence for standalone browser view (zero server / zero localhost)
+  function saveMockState(s) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('algotimer_standalone_state', JSON.stringify(s));
+      }
+    } catch (e) {}
+  }
+
+  function loadMockState() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const raw = localStorage.getItem('algotimer_standalone_state');
+        if (raw) return JSON.parse(raw);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // Safe Chrome message wrapper: strictly identify actual extension environment
+  const isExtension = typeof chrome !== 'undefined' &&
+                      Boolean(chrome.runtime) &&
+                      Boolean(chrome.runtime.id) &&
+                      typeof location !== 'undefined' &&
+                      location.protocol === 'chrome-extension:';
 
   function sendMessage(msg) {
     return new Promise((resolve) => {
       if (isExtension) {
-        chrome.runtime.sendMessage(msg, (response) => {
-          if (chrome.runtime.lastError) {
-            resolve({ error: chrome.runtime.lastError.message });
-          } else {
-            resolve(response || {});
-          }
-        });
+        try {
+          chrome.runtime.sendMessage(msg, (response) => {
+            if (chrome.runtime.lastError) {
+              // Extension background worker may be inactive or page in test mode; fallback to local handler
+              resolve(handleMockMessage(msg));
+            } else {
+              resolve(response || {});
+            }
+          });
+        } catch (err) {
+          resolve(handleMockMessage(msg));
+        }
       } else {
+        // Standalone browser mode: 100% client-side, zero servers, zero localhost!
         resolve(handleMockMessage(msg));
       }
     });
@@ -207,8 +236,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mock message handler for browser preview / local testing
   function handleMockMessage(msg) {
     switch (msg.type) {
-      case 'GET_STATE':
+      case 'GET_STATE': {
+        const saved = loadMockState();
+        if (saved) state = normalizeState(saved);
         return { success: true, state };
+      }
 
       case 'START': {
         const target = msg.target || (state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch'));
@@ -239,6 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.stopwatch.startTime = null;
           }
         }
+        saveMockState(state);
         return { success: true, state };
       }
 
@@ -260,6 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.targetTimer.startTime = null;
           }
         }
+        saveMockState(state);
         return { success: true, state };
       }
 
@@ -278,11 +312,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           state.targetTimer.startTime = null;
           state.targetTimer.elapsedBeforePause = 0;
         }
+        saveMockState(state);
         return { success: true, state };
       }
 
       case 'SET_MODE': {
         state.mode = msg.mode;
+        saveMockState(state);
         return { success: true, state };
       }
 
@@ -294,6 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           state.targetTimer.status = 'stopped';
           state.targetTimer.startTime = null;
         }
+        saveMockState(state);
         return { success: true, state };
       }
 
@@ -309,6 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           timestamp: Date.now()
         };
         state.laps.unshift(lap);
+        saveMockState(state);
         return { success: true, state, lap };
       }
 
@@ -325,17 +363,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         state.history = state.history || [];
         state.history.unshift(item);
+        saveMockState(state);
         return { success: true, state, session: item };
       }
 
       case 'CLEAR_HISTORY':
         state.history = [];
+        saveMockState(state);
         return { success: true, state };
 
       case 'UPDATE_SETTINGS':
         if (msg.soundEnabled !== undefined) state.soundEnabled = msg.soundEnabled;
         if (msg.floatingWidgetEnabled !== undefined) state.floatingWidgetEnabled = msg.floatingWidgetEnabled;
         if (msg.allowDualActive !== undefined) state.allowDualActive = msg.allowDualActive;
+        saveMockState(state);
         return { success: true, state };
 
       default:
@@ -460,13 +501,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         focused: true
       });
     } else {
-      window.open("float.html", "AlgoTimerFloat", "width=280,height=180,resizable=yes");
+      window.open("float.html", "AlgoTimerFloat", "width=320,height=380,resizable=yes");
     }
   }
 
   if (btnPopoutPip) btnPopoutPip.addEventListener("click", triggerPopoutWindow);
   if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener("click", triggerPopoutWindow);
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
+
+  
+  // ================= DYNAMIC THEME ENGINE =================
+  const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
+  const THEME_GRADIENTS = {
+    cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
+    cyan: { stop1: '#22d3ee', stop2: '#00f2fe', stop3: '#38bdf8' },
+    violet: { stop1: '#c084fc', stop2: '#8b5cf6', stop3: '#6366f1' },
+    emerald: { stop1: '#34d399', stop2: '#10b981', stop3: '#059669' }
+  };
+
+  let currentTheme = 'cosmic';
+
+  function updateDialThemeGradient(themeName) {
+    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.cosmic;
+    const s1 = document.getElementById('grad-stop-1');
+    const s2 = document.getElementById('grad-stop-2');
+    const s3 = document.getElementById('grad-stop-3');
+    if (s1) s1.setAttribute('stop-color', grad.stop1);
+    if (s2) s2.setAttribute('stop-color', grad.stop2);
+    if (s3) s3.setAttribute('stop-color', grad.stop3);
+  }
+
+  function applyTheme(themeName) {
+    if (!THEMES.includes(themeName)) themeName = 'cosmic';
+    currentTheme = themeName;
+    document.documentElement.setAttribute('data-theme', themeName);
+
+    const themeLabel = document.getElementById('header-theme-label');
+    if (themeLabel) {
+      themeLabel.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+    }
+
+    document.querySelectorAll('.theme-pill-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.themeChoice === themeName);
+    });
+
+    updateDialThemeGradient(themeName);
+
+    try {
+      if (isExtension && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ activeTheme: themeName });
+      } else {
+        localStorage.setItem('algotimer_theme', themeName);
+      }
+    } catch (e) {}
+  }
+
+  // Quick theme cycler button
+  const btnQuickTheme = document.getElementById('btn-quick-theme');
+  if (btnQuickTheme) {
+    btnQuickTheme.addEventListener('click', () => {
+      const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
+      applyTheme(THEMES[nextIdx]);
+    });
+  }
+
+  // Settings theme pills
+  document.querySelectorAll('.theme-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const choice = btn.dataset.themeChoice;
+      if (choice) applyTheme(choice);
+    });
+  });
+
+  // Load saved theme
+  try {
+    if (isExtension && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['activeTheme'], (res) => {
+        if (res && res.activeTheme) applyTheme(res.activeTheme);
+        else applyTheme('cosmic');
+      });
+    } else {
+      const savedTheme = localStorage.getItem('algotimer_theme');
+      applyTheme(savedTheme || 'cosmic');
+    }
+  } catch (e) {
+    applyTheme('cosmic');
+  }
 
   // ================= MAIN RENDER LOOP =================
   function updateUI() {
@@ -642,6 +762,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (dialProgress) dialProgress.classList.remove('warning');
 
         // Continuous 60s rotating ring
+        
+    // Sub-Gauges (Laps, Split, Status)
+    const subLapsVal = document.getElementById('sub-laps-val');
+    if (subLapsVal) subLapsVal.textContent = state.laps ? state.laps.length : 0;
+
+    const subSplitVal = document.getElementById('sub-split-val');
+    if (subSplitVal) {
+      if (state.laps && state.laps.length > 0) {
+        const lastLap = state.laps[0];
+        subSplitVal.textContent = formatTimeParts(lastLap.lapDuration).base;
+      } else {
+        subSplitVal.textContent = '00:00';
+      }
+    }
+
+    const subStateVal = document.getElementById('sub-state-val');
+    if (subStateVal) {
+      const curStatus = state.mode === 'stopwatch' ? state.stopwatch.status : (state.mode === 'timer' ? state.targetTimer.status : 'DUAL');
+      subStateVal.textContent = (curStatus || 'READY').toUpperCase();
+    }
+
         const secRatio = (swElapsed % 60000) / 60000;
         if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
 
