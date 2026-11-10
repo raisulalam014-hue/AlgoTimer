@@ -460,8 +460,8 @@ internal sealed class CompanionWindow : Form
             ("bottom-left", screen.WorkingArea.Left + 16, screen.WorkingArea.Bottom - Height - 16),
             ("bottom-right", screen.WorkingArea.Right - Width - 16, screen.WorkingArea.Bottom - Height - 16)
         };
-        var nearest = corners.OrderBy(point => Math.Hypot(Left - point.Item2, Top - point.Item3)).First();
-        var distance = Math.Hypot(Left - nearest.Item2, Top - nearest.Item3);
+        var nearest = corners.OrderBy(point => Distance(Left, Top, point.Item2, point.Item3)).First();
+        var distance = Distance(Left, Top, nearest.Item2, nearest.Item3);
         if (distance <= 88)
         {
             _settings.Corner = nearest.Item1;
@@ -475,6 +475,17 @@ internal sealed class CompanionWindow : Form
         {
             SaveCurrentSettings();
         }
+    }
+
+    private static double Distance(int x1, int y1, int x2, int y2)
+    {
+        var dx = Math.Abs((double)x1 - x2);
+        var dy = Math.Abs((double)y1 - y2);
+        var max = Math.Max(dx, dy);
+        if (max == 0) return 0;
+
+        var ratio = Math.Min(dx, dy) / max;
+        return max * Math.Sqrt(1 + ratio * ratio);
     }
 
     private void OnDisplaySettingsChanged(object? sender, EventArgs e)
