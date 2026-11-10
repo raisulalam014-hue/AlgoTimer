@@ -12,11 +12,16 @@ internal sealed class CompanionWindow : Form
     private readonly Label _secondaryClock = new();
     private readonly Label _status = new();
     private readonly Label _connection = new();
+    private readonly Label _shortcutSummary = new();
     private readonly Font _singleClockFont = new("Segoe UI", 35F, FontStyle.Bold);
     private readonly Font _dualClockFont = new("Segoe UI", 24F, FontStyle.Bold);
     private Panel? _header;
     private Panel? _content;
     private Panel? _themeBar;
+    private Label? _brandMark;
+    private RoundedPanel? _timerCard;
+    private RoundedPanel? _placementCard;
+    private RoundedPanel? _shortcutCard;
     private Button _runButton = null!;
     private Button _pinButton = null!;
     private readonly ComboBox _cornerPicker = new();
@@ -26,6 +31,13 @@ internal sealed class CompanionWindow : Form
     private JsonElement? _snapshot;
     private bool _applyingPosition;
     private string _theme = "sunset";
+    private Color _surfaceColor = Color.FromArgb(20, 29, 43);
+    private Color _canvasColor = Color.FromArgb(11, 17, 28);
+    private Color _inkColor = Color.FromArgb(239, 246, 255);
+    private Color _mutedColor = Color.FromArgb(146, 162, 183);
+    private Color _borderColor = Color.FromArgb(39, 53, 72);
+    private Color _accentColor = Color.FromArgb(65, 205, 225);
+    private Dictionary<string, bool> _registeredHotkeys = new(StringComparer.OrdinalIgnoreCase);
 
     public event Action<string>? CommandRequested;
     public event Action? SettingsChanged;
@@ -50,16 +62,16 @@ internal sealed class CompanionWindow : Form
     {
         _settings = settings;
         Text = "AlgoTimer Companion";
-        Width = 352;
-        Height = 292;
-        MinimumSize = new Size(352, 292);
-        MaximumSize = new Size(352, 292);
+        Width = 410;
+        Height = 490;
+        MinimumSize = new Size(410, 490);
+        MaximumSize = new Size(410, 490);
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;
         TopMost = true;
         KeyPreview = true;
-        BackColor = Color.FromArgb(248, 250, 253);
+        BackColor = _canvasColor;
         Font = new Font("Segoe UI", 9F);
         Padding = new Padding(1);
 
@@ -108,6 +120,21 @@ internal sealed class CompanionWindow : Form
 
     public void SetConnectionMessage(string message) => _connection.Text = message;
 
+    public void SetHotkeyRegistrationStatus(IReadOnlyDictionary<string, bool> registered)
+    {
+        _registeredHotkeys = new Dictionary<string, bool>(registered, StringComparer.OrdinalIgnoreCase);
+        var activeCount = _settings.Hotkeys.Count(pair =>
+            !string.IsNullOrWhiteSpace(pair.Value) &&
+            _registeredHotkeys.TryGetValue(pair.Key, out var isRegistered) &&
+            isRegistered);
+        var unavailableCount = _settings.Hotkeys.Count(pair =>
+            !string.IsNullOrWhiteSpace(pair.Value) &&
+            (!_registeredHotkeys.TryGetValue(pair.Key, out var isRegistered) || !isRegistered));
+        _shortcutSummary.Text = unavailableCount == 0
+            ? $"{activeCount} shortcuts active"
+            : $"{activeCount} active · {unavailableCount} unavailable";
+    }
+
     public void SetTheme(string theme)
     {
         _theme = theme switch
@@ -118,44 +145,70 @@ internal sealed class CompanionWindow : Form
             "emerald" => "graphite",
             _ => "sunset"
         };
-        var (surface, canvas, ink, muted, accent, border) = _theme switch
+        _accentColor = _theme switch
         {
-            "warm" => (ColorTranslator.FromHtml("#fffdf9"), ColorTranslator.FromHtml("#f4f0e9"), ColorTranslator.FromHtml("#3e332a"), ColorTranslator.FromHtml("#75685d"), ColorTranslator.FromHtml("#e86825"), ColorTranslator.FromHtml("#e8ded3")),
-            "aurora" => (Color.White, ColorTranslator.FromHtml("#eef0fb"), ColorTranslator.FromHtml("#24294e"), ColorTranslator.FromHtml("#59617e"), ColorTranslator.FromHtml("#6758d8"), ColorTranslator.FromHtml("#dce0f2")),
-            "graphite" => (ColorTranslator.FromHtml("#24232b"), ColorTranslator.FromHtml("#19181e"), ColorTranslator.FromHtml("#f0eef6"), ColorTranslator.FromHtml("#b8b3c5"), ColorTranslator.FromHtml("#b59aff"), ColorTranslator.FromHtml("#393741")),
-            "black" => (ColorTranslator.FromHtml("#080808"), Color.Black, ColorTranslator.FromHtml("#f5f5f5"), ColorTranslator.FromHtml("#c8c8c8"), ColorTranslator.FromHtml("#f5cc55"), ColorTranslator.FromHtml("#292929")),
-            _ => (ColorTranslator.FromHtml("#241b26"), ColorTranslator.FromHtml("#17131b"), ColorTranslator.FromHtml("#f9edf0"), ColorTranslator.FromHtml("#c8a9b5"), ColorTranslator.FromHtml("#fb795f"), ColorTranslator.FromHtml("#48313f"))
+            "warm" => ColorTranslator.FromHtml("#48C6DF"),
+            "aurora" => ColorTranslator.FromHtml("#72A9FF"),
+            "graphite" => ColorTranslator.FromHtml("#B29AFF"),
+            "black" => ColorTranslator.FromHtml("#62D7E9"),
+            _ => ColorTranslator.FromHtml("#4AD0E5")
         };
-        BackColor = canvas;
-        if (_header is not null) _header.BackColor = surface;
-        if (_content is not null) _content.BackColor = surface;
-        _clock.ForeColor = ink;
-        _secondaryClock.ForeColor = muted;
-        _status.ForeColor = muted;
-        _connection.ForeColor = muted;
-        _runButton.BackColor = accent;
-        _runButton.FlatAppearance.BorderColor = accent;
-        _runButton.ForeColor = Color.White;
-        if (_themeBar is not null) _themeBar.BackColor = accent;
-        _cornerPicker.BackColor = surface;
-        _cornerPicker.ForeColor = ink;
-        _screenPicker.BackColor = surface;
-        _screenPicker.ForeColor = ink;
+        _surfaceColor = Color.FromArgb(20, 29, 43);
+        _canvasColor = Color.FromArgb(11, 17, 28);
+        _inkColor = Color.FromArgb(239, 246, 255);
+        _mutedColor = Color.FromArgb(146, 162, 183);
+        _borderColor = Color.FromArgb(39, 53, 72);
+        BackColor = _canvasColor;
+        if (_header is not null) _header.BackColor = _canvasColor;
+        if (_content is not null) _content.BackColor = _canvasColor;
+        if (_timerCard is not null) _timerCard.SetColors(_surfaceColor, _borderColor);
+        if (_placementCard is not null) _placementCard.SetColors(_surfaceColor, _borderColor);
+        if (_shortcutCard is not null) _shortcutCard.SetColors(_surfaceColor, _borderColor);
+        _clock.ForeColor = _inkColor;
+        _secondaryClock.ForeColor = _mutedColor;
+        _status.ForeColor = IsAnyTimerRunning() ? _accentColor : _mutedColor;
+        _connection.ForeColor = _mutedColor;
+        _shortcutSummary.ForeColor = _mutedColor;
+        _runButton.BackColor = _accentColor;
+        _runButton.ForeColor = Color.FromArgb(7, 22, 29);
+        _runButton.FlatAppearance.BorderColor = _accentColor;
+        _runButton.FlatAppearance.MouseOverBackColor = ControlPaint.Light(_accentColor, 0.12F);
+        if (_themeBar is not null) _themeBar.BackColor = _accentColor;
+        _cornerPicker.BackColor = _surfaceColor;
+        _cornerPicker.ForeColor = _inkColor;
+        _screenPicker.BackColor = _surfaceColor;
+        _screenPicker.ForeColor = _inkColor;
         foreach (var button in FindButtons(this).Where(button => button != _runButton && button != _pinButton))
         {
-            button.BackColor = surface;
-            button.ForeColor = ink;
-            button.FlatAppearance.BorderColor = border;
+            button.BackColor = _surfaceColor;
+            button.ForeColor = _inkColor;
+            button.FlatAppearance.BorderColor = _borderColor;
+            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(31, 44, 63);
         }
-        foreach (var label in FindLabels(this)) label.ForeColor = ink;
-        _secondaryClock.ForeColor = muted;
-        _status.ForeColor = muted;
-        _connection.ForeColor = muted;
+        foreach (var label in FindLabels(this))
+        {
+            label.ForeColor = (label.Tag as string) switch
+            {
+                "muted" => _mutedColor,
+                "accent" => _accentColor,
+                _ => _inkColor
+            };
+        }
+        _clock.ForeColor = _inkColor;
+        _secondaryClock.ForeColor = _mutedColor;
+        _status.ForeColor = IsAnyTimerRunning() ? _accentColor : _mutedColor;
+        _connection.ForeColor = _mutedColor;
+        _shortcutSummary.ForeColor = _mutedColor;
+        if (_brandMark is not null)
+        {
+            _brandMark.BackColor = _accentColor;
+            _brandMark.ForeColor = Color.FromArgb(8, 20, 29);
+        }
         _pinButton.BackColor = _settings.Pinned
-            ? Color.FromArgb((accent.R + 255) / 2, (accent.G + 255) / 2, (accent.B + 255) / 2)
-            : surface;
-        _pinButton.ForeColor = _settings.Pinned ? accent : ink;
-        _pinButton.FlatAppearance.BorderColor = border;
+            ? Color.FromArgb(31, 55, 69)
+            : _surfaceColor;
+        _pinButton.ForeColor = _settings.Pinned ? _accentColor : _inkColor;
+        _pinButton.FlatAppearance.BorderColor = _settings.Pinned ? _accentColor : _borderColor;
     }
 
     private static IEnumerable<Button> FindButtons(Control parent)
@@ -199,74 +252,108 @@ internal sealed class CompanionWindow : Form
         var header = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 42,
-            BackColor = Color.White,
-            Padding = new Padding(14, 0, 10, 0)
+            Height = 48,
+            BackColor = _canvasColor,
+            Padding = new Padding(17, 10, 12, 10)
         };
         _header = header;
+        var mark = new Label
+        {
+            Text = "A",
+            Dock = DockStyle.Left,
+            Width = 28,
+            Height = 28,
+            BackColor = _accentColor,
+            ForeColor = Color.FromArgb(8, 20, 29),
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Margin = new Padding(0, 10, 9, 0)
+        };
+        _brandMark = mark;
+        var brand = new Panel { Dock = DockStyle.Left, Width = 208 };
         var title = new Label
         {
-            Text = "●  AlgoTimer",
-            Dock = DockStyle.Left,
-            Width = 140,
-            ForeColor = Color.FromArgb(38, 51, 74),
+            Text = "AlgoTimer",
+            Location = new Point(0, -2),
+            Size = new Size(140, 20),
+            ForeColor = _inkColor,
             Font = new Font("Segoe UI Semibold", 10F),
             TextAlign = ContentAlignment.MiddleLeft
         };
-        var hideButton = MakeButton("×", false);
+        var subtitle = new Label
+        {
+            Text = "WINDOWS COMPANION",
+            Location = new Point(0, 15),
+            Size = new Size(180, 13),
+            ForeColor = _mutedColor,
+            Font = new Font("Segoe UI", 7F, FontStyle.Bold),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        subtitle.Tag = "muted";
+        brand.Controls.AddRange([title, subtitle]);
+        var hideButton = MakeButton("×", false, 30);
         hideButton.Dock = DockStyle.Right;
-        hideButton.Width = 32;
+        hideButton.Height = 28;
         hideButton.Click += (_, _) => HideTimer();
         header.Controls.Add(hideButton);
-        header.Controls.Add(title);
+        header.Controls.Add(brand);
+        header.Controls.Add(mark);
         EnableDrag(header);
+        EnableDrag(mark);
+        EnableDrag(brand);
         EnableDrag(title);
+        EnableDrag(subtitle);
         Controls.Add(header);
 
-        var content = new Panel { Dock = DockStyle.Fill, Padding = new Padding(16, 10, 16, 10) };
+        var content = new Panel { Dock = DockStyle.Fill, Padding = new Padding(14, 0, 14, 0) };
         _content = content;
-        _status.Text = "Waiting for Chrome";
-        _status.ForeColor = Color.FromArgb(105, 118, 139);
-        _status.Font = new Font("Segoe UI", 8.5F);
-        _status.Location = new Point(16, 8);
-        _status.AutoSize = true;
+        _status.Text = "WAITING FOR CHROME";
+        _status.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+        _status.Location = new Point(22, 8);
+        _status.Size = new Size(350, 16);
 
+        _timerCard = MakeCard(12, 30, 370, 132);
         _clock.Text = "--:--";
-        _clock.Font = new Font("Segoe UI", 35F, FontStyle.Bold);
-        _clock.ForeColor = Color.FromArgb(25, 39, 61);
-        _clock.Location = new Point(14, 30);
-        _clock.Size = new Size(318, 61);
+        _clock.Font = _singleClockFont;
+        _clock.Location = new Point(15, 27);
+        _clock.Size = new Size(340, 62);
         _clock.TextAlign = ContentAlignment.MiddleCenter;
 
-        _secondaryClock.Text = "";
-        _secondaryClock.Font = new Font("Segoe UI", 9F);
-        _secondaryClock.ForeColor = Color.FromArgb(102, 117, 139);
-        _secondaryClock.Location = new Point(16, 90);
-        _secondaryClock.Size = new Size(316, 20);
+        _secondaryClock.Text = "SYNCING TIMER STATE";
+        _secondaryClock.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+        _secondaryClock.Location = new Point(15, 91);
+        _secondaryClock.Size = new Size(340, 20);
         _secondaryClock.TextAlign = ContentAlignment.MiddleCenter;
+        _timerCard.Controls.AddRange([_status, _clock, _secondaryClock]);
 
         var controls = new FlowLayoutPanel
         {
-            Location = new Point(16, 116),
-            Size = new Size(318, 38),
-            WrapContents = false
+            Location = new Point(12, 174),
+            Size = new Size(370, 42),
+            WrapContents = false,
+            BackColor = Color.Transparent
         };
-        _runButton = MakeButton("Start / Resume", true);
-        _runButton.Width = 146;
+        _runButton = MakeButton("Start / Resume", true, 168);
         _runButton.Click += (_, _) => CommandRequested?.Invoke(IsAnyTimerRunning() ? "pause-timer" : "start-timer");
-        var lapButton = MakeButton("Lap", false);
-        lapButton.Width = 76;
+        var lapButton = MakeButton("Lap", false, 87);
         lapButton.Click += (_, _) => CommandRequested?.Invoke("record-lap");
-        var resetButton = MakeButton("Reset", false);
-        resetButton.Width = 76;
+        var resetButton = MakeButton("Reset", false, 87);
         resetButton.Click += (_, _) => CommandRequested?.Invoke("reset-timer");
         controls.Controls.AddRange([_runButton, lapButton, resetButton]);
 
+        _placementCard = MakeCard(12, 228, 370, 96);
+        var placementTitle = MakeLabel("WINDOW POSITION", 14, 10, 180, 16, 8F, FontStyle.Bold, _mutedColor);
+        placementTitle.Tag = "muted";
+        var alwaysOnTop = MakeLabel("ALWAYS ON TOP", 248, 10, 108, 16, 7F, FontStyle.Bold, _accentColor);
+        alwaysOnTop.Tag = "accent";
+        alwaysOnTop.TextAlign = ContentAlignment.MiddleRight;
         _cornerPicker.DropDownStyle = ComboBoxStyle.DropDownList;
+        _cornerPicker.FlatStyle = FlatStyle.Flat;
+        _cornerPicker.Font = new Font("Segoe UI", 8.5F);
         _cornerPicker.Items.AddRange(["Top left", "Top right", "Bottom left", "Bottom right"]);
         _cornerPicker.SelectedIndex = CornerIndex(_settings.Corner);
-        _cornerPicker.Location = new Point(16, 162);
-        _cornerPicker.Size = new Size(115, 26);
+        _cornerPicker.Location = new Point(13, 39);
+        _cornerPicker.Size = new Size(112, 28);
         _cornerPicker.SelectedIndexChanged += (_, _) =>
         {
             _settings.Corner = CornerValue(_cornerPicker.SelectedIndex);
@@ -275,8 +362,10 @@ internal sealed class CompanionWindow : Form
         };
 
         _screenPicker.DropDownStyle = ComboBoxStyle.DropDownList;
-        _screenPicker.Location = new Point(138, 162);
-        _screenPicker.Size = new Size(125, 26);
+        _screenPicker.FlatStyle = FlatStyle.Flat;
+        _screenPicker.Font = new Font("Segoe UI", 8.5F);
+        _screenPicker.Location = new Point(134, 39);
+        _screenPicker.Size = new Size(133, 28);
         _screenPicker.SelectedIndexChanged += (_, _) =>
         {
             if (_screenPicker.SelectedItem is DisplayChoice display)
@@ -287,15 +376,143 @@ internal sealed class CompanionWindow : Form
             }
         };
 
-        _pinButton = MakeButton("Pin", false);
-        _pinButton.Location = new Point(270, 160);
-        _pinButton.Size = new Size(64, 28);
+        _pinButton = MakeButton("Pin corner", false, 91);
+        _pinButton.Location = new Point(276, 39);
+        _pinButton.Height = 29;
         _pinButton.Click += (_, _) => TogglePin();
+        _placementCard.Controls.AddRange([placementTitle, alwaysOnTop, _cornerPicker, _screenPicker, _pinButton]);
 
-        var editHotkeysButton = MakeButton("Edit shortcuts", false);
-        editHotkeysButton.Location = new Point(16, 194);
-        editHotkeysButton.Size = new Size(106, 26);
-        editHotkeysButton.Click += (_, _) =>
+        _shortcutCard = MakeCard(12, 340, 370, 52);
+        var shortcutTitle = MakeLabel("SYSTEM-WIDE SHORTCUTS", 14, 8, 226, 17, 8F, FontStyle.Bold, _inkColor);
+        _shortcutSummary.Text = "Waiting for shortcut status";
+        _shortcutSummary.Font = new Font("Segoe UI", 7.5F);
+        _shortcutSummary.Tag = "muted";
+        _shortcutSummary.Location = new Point(14, 27);
+        _shortcutSummary.Size = new Size(220, 15);
+        var manageShortcuts = MakeButton("Manage", false, 84);
+        manageShortcuts.Location = new Point(270, 11);
+        manageShortcuts.Height = 30;
+        manageShortcuts.Click += (_, _) => ShowShortcutDialog();
+        _shortcutCard.Controls.AddRange([shortcutTitle, _shortcutSummary, manageShortcuts]);
+
+        _connection.Text = "Connect AlgoTimer in Chrome to start";
+        _connection.Font = new Font("Segoe UI", 7.5F);
+        _connection.Tag = "muted";
+        _connection.Location = new Point(22, 405);
+        _connection.Size = new Size(350, 20);
+        _connection.TextAlign = ContentAlignment.MiddleCenter;
+
+        content.Controls.AddRange([_timerCard, controls, _placementCard, _shortcutCard, _connection]);
+        Controls.Add(content);
+
+        var border = new Panel { Dock = DockStyle.Top, Height = 2, BackColor = _accentColor };
+        _themeBar = border;
+        Controls.Add(border);
+        border.BringToFront();
+        SetTheme(_theme);
+    }
+
+    private RoundedPanel MakeCard(int x, int y, int width, int height)
+    {
+        var card = new RoundedPanel
+        {
+            Location = new Point(x, y),
+            Size = new Size(width, height),
+            BackColor = _surfaceColor,
+            Radius = 10
+        };
+        card.SetColors(_surfaceColor, _borderColor);
+        return card;
+    }
+
+    private static Label MakeLabel(string text, int x, int y, int width, int height, float size, FontStyle style, Color color) =>
+        new()
+        {
+            Text = text,
+            Location = new Point(x, y),
+            Size = new Size(width, height),
+            Font = new Font("Segoe UI", size, style),
+            ForeColor = color,
+            BackColor = Color.Transparent,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+
+    private Button MakeButton(string text, bool primary, int width)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Width = width,
+            Height = 40,
+            FlatStyle = FlatStyle.Flat,
+            Font = new Font("Segoe UI Semibold", 8.5F),
+            ForeColor = primary ? Color.FromArgb(7, 22, 29) : _inkColor,
+            BackColor = primary ? _accentColor : _surfaceColor,
+            Margin = new Padding(0, 0, 7, 0),
+            Cursor = Cursors.Hand,
+            UseVisualStyleBackColor = false,
+            Tag = primary ? "primary" : null
+        };
+        button.FlatAppearance.BorderColor = primary ? _accentColor : _borderColor;
+        button.FlatAppearance.BorderSize = 1;
+        button.FlatAppearance.MouseOverBackColor = primary
+            ? ControlPaint.Light(_accentColor, 0.12F)
+            : Color.FromArgb(31, 44, 63);
+        button.FlatAppearance.MouseDownBackColor = Color.FromArgb(35, 67, 82);
+        return button;
+    }
+
+    private void ShowShortcutDialog()
+    {
+        var dialog = new Form
+        {
+            Text = "AlgoTimer shortcuts",
+            ClientSize = new Size(390, 365),
+            MinimumSize = new Size(406, 404),
+            MaximumSize = new Size(406, 404),
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterParent,
+            ShowInTaskbar = false,
+            BackColor = _canvasColor,
+            Font = Font
+        };
+        var title = MakeLabel("SYSTEM-WIDE SHORTCUTS", 18, 15, 320, 22, 9F, FontStyle.Bold, _inkColor);
+        var explanation = MakeLabel("Works across Windows while AlgoTimer is connected.", 18, 39, 350, 18, 8F, FontStyle.Regular, _mutedColor);
+        dialog.Controls.AddRange([title, explanation]);
+
+        var actions = new (string Command, string Title)[]
+        {
+            ("start-timer", "Start / Resume"),
+            ("pause-timer", "Pause"),
+            ("record-lap", "Record lap"),
+            ("reset-timer", "Reset timer"),
+            ("toggle-window", "Show / hide window")
+        };
+        for (var index = 0; index < actions.Length; index++)
+        {
+            var (command, actionTitle) = actions[index];
+            var row = MakeCard(16, 68 + index * 42, 358, 36);
+            var action = MakeLabel(actionTitle, 11, 0, 130, 36, 8.5F, FontStyle.Regular, _inkColor);
+            var binding = _settings.Hotkeys.TryGetValue(command, out var configured) && !string.IsNullOrWhiteSpace(configured)
+                ? configured.Replace("+", " + ", StringComparison.Ordinal)
+                : "Off";
+            var keyLabel = MakeLabel(binding, 143, 0, 138, 36, 8F, FontStyle.Bold, _inkColor);
+            keyLabel.TextAlign = ContentAlignment.MiddleRight;
+            var isConfigured = binding != "Off";
+            var isRegistered = _registeredHotkeys.TryGetValue(command, out var registered) && registered;
+            var stateText = !isConfigured ? "OFF" : isRegistered ? "ACTIVE" : "UNAVAILABLE";
+            var stateColor = !isConfigured ? _mutedColor : isRegistered ? _accentColor : Color.FromArgb(255, 133, 133);
+            var state = MakeLabel(stateText, 284, 0, 66, 36, 6.5F, FontStyle.Bold, stateColor);
+            state.TextAlign = ContentAlignment.MiddleRight;
+            row.Controls.AddRange([action, keyLabel, state]);
+            dialog.Controls.Add(row);
+        }
+
+        var help = MakeLabel("Edit bindings in the settings file, then reload AlgoTimer in Chrome.", 18, 284, 355, 30, 7.5F, FontStyle.Regular, _mutedColor);
+        var editButton = MakeButton("Edit shortcut settings", false, 154);
+        editButton.Location = new Point(18, 322);
+        editButton.Height = 30;
+        editButton.Click += (_, _) =>
         {
             try
             {
@@ -306,44 +523,20 @@ internal sealed class CompanionWindow : Form
                     UseShellExecute = false
                 });
                 _connection.Text = "Save shortcuts, then reload AlgoTimer in Chrome to apply";
+                dialog.Close();
             }
             catch (Exception error)
             {
-                _connection.Text = $"Could not open settings: {error.Message}";
+                help.Text = $"Could not open settings: {error.Message}";
             }
         };
-
-        _connection.Text = "Connect AlgoTimer in Chrome to start";
-        _connection.ForeColor = Color.FromArgb(113, 128, 150);
-        _connection.Font = new Font("Segoe UI", 7.5F);
-        _connection.Location = new Point(16, 226);
-        _connection.Size = new Size(318, 16);
-        content.Controls.AddRange([_status, _clock, _secondaryClock, controls, _cornerPicker, _screenPicker, _pinButton, editHotkeysButton, _connection]);
-        Controls.Add(content);
-        SetTheme(_theme);
-
-        var border = new Panel { Dock = DockStyle.Top, Height = 3, BackColor = Color.FromArgb(91, 91, 214) };
-        _themeBar = border;
-        Controls.Add(border);
-        border.BringToFront();
-    }
-
-    private Button MakeButton(string text, bool primary)
-    {
-        var button = new Button
-        {
-            Text = text,
-            Height = 34,
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI Semibold", 8.5F),
-            ForeColor = primary ? Color.White : Color.FromArgb(76, 91, 114),
-            BackColor = primary ? Color.FromArgb(91, 91, 214) : Color.White,
-            Margin = new Padding(0, 0, 7, 0),
-            Cursor = Cursors.Hand
-        };
-        button.FlatAppearance.BorderColor = primary ? Color.FromArgb(91, 91, 214) : Color.FromArgb(224, 229, 237);
-        button.FlatAppearance.BorderSize = 1;
-        return button;
+        var closeButton = MakeButton("Done", false, 76);
+        closeButton.Location = new Point(298, 322);
+        closeButton.Height = 30;
+        closeButton.Click += (_, _) => dialog.Close();
+        dialog.Controls.AddRange([help, editButton, closeButton]);
+        dialog.ShowDialog(this);
+        dialog.Dispose();
     }
 
     private void PopulateDisplays()
@@ -360,7 +553,8 @@ internal sealed class CompanionWindow : Form
     {
         if (_snapshot is not { } state)
         {
-            _status.Text = "Waiting for timer state from Chrome";
+            _status.Text = "WAITING FOR TIMER STATE FROM CHROME";
+            _status.ForeColor = _mutedColor;
             _clock.Text = "--:--";
             _runButton.Text = "Start / Resume";
             return;
@@ -376,6 +570,7 @@ internal sealed class CompanionWindow : Form
         var anyRunning = IsRunning(stopwatch) || IsRunning(target);
         var status = mode == "timer" ? GetString(target, "status", "stopped") : GetString(stopwatch, "status", "stopped");
         _status.Text = $"{(anyRunning ? "●  Running" : $"●  {status}")}   ·   {mode switch { "dual" => "Dual timers", "timer" => "Target timer", _ => "Stopwatch" }}";
+        _status.ForeColor = anyRunning ? _accentColor : _mutedColor;
         _runButton.Text = anyRunning ? "Pause" : "Start / Resume";
 
         if (mode == "dual")
@@ -419,10 +614,10 @@ internal sealed class CompanionWindow : Form
 
     private void UpdatePinLabel()
     {
-        _pinButton.Text = _settings.Pinned ? "Pinned" : "Pin";
-        _pinButton.BackColor = _settings.Pinned ? Color.FromArgb(240, 239, 255) : Color.White;
-        _pinButton.ForeColor = _settings.Pinned ? Color.FromArgb(79, 79, 190) : Color.FromArgb(76, 91, 114);
-        _pinButton.FlatAppearance.BorderColor = _settings.Pinned ? Color.FromArgb(211, 209, 250) : Color.FromArgb(224, 229, 237);
+        _pinButton.Text = _settings.Pinned ? "Pinned" : "Pin corner";
+        _pinButton.BackColor = _settings.Pinned ? Color.FromArgb(31, 55, 69) : _surfaceColor;
+        _pinButton.ForeColor = _settings.Pinned ? _accentColor : _inkColor;
+        _pinButton.FlatAppearance.BorderColor = _settings.Pinned ? _accentColor : _borderColor;
     }
 
     private void ApplyCornerPosition()
@@ -599,6 +794,56 @@ internal sealed class CompanionWindow : Form
         return hours > 0
             ? $"{hours:00}:{seconds / 60 % 60:00}:{seconds % 60:00}"
             : $"{seconds / 60:00}:{seconds % 60:00}";
+    }
+
+    private sealed class RoundedPanel : Panel
+    {
+        private Color _fillColor = Color.FromArgb(20, 29, 43);
+        private Color _borderColor = Color.FromArgb(39, 53, 72);
+
+        public int Radius { get; set; } = 10;
+
+        public RoundedPanel()
+        {
+            DoubleBuffered = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
+        }
+
+        public void SetColors(Color fill, Color border)
+        {
+            _fillColor = fill;
+            _borderColor = border;
+            Invalidate();
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            var bounds = new Rectangle(0, 0, Math.Max(0, Width - 1), Math.Max(0, Height - 1));
+            using var path = CreateRoundedPath(bounds, Radius);
+            using var fill = new SolidBrush(_fillColor);
+            using var border = new Pen(_borderColor);
+            e.Graphics.FillPath(fill, path);
+            e.Graphics.DrawPath(border, path);
+        }
+
+        private static System.Drawing.Drawing2D.GraphicsPath CreateRoundedPath(Rectangle bounds, int radius)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            var diameter = Math.Min(radius * 2, Math.Min(bounds.Width, bounds.Height));
+            if (diameter <= 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
     }
 
     private sealed record DisplayChoice(string Name, string Device)
