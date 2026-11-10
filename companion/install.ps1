@@ -9,17 +9,20 @@ if ($extensionId -notmatch '^[a-p]{32}$') {
   throw 'The extension ID must be the 32-character ID shown by Chrome.'
 }
 
-$output = Join-Path $PSScriptRoot 'dist'
-$hostPath = Join-Path $output 'AlgoTimer.Companion.exe'
+$hostPath = Join-Path $PSScriptRoot 'AlgoTimer.Companion.exe'
 if (-not (Test-Path -LiteralPath $hostPath)) {
-  throw 'Companion executable not found. Run .\build.ps1 first.'
+  $hostPath = Join-Path (Join-Path $PSScriptRoot 'dist') 'AlgoTimer.Companion.exe'
+}
+if (-not (Test-Path -LiteralPath $hostPath)) {
+  throw 'Companion executable not found. Extract the full package or run .\build.ps1 first.'
 }
 
-$manifestPath = Join-Path $output 'com.algotimer.companion.json'
+$hostPath = (Resolve-Path -LiteralPath $hostPath).Path
+$manifestPath = Join-Path (Split-Path -Parent $hostPath) 'com.algotimer.companion.json'
 $manifest = @{
   name = 'com.algotimer.companion'
   description = 'AlgoTimer Windows native companion'
-  path = (Resolve-Path -LiteralPath $hostPath).Path
+  path = $hostPath
   type = 'stdio'
   allowed_origins = @("chrome-extension://$extensionId/")
 } | ConvertTo-Json -Depth 4

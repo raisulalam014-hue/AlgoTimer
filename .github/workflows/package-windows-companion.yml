@@ -1,0 +1,58 @@
+name: Package Windows Companion
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish self-contained Windows x64 companion
+        shell: pwsh
+        run: |
+          $publishDirectory = Join-Path $env:RUNNER_TEMP 'algotimer-companion-publish'
+          dotnet publish companion/AlgoTimer.Companion.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            --output $publishDirectory
+          if ($LASTEXITCODE -ne 0) {
+            throw "Companion publish failed with exit code $LASTEXITCODE."
+          }
+
+          $executable = Join-Path $publishDirectory 'AlgoTimer.Companion.exe'
+          if (-not (Test-Path -LiteralPath $executable)) {
+            throw "Published companion executable was not found at $executable."
+          }
+
+          $packageDirectory = Join-Path $env:RUNNER_TEMP 'AlgoTimer-Companion-windows-x64'
+          New-Item -ItemType Directory -Path $packageDirectory -Force | Out-Null
+          Copy-Item -LiteralPath $executable -Destination $packageDirectory
+          Copy-Item -LiteralPath 'companion/install.ps1' -Destination $packageDirectory
+          Copy-Item -LiteralPath 'companion/uninstall.ps1' -Destination $packageDirectory
+          Copy-Item -LiteralPath 'companion/README.md' -Destination $packageDirectory
+          Copy-Item -LiteralPath 'LICENSE' -Destination $packageDirectory
+
+          $archive = Join-Path $env:RUNNER_TEMP 'AlgoTimer-Companion-windows-x64.zip'
+          Compress-Archive -Path (Join-Path $packageDirectory '*') -DestinationPath $archive
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlgoTimer-Companion-windows-x64
+          path: ${{ runner.temp }}/AlgoTimer-Companion-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30

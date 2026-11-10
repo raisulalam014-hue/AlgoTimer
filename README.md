@@ -34,13 +34,16 @@
 - If the companion is missing or disconnected, the Chrome extension remains usable and the popup reports the companion status.
 
 #### Install the companion
-1. Install the AlgoTimer extension in Chrome and copy its 32-character ID from `chrome://extensions`.
-2. Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) if it is not already available.
-3. Open PowerShell in the repository's `companion` folder and run `.\build.ps1`.
-4. Run `.\install.ps1` and enter the extension ID when prompted. This registers the native messaging host for the current Windows user only.
-5. Reload AlgoTimer in Chrome, open **Settings → Windows Companion**, and check that it reports a connection.
+The companion is an optional download; the Chrome extension works without it. To get the prebuilt Windows x64 package, open this repository's **Actions → Package Windows Companion**, choose **Run workflow**, and download the `AlgoTimer-Companion-windows-x64` artifact from the completed run. The artifact is a ZIP containing the companion and install/uninstall instructions; it expires after 30 days. This workflow does not publish a GitHub Release.
 
-The companion is launched by Chrome when the extension connects; no service or background startup task is installed. To remove the registration, run `.\uninstall.ps1`. The script only removes the companion's current-user Chrome native-messaging registration; published files are left in place.
+1. Install the AlgoTimer extension in Chrome and copy its 32-character ID from `chrome://extensions`.
+2. Extract the ZIP to a folder where it can stay; do not move or delete the folder after installation.
+3. Open PowerShell in that folder and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1`. Enter the extension ID when prompted. No administrator access or .NET SDK is required.
+4. Reload AlgoTimer in Chrome, open **Settings → Windows Companion**, and check that it reports a connection.
+
+Chrome launches the companion when the extension connects; it is not a standalone always-running app, Windows service, or startup task. The native window remains topmost and global hotkeys work only while the companion is connected and running. To uninstall, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall.ps1` from the same package folder and confirm. This removes the current-user native-messaging registration and only the package-generated manifest; it leaves the executable and other files in place. The extension remains usable without the companion.
+
+To build the companion from source instead, install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), run `.\build.ps1` from the `companion` folder, and then run `.\install.ps1`.
 
 #### Windows companion shortcuts
 
