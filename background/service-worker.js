@@ -438,8 +438,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             chrome.windows.create({
               url: chrome.runtime.getURL('float.html'),
               type: 'popup',
-              width: 280,
-              height: 180,
+              width: 300,
+              height: 230,
               top: 40,
               left: 100,
               focused: true

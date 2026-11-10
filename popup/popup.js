@@ -396,9 +396,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
     const tenths = Math.floor((ms % 1000) / 100);
+    const hundredthsVal = Math.floor((ms % 1000) / 10);
+    const hundredths = hundredthsVal < 10 ? '0' + hundredthsVal : String(hundredthsVal);
 
     const base = hrs > 0 ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
-    return { base, tenths, fullText: `${base}.${tenths}` };
+    return { base, tenths, hundredths, fullText: `${base}.${hundredths}` };
   }
 
   function formatMinutesShort(ms) {
@@ -496,12 +498,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.windows.create({
         url: chrome.runtime.getURL("float.html"),
         type: 'popup',
-        width: 340,
-        height: 440,
+        width: 300,
+        height: 235,
         focused: true
       });
     } else {
-      window.open("float.html", "AlgoTimerFloat", "width=340,height=440,resizable=yes");
+      window.open("float.html", "AlgoTimerFloat", "width=300,height=235,resizable=yes");
     }
   }
 
@@ -510,31 +512,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
 
   
-  // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
-  const THEME_GRADIENTS = {
-    cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
-    cyan: { stop1: '#22d3ee', stop2: '#00f2fe', stop3: '#38bdf8' },
-    violet: { stop1: '#c084fc', stop2: '#8b5cf6', stop3: '#6366f1' },
-    emerald: { stop1: '#34d399', stop2: '#10b981', stop3: '#059669' }
+  // ================= DYNAMIC THEME & ACCENT ENGINE =================
+  const THEMES = ['blue', 'purple', 'emerald', 'orange', 'cosmic', 'cyan', 'violet'];
+  const THEME_ACCENTS = {
+    blue: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
+    purple: { color: '#995BFF', grad: { stop1: '#995BFF', stop2: '#287BFF', stop3: '#995BFF' } },
+    emerald: { color: '#49C98B', grad: { stop1: '#49C98B', stop2: '#287BFF', stop3: '#49C98B' } },
+    orange: { color: '#FF4B24', grad: { stop1: '#FF4B24', stop2: '#FFD329', stop3: '#FF4B24' } },
+    cosmic: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
+    cyan: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
+    violet: { color: '#995BFF', grad: { stop1: '#995BFF', stop2: '#287BFF', stop3: '#995BFF' } }
   };
 
-  let currentTheme = 'cosmic';
+  let currentTheme = 'blue';
 
-  function updateDialThemeGradient(themeName) {
-    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.cosmic;
+  function applyTheme(themeName) {
+    if (!THEMES.includes(themeName)) themeName = 'blue';
+    currentTheme = themeName;
+    document.documentElement.setAttribute('data-theme', 'black');
+
+    const config = THEME_ACCENTS[themeName] || THEME_ACCENTS.blue;
+    document.documentElement.style.setProperty('--accent-blue', config.color);
+
     const s1 = document.getElementById('grad-stop-1');
     const s2 = document.getElementById('grad-stop-2');
     const s3 = document.getElementById('grad-stop-3');
-    if (s1) s1.setAttribute('stop-color', grad.stop1);
-    if (s2) s2.setAttribute('stop-color', grad.stop2);
-    if (s3) s3.setAttribute('stop-color', grad.stop3);
-  }
-
-  function applyTheme(themeName) {
-    if (!THEMES.includes(themeName)) themeName = 'cosmic';
-    currentTheme = themeName;
-    document.documentElement.setAttribute('data-theme', themeName);
+    if (s1) s1.setAttribute('stop-color', config.grad.stop1);
+    if (s2) s2.setAttribute('stop-color', config.grad.stop2);
+    if (s3) s3.setAttribute('stop-color', config.grad.stop3);
 
     const themeLabel = document.getElementById('header-theme-label');
     if (themeLabel) {
@@ -544,8 +549,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.theme-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.themeChoice === themeName);
     });
-
-    updateDialThemeGradient(themeName);
 
     try {
       if (isExtension && chrome.storage && chrome.storage.local) {
@@ -578,14 +581,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isExtension && chrome.storage && chrome.storage.local) {
       chrome.storage.local.get(['activeTheme'], (res) => {
         if (res && res.activeTheme) applyTheme(res.activeTheme);
-        else applyTheme('cosmic');
+        else applyTheme('blue');
       });
     } else {
       const savedTheme = localStorage.getItem('algotimer_theme');
-      applyTheme(savedTheme || 'cosmic');
+      applyTheme(savedTheme || 'blue');
     }
   } catch (e) {
-    applyTheme('cosmic');
+    applyTheme('blue');
   }
 
   // ================= MAIN RENDER LOOP =================
@@ -755,44 +758,58 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         // Stopwatch Mode
         const parts = formatTimeParts(swElapsed);
-        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
-        if (dialStatusLabel) dialStatusLabel.textContent = 'STOPWATCH';
+        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.hundredths}</small>`;
+        if (dialStatusLabel) dialStatusLabel.textContent = state.stopwatch.status.toUpperCase();
         if (dialTargetLabel) dialTargetLabel.style.display = 'none';
         if (dialDigits) dialDigits.classList.remove('warning');
         if (dialProgress) dialProgress.classList.remove('warning');
 
-        // Continuous 60s rotating ring
-        
-    // Sub-Gauges (Laps, Split, Status)
-    const subLapsVal = document.getElementById('sub-laps-val');
-    if (subLapsVal) subLapsVal.textContent = state.laps ? state.laps.length : 0;
-
-    const subSplitVal = document.getElementById('sub-split-val');
-    if (subSplitVal) {
-      if (state.laps && state.laps.length > 0) {
-        const lastLap = state.laps[0];
-        subSplitVal.textContent = formatTimeParts(lastLap.lapDuration).base;
-      } else {
-        subSplitVal.textContent = '00:00';
-      }
-    }
-
-    const subStateVal = document.getElementById('sub-state-val');
-    if (subStateVal) {
-      const curStatus = state.mode === 'stopwatch' ? state.stopwatch.status : (state.mode === 'timer' ? state.targetTimer.status : 'DUAL');
-      subStateVal.textContent = (curStatus || 'READY').toUpperCase();
-    }
-
+        // Continuous 60s rotating ring & Apple Watch Needle Hand (Image 1)
         const secRatio = (swElapsed % 60000) / 60000;
         if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
 
+        const needleGroup = document.getElementById('dial-needle-group');
+        if (needleGroup) {
+          const needleDeg = state.stopwatch.status === 'stopped' ? 0 : secRatio * 360;
+          needleGroup.style.transform = `rotate(${needleDeg}deg)`;
+        }
+
+        const dialStatusPill = document.getElementById('dial-status-pill');
+        if (dialStatusPill) {
+          dialStatusPill.className = 'dial-badge-pill ' + state.stopwatch.status;
+        }
+
+        const dialWrapper = document.getElementById('dial-wrapper');
+        if (dialWrapper) {
+          dialWrapper.className = 'dial-wrapper is-' + state.stopwatch.status;
+        }
+
+        // Sub-Gauges (Laps, Split, Status)
+        const subLapsVal = document.getElementById('sub-laps-val');
+        if (subLapsVal) subLapsVal.textContent = state.laps ? state.laps.length : 0;
+
+        const subSplitVal = document.getElementById('sub-split-val');
+        if (subSplitVal) {
+          if (state.laps && state.laps.length > 0) {
+            const lastLap = state.laps[0];
+            subSplitVal.textContent = formatTimeParts(lastLap.lapDuration).base;
+          } else {
+            subSplitVal.textContent = '00:00';
+          }
+        }
+
+        const subStateVal = document.getElementById('sub-state-val');
+        if (subStateVal) {
+          subStateVal.textContent = state.stopwatch.status.toUpperCase();
+        }
+
         // Toggle run button text
         if (state.stopwatch.status === 'running') {
-          if (btnToggleRun) btnToggleRun.classList.add('running');
+          if (btnToggleRun) btnToggleRun.classList.add('running', 'btn-running');
           if (btnToggleText) btnToggleText.textContent = 'Pause';
         } else {
-          if (btnToggleRun) btnToggleRun.classList.remove('running');
-          if (btnToggleText) btnToggleText.textContent = 'Start';
+          if (btnToggleRun) btnToggleRun.classList.remove('running', 'btn-running');
+          if (btnToggleText) btnToggleText.textContent = state.stopwatch.status === 'paused' ? 'Resume' : 'Play';
         }
 
         // Background Concurrent Target Timer Banner

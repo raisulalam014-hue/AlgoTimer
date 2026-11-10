@@ -1,5 +1,5 @@
-// AlgoTimer - Always-on-Top Floating Screen for Other Apps (VS Code, Discord, Desktop)
-// Cyber-Luxury HUD: Dynamic Color Themes, SVG Precision Ring, 3 Sub-Gauges, 4-Corner Snapping, Multi-Size
+// AlgoTimer - Two Floating Widget Modes (Mini Timer Pill & Normal Floating HUD)
+// Shared State Engine | 100% Client-Side | Zero Drift | Accurate Synchronization
 
 (function () {
   let state = {
@@ -11,56 +11,26 @@
   };
 
   const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left'];
-  const SIZES = [
-    { name: 'normal', width: 340, height: 440 },
-    { name: 'compact', width: 280, height: 260 },
-    { name: 'mini', width: 220, height: 130 }
-  ];
-
   let currentCornerIdx = 0;
-  let currentSizeIdx = 0;
+  let currentVisualMode = 'normal'; // 'normal' | 'mini'
   let activePipWindow = null;
 
-  
-  // Auto-resize window to optimal dimensions on launch
-  function ensureOptimalWindowSize() {
-    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
-      chrome.windows.getCurrent((win) => {
-        if (win && (win.height < 400 || win.width < 320)) {
-          chrome.windows.update(win.id, {
-            width: 340,
-            height: 440
-          });
-        }
-      });
-    } else {
-      if (window.outerHeight < 400 || window.outerWidth < 320) {
-        try { window.resizeTo(340, 440); } catch (e) {}
-      }
-    }
-  }
+  // Normal & Mini Target Dimensions
+  const DIMENSIONS = {
+    mini: { width: 220, height: 68 },
+    normal: { width: 300, height: 235 },
+    expanded: { width: 360, height: 380 }
+  };
 
-  function handleAutoLayout() {
-    const h = window.innerHeight;
-    const w = window.innerWidth;
-    if (h < 210) {
-      document.body.setAttribute('data-size', 'mini');
-    } else if (h < 330 || w < 290) {
-      document.body.setAttribute('data-size', 'compact');
-    } else {
-      document.body.setAttribute('data-size', 'normal');
-    }
-  }
+  // DOM Elements - Mode A: Mini Pill
+  const miniPillView = document.getElementById('mini-pill-view');
+  const miniStatusDot = document.getElementById('mini-status-dot');
+  const miniDigits = document.getElementById('mini-timer-digits');
 
-  window.addEventListener('resize', handleAutoLayout);
-  ensureOptimalWindowSize();
-  handleAutoLayout();
-
-  // DOM Elements
-  const singleView = document.getElementById('float-single-view');
+  // DOM Elements - Mode B: Normal / Expanded Widget
+  const normalWidgetView = document.getElementById('normal-widget-view');
+  const normalStatusDot = document.getElementById('normal-status-dot');
   const clockSingle = document.getElementById('float-clock-single');
-  const clockMillis = document.getElementById('float-millis');
-  const dialProgress = document.getElementById('float-dial-progress');
   const clockDual = document.getElementById('float-clock-dual');
   const dualSw = document.getElementById('float-dual-sw');
   const dualTimer = document.getElementById('float-dual-timer');
@@ -68,77 +38,26 @@
   const subLaps = document.getElementById('float-sub-laps');
   const subSplit = document.getElementById('float-sub-split');
   const subState = document.getElementById('float-sub-state');
+  const expandedLaps = document.getElementById('float-expanded-laps');
+  const expandedLapsList = document.getElementById('expanded-laps-list');
+  const expandedLapCount = document.getElementById('expanded-lap-count');
 
+  // Header and Control Buttons
+  const btnMinimizeToMini = document.getElementById('btn-minimize-to-mini');
+  const pipBtn = document.getElementById('btn-pip-always-ontop');
+  const cornerBtn = document.getElementById('btn-corner-cycle');
+  const cornerLabel = document.getElementById('corner-label');
   const playBtn = document.getElementById('btn-play');
   const playBtnText = document.getElementById('btn-play-text');
   const lapBtn = document.getElementById('btn-lap');
   const resetBtn = document.getElementById('btn-reset');
-  const pipBtn = document.getElementById('btn-pip-always-ontop');
-  const bannerPipBtn = document.getElementById('btn-banner-pip');
-  const cornerBtn = document.getElementById('btn-corner-cycle');
-  const cornerLabel = document.getElementById('corner-label');
-  const sizeBtn = document.getElementById('btn-size-cycle');
-  const sizeLabel = document.getElementById('size-label');
-  const themeBtn = document.getElementById('btn-float-theme');
-  const themeLabel = document.getElementById('float-theme-label');
 
   const cornerNames = {
-    'top-right': '↗ TR',
-    'bottom-right': '↘ BR',
-    'bottom-left': '↙ BL',
-    'top-left': '↖ TL'
+    'top-right': 'TR',
+    'bottom-right': 'BR',
+    'bottom-left': 'BL',
+    'top-left': 'TL'
   };
-
-  const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 70; // 439.82
-  if (dialProgress) dialProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
-
-  // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['cosmic', 'cyan', 'violet', 'emerald'];
-  const THEME_GRADIENTS = {
-    cosmic: { stop1: '#00f2fe', stop2: '#8b5cf6', stop3: '#ec4899' },
-    cyan: { stop1: '#22d3ee', stop2: '#00f2fe', stop3: '#38bdf8' },
-    violet: { stop1: '#c084fc', stop2: '#8b5cf6', stop3: '#6366f1' },
-    emerald: { stop1: '#34d399', stop2: '#10b981', stop3: '#059669' }
-  };
-
-  let currentTheme = 'cosmic';
-
-  function updateDialThemeGradient(themeName) {
-    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.cosmic;
-    const s1 = document.getElementById('grad-stop-1');
-    const s2 = document.getElementById('grad-stop-2');
-    const s3 = document.getElementById('grad-stop-3');
-    if (s1) s1.setAttribute('stop-color', grad.stop1);
-    if (s2) s2.setAttribute('stop-color', grad.stop2);
-    if (s3) s3.setAttribute('stop-color', grad.stop3);
-  }
-
-  function applyTheme(themeName) {
-    if (!THEMES.includes(themeName)) themeName = 'cosmic';
-    currentTheme = themeName;
-    document.documentElement.setAttribute('data-theme', themeName);
-
-    if (themeLabel) {
-      themeLabel.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
-    }
-
-    updateDialThemeGradient(themeName);
-
-    try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.set({ activeTheme: themeName });
-      } else {
-        localStorage.setItem('algotimer_theme', themeName);
-      }
-    } catch (e) {}
-  }
-
-  if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-      const nextIdx = (THEMES.indexOf(currentTheme) + 1) % THEMES.length;
-      applyTheme(THEMES[nextIdx]);
-    });
-  }
 
   // Safe sound player
   function playSound(name) {
@@ -213,11 +132,14 @@
     } else if (msg.type === 'ADD_LAP') {
       const swMs = getSwElapsed();
       if (!state.laps) state.laps = [];
+      const prevTotal = state.laps.length > 0 ? state.laps[0].totalTime : 0;
+      const lapDuration = Math.max(0, swMs - prevTotal);
       state.laps.unshift({
         num: state.laps.length + 1,
         totalTime: swMs,
-        lapDuration: swMs
+        lapDuration: lapDuration || swMs
       });
+      renderExpandedLaps();
     }
     try {
       localStorage.setItem('algotimer_standalone_state', JSON.stringify(state));
@@ -225,17 +147,20 @@
     if (cb) cb({ success: true, state });
   }
 
-  // Format parts: base (MM:SS or HH:MM:SS) + tenths
+  // Format parts: base (HH:MM:SS or MM:SS) + hundredths (2 digits, e.g. .52)
   function formatTimeParts(ms) {
     if (ms < 0) ms = 0;
     const totalSec = Math.floor(ms / 1000);
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
-    const tenths = Math.floor((ms % 1000) / 100);
-    const pad = (n) => (n < 10 ? '0' + n : n);
-    const base = hrs > 0 ? (hrs + ':' + pad(mins) + ':' + pad(secs)) : (pad(mins) + ':' + pad(secs));
-    return { base, tenths };
+    const hundredths = Math.floor((ms % 1000) / 10);
+    const pad = (n) => (n < 10 ? '0' + n : String(n));
+    
+    // Always format with hours:mins:secs for professional competitive coding layout
+    const base = pad(hrs) + ':' + pad(mins) + ':' + pad(secs);
+    const millis2 = pad(hundredths);
+    return { base, millis2 };
   }
 
   function getSwElapsed() {
@@ -254,29 +179,46 @@
     return Math.max(0, duration - elapsed);
   }
 
-  function getTargetElapsed() {
-    let elapsed = (state.targetTimer && state.targetTimer.elapsedBeforePause) || 0;
-    if (state.targetTimer && state.targetTimer.status === 'running') {
-      elapsed += Date.now() - state.targetTimer.startTime;
-    }
-    return elapsed;
-  }
-
-  // Animation Frame Loop
+  // =========================================================================
+  // ANIMATION FRAME RENDER LOOP (SINGLE SOURCE OF TRUTH)
+  // =========================================================================
   function tick() {
     const swMs = getSwElapsed();
     const tgtMs = getTargetRemaining();
-    const tgtElapsed = getTargetElapsed();
 
+    const swParts = formatTimeParts(swMs);
+    const tgtParts = formatTimeParts(tgtMs);
+
+    const activeStatus = state.mode === 'stopwatch'
+      ? (state.stopwatch ? state.stopwatch.status : 'stopped')
+      : (state.mode === 'timer' ? (state.targetTimer ? state.targetTimer.status : 'stopped') : 'running');
+
+    // 1. UPDATE MODE A: MINI PILL VIEW
+    if (miniDigits) {
+      const activeDisplay = state.mode === 'timer' ? tgtParts : swParts;
+      miniDigits.innerHTML = activeDisplay.base + '<small id="mini-timer-millis">.' + activeDisplay.millis2 + '</small>';
+    }
+
+    if (miniStatusDot) {
+      miniStatusDot.className = 'mini-status-dot ' + activeStatus;
+    }
+    const miniInner = document.getElementById('mini-pill-inner');
+    if (miniInner) {
+      miniInner.className = 'mini-pill-inner is-' + activeStatus;
+    }
+    const timerHero = document.getElementById('float-timer-hero');
+    if (timerHero) {
+      timerHero.className = 'float-timer-hero is-' + activeStatus;
+    }
+
+    // 2. UPDATE MODE B: NORMAL WIDGET VIEW
     if (state.mode === 'dual') {
       if (modeBadge) modeBadge.textContent = '⚡ DUAL MODE';
-      if (singleView) singleView.style.display = 'none';
+      if (clockSingle) clockSingle.style.display = 'none';
       if (clockDual) clockDual.style.display = 'flex';
 
-      const swP = formatTimeParts(swMs);
-      const tgtP = formatTimeParts(tgtMs);
-      if (dualSw) dualSw.textContent = swP.base + '.' + swP.tenths;
-      if (dualTimer) dualTimer.textContent = tgtP.base + '.' + tgtP.tenths;
+      if (dualSw) dualSw.textContent = swParts.base + '.' + swParts.millis2;
+      if (dualTimer) dualTimer.textContent = tgtParts.base + '.' + tgtParts.millis2;
 
       if (tgtMs <= 300000 && tgtMs > 0 && state.targetTimer.status === 'running') {
         if (dualTimer) dualTimer.classList.add('warning');
@@ -290,58 +232,46 @@
 
     } else if (state.mode === 'timer') {
       if (modeBadge) modeBadge.textContent = 'TARGET TIMER';
-      if (singleView) singleView.style.display = 'block';
+      if (clockSingle) {
+        clockSingle.style.display = 'block';
+        clockSingle.innerHTML = tgtParts.base + '<small id="float-millis">.' + tgtParts.millis2 + '</small>';
+        clockSingle.classList.toggle('warning', tgtMs <= 300000 && tgtMs > 0 && state.targetTimer.status === 'running');
+      }
       if (clockDual) clockDual.style.display = 'none';
 
-      const parts = formatTimeParts(tgtMs);
-      if (clockSingle) clockSingle.innerHTML = parts.base + '<small id="float-millis">.' + parts.tenths + '</small>';
-
-      const targetDuration = (state.targetTimer && state.targetTimer.targetDurationMs) || 1800000;
-      const progressRatio = Math.min(1, tgtElapsed / targetDuration);
-      if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
-
-      if (tgtMs <= 300000 && tgtMs > 0 && state.targetTimer.status === 'running') {
-        if (clockSingle) clockSingle.classList.add('warning');
-      } else {
-        if (clockSingle) clockSingle.classList.remove('warning');
-      }
-
       const isRunning = state.targetTimer.status === 'running';
-      if (playBtnText) playBtnText.textContent = isRunning ? 'Pause' : 'Start';
+      if (playBtnText) playBtnText.textContent = isRunning ? 'Pause' : 'Play';
       if (playBtn) playBtn.classList.toggle('running', isRunning);
 
     } else {
       if (modeBadge) modeBadge.textContent = 'STOPWATCH';
-      if (singleView) singleView.style.display = 'block';
+      if (clockSingle) {
+        clockSingle.style.display = 'block';
+        clockSingle.classList.remove('warning');
+        clockSingle.innerHTML = swParts.base + '<small id="float-millis">.' + swParts.millis2 + '</small>';
+      }
       if (clockDual) clockDual.style.display = 'none';
-      if (clockSingle) clockSingle.classList.remove('warning');
-
-      const parts = formatTimeParts(swMs);
-      if (clockSingle) clockSingle.innerHTML = parts.base + '<small id="float-millis">.' + parts.tenths + '</small>';
-
-      // 60-second continuous rotating progress arc
-      const secRatio = (swMs % 60000) / 60000;
-      if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
 
       const isRunning = state.stopwatch.status === 'running';
-      if (playBtnText) playBtnText.textContent = isRunning ? 'Pause' : 'Start';
+      if (playBtnText) playBtnText.textContent = isRunning ? 'Pause' : 'Play';
       if (playBtn) playBtn.classList.toggle('running', isRunning);
     }
 
-    // 3 Sub-Gauges (LAPS, SPLIT, STATUS)
+    if (normalStatusDot) {
+      normalStatusDot.className = 'status-pulse-dot ' + activeStatus;
+    }
+
+    // Sub-Gauges (Normal Mode)
     if (subLaps) subLaps.textContent = state.laps ? state.laps.length : 0;
     if (subSplit) {
       if (state.laps && state.laps.length > 0) {
         subSplit.textContent = formatTimeParts(state.laps[0].lapDuration).base;
       } else {
-        subSplit.textContent = '00:00';
+        subSplit.textContent = '00:00:00';
       }
     }
     if (subState) {
-      const curStatus = state.mode === 'stopwatch'
-        ? (state.stopwatch ? state.stopwatch.status : 'ready')
-        : (state.mode === 'timer' ? (state.targetTimer ? state.targetTimer.status : 'ready') : 'dual');
-      subState.textContent = (curStatus || 'READY').toUpperCase();
+      subState.textContent = (activeStatus || 'READY').toUpperCase();
     }
 
     requestAnimationFrame(tick);
@@ -349,7 +279,129 @@
 
   tick();
 
-  // Control Buttons
+  // Render Expanded Laps
+  function renderExpandedLaps() {
+    if (!expandedLapsList) return;
+    if (expandedLapCount) expandedLapCount.textContent = state.laps ? state.laps.length : 0;
+
+    if (!state.laps || state.laps.length === 0) {
+      expandedLapsList.innerHTML = '<div class="expanded-lap-empty">No laps recorded yet. Press L to record split.</div>';
+      return;
+    }
+
+    expandedLapsList.innerHTML = state.laps.slice(0, 5).map(lap => {
+      const splitP = formatTimeParts(lap.lapDuration);
+      const totalP = formatTimeParts(lap.totalTime);
+      return '<div class="expanded-lap-row">' +
+        '<span class="expanded-lap-num">#' + String(lap.num).padStart(2, '0') + '</span>' +
+        '<span class="expanded-lap-split">+' + splitP.base + '.' + splitP.millis2 + '</span>' +
+        '<span class="expanded-lap-total">' + totalP.base + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  // =========================================================================
+  // TWO FLOATING MODES: TRANSITIONS & WINDOW POSITION PRESERVATION
+  // =========================================================================
+  function transitionToMode(mode) {
+    if (mode !== 'mini' && mode !== 'normal') mode = 'normal';
+    currentVisualMode = mode;
+    document.body.className = 'mode-' + mode;
+
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ algotimer_float_mode: mode });
+      } else {
+        localStorage.setItem('algotimer_float_mode', mode);
+      }
+    } catch (e) {}
+
+    const targetDims = DIMENSIONS[mode];
+
+    // Preserve window position across mode transitions
+    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
+      chrome.windows.getCurrent((win) => {
+        if (!win) return;
+        const corner = CORNERS[currentCornerIdx];
+        const screenW = screen.availWidth;
+        const screenH = screen.availHeight;
+
+        let newLeft = win.left;
+        let newTop = win.top;
+
+        // Keep anchored to the dock corner
+        if (corner === 'top-right') {
+          newLeft = (win.left + win.width) - targetDims.width;
+          newTop = win.top;
+        } else if (corner === 'bottom-right') {
+          newLeft = (win.left + win.width) - targetDims.width;
+          newTop = (win.top + win.height) - targetDims.height;
+        } else if (corner === 'bottom-left') {
+          newLeft = win.left;
+          newTop = (win.top + win.height) - targetDims.height;
+        } else {
+          newLeft = win.left;
+          newTop = win.top;
+        }
+
+        newLeft = Math.max(10, Math.min(screenW - targetDims.width - 10, newLeft));
+        newTop = Math.max(10, Math.min(screenH - targetDims.height - 10, newTop));
+
+        chrome.windows.update(win.id, {
+          width: targetDims.width,
+          height: targetDims.height,
+          left: Math.round(newLeft),
+          top: Math.round(newTop)
+        });
+      });
+    } else {
+      try {
+        window.resizeTo(targetDims.width, targetDims.height);
+      } catch (e) {}
+    }
+
+    if (activePipWindow) {
+      try {
+        activePipWindow.resizeTo(targetDims.width, targetDims.height);
+      } catch (e) {}
+    }
+  }
+
+  // Click on Mini Pill -> Expand to Normal Floating Mode
+  if (miniPillView) {
+    miniPillView.addEventListener('click', () => {
+      transitionToMode('normal');
+    });
+  }
+
+  // Click on Minimize Button -> Transition to Mini Timer Mode
+  if (btnMinimizeToMini) {
+    btnMinimizeToMini.addEventListener('click', (e) => {
+      e.stopPropagation();
+      transitionToMode('mini');
+    });
+  }
+
+  // Smart Responsive Sizing via ResizeObserver
+  function checkResponsiveLayout() {
+    const h = window.innerHeight;
+    const w = window.innerWidth;
+
+    if (currentVisualMode === 'normal') {
+      if (h >= 320 && w >= 320) {
+        document.body.classList.add('is-expanded');
+        renderExpandedLaps();
+      } else {
+        document.body.classList.remove('is-expanded');
+      }
+    }
+  }
+
+  window.addEventListener('resize', checkResponsiveLayout);
+
+  // =========================================================================
+  // CONTROL BUTTONS (START, LAP, RESET)
+  // =========================================================================
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       playSound('tick');
@@ -382,7 +434,7 @@
   }
 
   // =========================================================================
-  // ALWAYS ON TOP: Document Picture-in-Picture (Floats over VS Code, Discord, etc.)
+  // ALWAYS ON TOP: Document Picture-in-Picture
   // =========================================================================
   async function launchAlwaysOnTopPiP() {
     if (!('documentPictureInPicture' in window)) {
@@ -397,18 +449,16 @@
     }
 
     try {
-      const curSize = SIZES[currentSizeIdx];
+      const curDims = DIMENSIONS[currentVisualMode] || DIMENSIONS.normal;
       const pipWindow = await window.documentPictureInPicture.requestWindow({
-        width: curSize.width,
-        height: curSize.height
+        width: curDims.width,
+        height: curDims.height
       });
 
       activePipWindow = pipWindow;
       if (pipBtn) pipBtn.classList.add('active');
       const pipText = document.getElementById('btn-pip-text');
       if (pipText) pipText.textContent = 'Pinned';
-      const tipBanner = document.getElementById('banner-pip-tip');
-      if (tipBanner) tipBanner.style.display = 'none';
 
       // Clone styles
       [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
@@ -423,8 +473,7 @@
         document.body.appendChild(widget);
         activePipWindow = null;
         if (pipBtn) pipBtn.classList.remove('active');
-        if (pipText) pipText.textContent = 'Always on Top';
-        if (tipBanner) tipBanner.style.display = 'flex';
+        if (pipText) pipText.textContent = 'Pin';
       });
 
     } catch (err) {
@@ -433,7 +482,6 @@
   }
 
   if (pipBtn) pipBtn.addEventListener('click', launchAlwaysOnTopPiP);
-  if (bannerPipBtn) bannerPipBtn.addEventListener('click', launchAlwaysOnTopPiP);
 
   // =========================================================================
   // CORNER DOCK CYCLING: Snaps window to screen corners
@@ -444,20 +492,20 @@
       const corner = CORNERS[currentCornerIdx];
       if (cornerLabel) cornerLabel.textContent = cornerNames[corner];
 
-      const curSize = SIZES[currentSizeIdx];
+      const curDims = DIMENSIONS[currentVisualMode] || DIMENSIONS.normal;
       const screenW = screen.availWidth;
       const screenH = screen.availHeight;
 
       let left = 20, top = 40;
       if (corner === 'top-right') {
-        left = screenW - curSize.width - 25;
+        left = screenW - curDims.width - 25;
         top = 40;
       } else if (corner === 'bottom-right') {
-        left = screenW - curSize.width - 25;
-        top = screenH - curSize.height - 40;
+        left = screenW - curDims.width - 25;
+        top = screenH - curDims.height - 40;
       } else if (corner === 'bottom-left') {
         left = 25;
-        top = screenH - curSize.height - 40;
+        top = screenH - curDims.height - 40;
       } else if (corner === 'top-left') {
         left = 25;
         top = 40;
@@ -469,41 +517,13 @@
             chrome.windows.update(win.id, {
               left: Math.round(left),
               top: Math.round(top),
-              width: curSize.width,
-              height: curSize.height
+              width: curDims.width,
+              height: curDims.height
             });
           }
         });
       } else {
         window.moveTo(Math.round(left), Math.round(top));
-      }
-    });
-  }
-
-  // =========================================================================
-  // SIZE TOGGLE: Normal -> Compact -> Mini
-  // =========================================================================
-  if (sizeBtn) {
-    sizeBtn.addEventListener('click', () => {
-      currentSizeIdx = (currentSizeIdx + 1) % SIZES.length;
-      const curSize = SIZES[currentSizeIdx];
-      document.body.setAttribute('data-size', curSize.name);
-
-      if (sizeLabel) {
-        sizeLabel.textContent = curSize.name.charAt(0).toUpperCase() + curSize.name.slice(1);
-      }
-
-      if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.getCurrent) {
-        chrome.windows.getCurrent((win) => {
-          if (win) {
-            chrome.windows.update(win.id, {
-              width: curSize.width,
-              height: curSize.height
-            });
-          }
-        });
-      } else {
-        window.resizeTo(curSize.width, curSize.height);
       }
     });
   }
@@ -529,28 +549,28 @@
 
   // Sync state initially
   sendMsg({ type: 'GET_STATE' }, (res) => {
-    if (res && res.state) state = Object.assign(state, res.state);
+    if (res && res.state) {
+      state = Object.assign(state, res.state);
+      renderExpandedLaps();
+    }
   });
 
-  // Load and apply theme
+  // Load and apply saved mode
   try {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['activeTheme'], (res) => {
-        if (res && res.activeTheme) applyTheme(res.activeTheme);
-        else applyTheme('cosmic');
-      });
-      // Listen for storage changes from popup
-      chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes.activeTheme) {
-          applyTheme(changes.activeTheme.newValue);
+      chrome.storage.local.get(['algotimer_float_mode'], (res) => {
+        if (res && res.algotimer_float_mode) {
+          transitionToMode(res.algotimer_float_mode);
+        } else {
+          transitionToMode('normal');
         }
       });
     } else {
-      const saved = localStorage.getItem('algotimer_theme');
-      applyTheme(saved || 'cosmic');
+      const savedMode = localStorage.getItem('algotimer_float_mode');
+      transitionToMode(savedMode || 'normal');
     }
   } catch (e) {
-    applyTheme('cosmic');
+    transitionToMode('normal');
   }
 
   // Listen for broadcast messages from background / popup
@@ -558,8 +578,7 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.type === 'TICK' && msg.state) {
         state = Object.assign(state, msg.state);
-      } else if (msg.type === 'THEME_CHANGED' && msg.theme) {
-        applyTheme(msg.theme);
+        renderExpandedLaps();
       }
     });
   }
