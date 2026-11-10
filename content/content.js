@@ -77,11 +77,12 @@
 
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       try {
-        chrome.storage.local.get(['widgetCorner', 'widgetSize', 'widgetWidth'], (res) => {
+        chrome.storage.local.get(['widgetCorner', 'widgetSize', 'widgetWidth', 'activeTheme'], (res) => {
           if (res) {
             if (res.widgetCorner && CORNERS.includes(res.widgetCorner)) currentCorner = res.widgetCorner;
             if (res.widgetSize && SIZES.includes(res.widgetSize)) currentSize = res.widgetSize;
             if (res.widgetWidth) customWidth = res.widgetWidth;
+            applyWidgetTheme(res.activeTheme);
             applyPositionAndSize();
           }
         });
@@ -209,6 +210,11 @@
   // Build and Inject Floating Root DOM
   const root = document.createElement('div');
   root.id = 'algotimer-floating-root';
+  root.dataset.theme = 'sunset';
+  const widgetThemes = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const applyWidgetTheme = (theme) => {
+    root.dataset.theme = widgetThemes.includes(theme) ? theme : 'sunset';
+  };
 
   const widget = document.createElement('div');
   widget.className = 'algotimer-widget';
@@ -235,7 +241,7 @@
         </button>
 
         <!-- Pop Out Window / PiP -->
-        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-on-top PiP Float Screen">
+        <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Open persistent floating timer window">
           ⤢
         </button>
 
@@ -540,7 +546,7 @@
     } catch (err) {}
   });
 
-  // Pop Up Screen (Opens dedicated Always-on-Top Floating window outside browser over other apps)
+  // Open the persistent extension window; browser Picture-in-Picture is available from that window.
   pipBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     safeSendMessage({ type: 'OPEN_FLOAT_WINDOW' });
@@ -740,6 +746,14 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.type === 'STATE_UPDATED') {
         syncState(msg.state);
+      }
+    });
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.activeTheme) {
+        applyWidgetTheme(changes.activeTheme.newValue);
       }
     });
   }

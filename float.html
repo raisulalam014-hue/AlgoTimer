@@ -1,40 +1,111 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="black">
+<html lang="en" data-theme="sunset">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer - Floating Stopwatch</title>
+  <title>AlgoTimer - Persistent Floating Timer</title>
   <style>
     /* ==========================================================================
-       AlgoTimer — Premium Black Minimalist Floating Stopwatch
-       Apple Watch Aesthetics x Modern Fintech Dashboard
-       Pitch Black (#080808) & Dark Charcoal Surfaces with Vibrant Accents
+       AlgoTimer - Dynamic Cyber-Luxury Floating Screen
+       Obsidian Backdrop | Violet Nebula Glow | Electric Cyan & Magenta Accents
        ========================================================================== */
 
-    :root {
-      --bg-main: #080808;
-      --bg-secondary: #101010;
-      --bg-card: #171717;
-      --bg-card-elevated: #202020;
-      --bg-pill: rgba(16, 16, 16, 0.96);
-      --border-subtle: #303030;
-      --border-focus: #484848;
+    :root,
+    [data-theme="cosmic"] {
+      --bg-deep: #060713;
+      --bg-nebula: radial-gradient(circle at 50% 25%, rgba(124, 58, 237, 0.35) 0%, rgba(6, 182, 212, 0.14) 42%, rgba(6, 7, 19, 0.98) 82%);
+      --bg-surface: rgba(16, 19, 38, 0.85);
+      --bg-surface-elevated: rgba(24, 28, 56, 0.82);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(0, 242, 254, 0.45);
 
-      --text-primary: #FFFFFF;
-      --text-secondary: #A5A5A5;
-      --text-muted: #707070;
+      --accent-cyan: #00f2fe;
+      --accent-purple: #8b5cf6;
+      --accent-magenta: #ec4899;
+      --accent-lavender: #c084fc;
 
-      --accent-blue: #287BFF;
-      --accent-green: #49C98B;
-      --accent-orange: #FF4B24;
-      --accent-yellow: #FFD329;
-      --accent-purple: #995BFF;
+      --hero-btn: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #00f2fe 100%);
+      --hero-shadow: 0 4px 18px rgba(124, 58, 237, 0.55), 0 0 14px rgba(0, 242, 254, 0.35);
 
-      --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", "Inter", "Segoe UI", Roboto, sans-serif;
+      --kbd-border: rgba(0, 242, 254, 0.5);
+      --kbd-color: #00f2fe;
 
-      --morph-duration: 200ms;
-      --morph-easing: cubic-bezier(0.22, 1, 0.36, 1);
+      --horizon-start: #ec4899;
+      --horizon-mid: #8b5cf6;
+      --horizon-end: #00f2fe;
+      --horizon-shadow: 0 -2px 14px 2px rgba(0, 242, 254, 0.7), 0 -4px 28px 6px rgba(139, 92, 246, 0.5);
+
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    .pin-control[aria-pressed="true"] {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 9%, white);
+      border-color: var(--border-active);
+    }
+
+    [data-theme="cyan"] {
+      --bg-deep: #040914;
+      --bg-nebula: radial-gradient(circle at 50% 25%, rgba(2, 132, 199, 0.35) 0%, rgba(0, 242, 254, 0.16) 45%, rgba(4, 9, 20, 0.98) 82%);
+      --bg-surface: rgba(10, 24, 42, 0.88);
+      --bg-surface-elevated: rgba(14, 34, 58, 0.85);
+      --border-active: rgba(0, 242, 254, 0.6);
+      --accent-cyan: #00f2fe;
+      --accent-purple: #0284c7;
+      --accent-magenta: #f59e0b;
+      --accent-lavender: #7dd3fc;
+      --hero-btn: linear-gradient(135deg, #0284c7 0%, #00f2fe 100%);
+      --hero-shadow: 0 4px 18px rgba(2, 132, 199, 0.55), 0 0 16px rgba(0, 242, 254, 0.45);
+      --kbd-border: rgba(0, 242, 254, 0.65);
+      --kbd-color: #00f2fe;
+      --horizon-start: #f59e0b;
+      --horizon-mid: #0284c7;
+      --horizon-end: #00f2fe;
+      --horizon-shadow: 0 -2px 14px 2px rgba(0, 242, 254, 0.7), 0 -4px 26px 5px rgba(2, 132, 199, 0.45);
+    }
+
+    [data-theme="violet"] {
+      --bg-deep: #080616;
+      --bg-nebula: radial-gradient(circle at 50% 25%, rgba(139, 92, 246, 0.4) 0%, rgba(192, 132, 252, 0.15) 45%, rgba(8, 6, 22, 0.98) 82%);
+      --bg-surface: rgba(22, 16, 44, 0.88);
+      --bg-surface-elevated: rgba(32, 24, 62, 0.85);
+      --border-active: rgba(192, 132, 252, 0.6);
+      --accent-cyan: #c084fc;
+      --accent-purple: #a855f7;
+      --accent-magenta: #ec4899;
+      --accent-lavender: #f0abfc;
+      --hero-btn: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
+      --hero-shadow: 0 4px 18px rgba(124, 58, 237, 0.55), 0 0 16px rgba(192, 132, 252, 0.45);
+      --kbd-border: rgba(192, 132, 252, 0.6);
+      --kbd-color: #f0abfc;
+      --horizon-start: #ec4899;
+      --horizon-mid: #a855f7;
+      --horizon-end: #c084fc;
+      --horizon-shadow: 0 -2px 14px 2px rgba(192, 132, 252, 0.7), 0 -4px 28px 6px rgba(168, 85, 247, 0.5);
+    }
+
+    [data-theme="emerald"] {
+      --bg-deep: #040e0b;
+      --bg-nebula: radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.35) 0%, rgba(52, 211, 153, 0.15) 45%, rgba(4, 14, 11, 0.98) 82%);
+      --bg-surface: rgba(10, 30, 24, 0.88);
+      --bg-surface-elevated: rgba(16, 44, 34, 0.85);
+      --border-active: rgba(52, 211, 153, 0.6);
+      --accent-cyan: #34d399;
+      --accent-purple: #10b981;
+      --accent-magenta: #06b6d4;
+      --accent-lavender: #a7f3d0;
+      --hero-btn: linear-gradient(135deg, #059669 0%, #34d399 100%);
+      --hero-shadow: 0 4px 18px rgba(5, 150, 105, 0.55), 0 0 16px rgba(52, 211, 153, 0.45);
+      --kbd-border: rgba(52, 211, 153, 0.6);
+      --kbd-color: #6ee7b7;
+      --horizon-start: #10b981;
+      --horizon-mid: #34d399;
+      --horizon-end: #6ee7b7;
+      --horizon-shadow: 0 -2px 14px 2px rgba(52, 211, 153, 0.7), 0 -4px 28px 6px rgba(16, 185, 129, 0.45);
     }
 
     * {
@@ -42,14 +113,15 @@
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     html, body {
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: var(--bg-main);
+      background-color: var(--bg-deep);
+      background-image: var(--bg-nebula);
+      background-attachment: fixed;
       font-family: var(--font-sans);
       color: var(--text-primary);
       user-select: none;
@@ -66,156 +138,44 @@
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      background-color: var(--bg-main);
     }
 
-    /* ==========================================================================
-       MODE A: MINI TIMER PILL (NUMBER ONLY)
-       Compact rounded black pill with accent milliseconds
-       ========================================================================== */
-    #mini-pill-view {
+    /* Bottom Horizon Flare */
+    .horizon-flare {
       position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 12px;
-      box-sizing: border-box;
-      cursor: pointer;
-      background: transparent;
-      opacity: 0;
-      transform: scale(0.96);
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity var(--morph-duration) var(--morph-easing), 
-                  transform var(--morph-duration) var(--morph-easing),
-                  visibility var(--morph-duration);
-      z-index: 10;
-    }
-
-    .mini-pill-inner {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 9px 20px;
-      border-radius: 9999px;
-      background: var(--bg-pill);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-      transition: transform 0.16s var(--morph-easing), border-color 0.2s ease, box-shadow 0.2s ease;
-      max-width: 95%;
-    }
-
-    #mini-pill-view:hover .mini-pill-inner {
-      transform: translateY(-1px) scale(1.02);
-      border-color: var(--border-focus);
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
-    }
-
-    /* Living Timer subtle glow on Pill when running */
-    .mini-pill-inner.is-running {
-      border-color: rgba(73, 201, 139, 0.4);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 16px rgba(73, 201, 139, 0.2);
-    }
-
-    .mini-pill-inner.is-paused {
-      border-color: rgba(255, 211, 41, 0.35);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 211, 41, 0.15);
-    }
-
-    .mini-status-dot {
-      width: 7px;
-      height: 7px;
+      bottom: 0;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--horizon-start) 20%, var(--horizon-mid) 50%, var(--horizon-end) 80%, transparent 100%);
+      box-shadow: var(--horizon-shadow);
       border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--text-muted);
-      transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .mini-status-dot.running {
-      background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulseDot 1.6s infinite ease-in-out;
-    }
-
-    .mini-status-dot.paused {
-      background: var(--accent-yellow);
-      box-shadow: 0 0 6px var(--accent-yellow);
-      animation: none;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.85); }
-    }
-
-    .mini-timer-digits {
-      font-family: var(--font-mono);
-      font-size: clamp(18px, 6vw, 24px);
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.5px;
-      color: #FFFFFF;
-      line-height: 1;
-      white-space: nowrap;
-    }
-
-    .mini-timer-digits small {
-      font-size: 0.75em;
-      color: var(--accent-blue);
-      margin-left: 2px;
-    }
-
-    /* ==========================================================================
-       MODE B: NORMAL FLOATING WIDGET (Apple Watch + Fintech Card)
-       Suggested Dimensions: ~300px x ~235px
-       ========================================================================== */
-    #normal-widget-view {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      opacity: 0;
-      transform: scale(0.96);
-      visibility: hidden;
       pointer-events: none;
-      transition: opacity var(--morph-duration) var(--morph-easing),
-                  transform var(--morph-duration) var(--morph-easing),
-                  visibility var(--morph-duration);
-      z-index: 5;
+      z-index: 20;
     }
 
-    /* Minimalist Header */
+    /* Header */
     .float-header {
-      height: 40px;
+      height: 38px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 10px;
-      background: var(--bg-secondary);
+      background: rgba(16, 19, 38, 0.75);
       border-bottom: 1px solid var(--border-subtle);
       gap: 6px;
-      transition: opacity var(--morph-duration) var(--morph-easing),
-                  transform var(--morph-duration) var(--morph-easing);
-      transform: translateY(-8px);
-      opacity: 0;
     }
 
     .float-title {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 11px;
       font-weight: 800;
-      color: #FFFFFF;
-      letter-spacing: 0.3px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
       white-space: nowrap;
     }
 
@@ -223,7 +183,8 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--accent-blue);
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+      box-shadow: 0 0 8px var(--accent-cyan);
       flex-shrink: 0;
     }
 
@@ -232,191 +193,195 @@
       align-items: center;
       gap: 4px;
       flex-shrink: 0;
+      -webkit-app-region: no-drag;
     }
 
     .float-btn {
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
       font-size: 10px;
       font-weight: 700;
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       white-space: nowrap;
-      transition: all 140ms var(--morph-easing);
+      transition: all 0.15s ease;
     }
 
     .float-btn:hover {
-      background: var(--bg-card-elevated);
-      border-color: var(--border-focus);
-      color: #FFFFFF;
-    }
-
-    .float-btn:active {
-      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-active);
+      color: #ffffff;
+      transform: translateY(-1px);
     }
 
     .float-btn.active {
-      background: var(--bg-card-elevated);
-      border-color: var(--accent-blue);
-      color: #FFFFFF;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, rgba(6, 182, 212, 0.3) 100%);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
     }
 
-    /* Minimize to Mini Pill Button */
-    .float-btn-minimize {
-      background: var(--bg-card-elevated);
-      color: #FFFFFF;
-    }
-
-    /* Normal Body Layout */
+    /* Main Body */
     .float-body {
       flex: 1;
-      min-height: 0;
+      min-height: 0; /* Critical for child flex scaling! */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px 10px;
-      gap: 6px;
+      padding: 6px 12px 10px;
+      gap: 4px;
       text-align: center;
-      overflow: hidden;
       position: relative;
+      overflow: hidden;
     }
 
     .float-tag {
       font-size: 9px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: var(--bg-card);
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-subtle);
-      padding: 2px 10px;
+      padding: 2px 8px;
       border-radius: 12px;
       max-width: 90%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       flex-shrink: 0;
-      transition: opacity var(--morph-duration) var(--morph-easing),
-                  transform var(--morph-duration) var(--morph-easing);
-      transform: translateY(-4px);
-      opacity: 0;
     }
 
-    /* Timer Hero Section */
-    .float-timer-hero {
+    /* Single View & Dial Area */
+    #float-single-view {
       flex: 1;
       min-height: 0;
       width: 100%;
       display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .float-dial-wrapper {
+      position: relative;
+      width: min(150px, 36vh, 55vw);
+      height: min(150px, 36vh, 55vw);
+      max-width: 160px;
+      max-height: 160px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 1;
+    }
+
+    .float-dial-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .float-dial-ticks {
+      stroke: rgba(255, 255, 255, 0.15);
+    }
+
+    .float-dial-track {
+      stroke: rgba(255, 255, 255, 0.06);
+    }
+
+    .float-dial-progress {
+      stroke-dasharray: 439.82;
+      stroke-dashoffset: 439.82;
+      transition: stroke-dashoffset 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .float-dial-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      position: relative;
-    }
-
-    /* Subtle Living Glow */
-    .hero-glow-halo {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 170px;
-      height: 85px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: radial-gradient(ellipse at center, rgba(40, 123, 255, 0.18) 0%, transparent 70%);
-      filter: blur(14px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .float-timer-hero.is-running .hero-glow-halo {
-      opacity: 1;
-    }
-
-    .float-timer-hero.is-paused .hero-glow-halo {
-      opacity: 0.4;
-      background: radial-gradient(ellipse at center, rgba(255, 211, 41, 0.15) 0%, transparent 70%);
-    }
-
-    .float-status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      margin-bottom: 2px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .status-pulse-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      flex-shrink: 0;
-      transition: background-color 0.2s ease;
-    }
-
-    .status-pulse-dot.running {
-      background: var(--accent-green);
-      box-shadow: 0 0 6px var(--accent-green);
-    }
-
-    .status-pulse-dot.paused {
-      background: var(--accent-yellow);
-      box-shadow: 0 0 6px var(--accent-yellow);
+      gap: 2px;
     }
 
     .float-mode-badge {
       font-size: 8px;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
       font-weight: 800;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
       text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1px 7px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
     }
 
     .float-clock {
-      position: relative;
-      z-index: 1;
       font-family: var(--font-mono);
-      font-size: clamp(24px, 7vh, 34px);
+      font-size: clamp(20px, 6vh, 26px);
       font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -1px;
-      color: #FFFFFF;
+      color: #ffffff;
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
       line-height: 1.1;
-      white-space: nowrap;
     }
 
     .float-clock small {
-      font-size: 0.72em;
-      color: var(--accent-blue);
+      font-size: clamp(12px, 3.5vh, 15px);
+      color: var(--accent-cyan);
       margin-left: 2px;
     }
 
     .float-clock.warning {
-      color: var(--accent-orange);
+      color: #f43f5e;
+      text-shadow: 0 0 16px rgba(244, 63, 94, 0.6);
+    }
+
+    /* Sub-Gauges (LAPS, SPLIT, STATUS) */
+    .float-sub-gauges {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .float-sub-gauge {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 2px 4px;
+      min-width: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .float-sub-val {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .float-sub-lbl {
+      font-size: 6px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
     }
 
     /* Dual Clocks View */
     .float-dual-box {
-      position: relative;
-      z-index: 1;
       display: flex;
       flex-direction: column;
       gap: 4px;
       width: 100%;
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 6px 10px;
@@ -431,142 +396,75 @@
 
     .float-dual-label {
       font-size: 10px;
-      color: var(--text-secondary);
+      color: #94a3b8;
       font-weight: 700;
     }
 
     .float-dual-digits {
       font-family: var(--font-mono);
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      color: #FFFFFF;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
     }
 
     .float-dual-digits.warning {
-      color: var(--accent-orange);
+      color: #f43f5e;
     }
 
-    /* ==========================================================================
-       ACTION CONTROLS ROW — Apple Watch Squircle Buttons
-       ========================================================================== */
+    /* Controls Row */
     .float-controls {
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
       margin-top: 2px;
-      transition: opacity var(--morph-duration) var(--morph-easing),
-                  transform var(--morph-duration) var(--morph-easing);
-      transform: translateY(8px);
-      opacity: 0;
     }
 
     .float-ctrl-btn {
-      background: var(--bg-card);
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      border-radius: 12px;
-      padding: 7px 12px;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 6px 10px;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      transition: all 140ms var(--morph-easing);
-      user-select: none;
+      gap: 4px;
+      transition: all 0.15s ease;
     }
 
     .float-ctrl-btn:hover {
-      background: var(--bg-card-elevated);
-      border-color: var(--border-focus);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-active);
       transform: translateY(-1px);
-    }
-
-    .float-ctrl-btn:active {
-      transform: scale(0.95);
-    }
-
-    #btn-reset:active {
-      transform: scale(0.95) rotate(-15deg);
     }
 
     .float-ctrl-primary {
       flex: 1.4;
-      background: var(--accent-blue);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #FFFFFF;
-      padding: 8px 16px;
-      border-radius: 14px;
+      background: var(--hero-btn);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 7px 14px;
+      border-radius: 12px;
+      box-shadow: var(--hero-shadow);
       font-size: 12px;
       font-weight: 800;
-      box-shadow: 0 4px 16px rgba(40, 123, 255, 0.35);
-      position: relative;
-      overflow: hidden;
-      transition: background 160ms var(--morph-easing),
-                  box-shadow 160ms var(--morph-easing),
-                  transform 140ms var(--morph-easing);
     }
 
     .float-ctrl-primary:hover {
-      background: #3c8aff;
-      box-shadow: 0 6px 20px rgba(40, 123, 255, 0.5);
-    }
-
-    .float-ctrl-primary:active {
-      transform: scale(0.96);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(124, 58, 237, 0.7), 0 0 16px rgba(0, 242, 254, 0.5);
     }
 
     .float-ctrl-primary.running {
-      background: var(--accent-orange);
-      box-shadow: 0 4px 16px rgba(255, 75, 36, 0.45);
-    }
-
-    .float-ctrl-primary.running:hover {
-      background: #ff6140;
-    }
-
-    .btn-icon-wrap {
-      position: relative;
-      width: 12px;
-      height: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .btn-icon-wrap svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      transition: opacity 160ms var(--morph-easing),
-                  transform 160ms var(--morph-easing);
-    }
-
-    .float-ctrl-primary:not(.running) .icon-play {
-      opacity: 1;
-      transform: scale(1) rotate(0deg);
-    }
-
-    .float-ctrl-primary:not(.running) .icon-pause {
-      opacity: 0;
-      transform: scale(0.6) rotate(-90deg);
-    }
-
-    .float-ctrl-primary.running .icon-play {
-      opacity: 0;
-      transform: scale(0.6) rotate(90deg);
-    }
-
-    .float-ctrl-primary.running .icon-pause {
-      opacity: 1;
-      transform: scale(1) rotate(0deg);
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+      box-shadow: 0 4px 20px rgba(225, 29, 72, 0.6);
     }
 
     /* Shortcut Keycaps */
@@ -580,330 +478,545 @@
       font-family: var(--font-mono);
       font-size: 8px;
       font-weight: 800;
-      color: var(--text-muted);
-      background: var(--bg-main);
-      border: 1px solid var(--border-subtle);
+      color: var(--kbd-color);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--kbd-border);
       border-radius: 4px;
+      box-shadow: 0 0 6px rgba(0, 242, 254, 0.25);
     }
 
     .float-ctrl-primary kbd.float-key {
-      color: #FFFFFF;
-      background: rgba(0, 0, 0, 0.3);
-      border-color: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.25);
     }
 
-    /* Sub-Gauges (LAPS, SPLIT, STATUS) */
-    .float-sub-gauges {
-      display: flex;
-      gap: 6px;
-      margin-top: 2px;
-      flex-shrink: 0;
-      transition: opacity var(--morph-duration) var(--morph-easing),
-                  transform var(--morph-duration) var(--morph-easing);
-      transform: translateY(6px);
-      opacity: 0;
+    /* ================= RESPONSIVE ADAPTATIONS ================= */
+    /* COMPACT MODE (Height < 330px or Width < 290px) */
+    @media (max-height: 330px), (max-width: 290px) {
+      .float-tag,
+      .float-sub-gauges,
+      .btn-lbl {
+        display: none !important;
+      }
+      .float-dial-wrapper {
+        width: min(105px, 34vh);
+        height: min(105px, 34vh);
+      }
+      .float-clock {
+        font-size: 19px;
+      }
+      .float-clock small {
+        font-size: 12px;
+      }
+      .float-body {
+        padding: 4px 8px 6px;
+        gap: 3px;
+      }
+      .float-ctrl-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+      .float-ctrl-primary {
+        padding: 5px 12px;
+        font-size: 11px;
+      }
     }
 
-    .float-sub-gauge {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 3px 8px;
-      min-width: 44px;
+    /* MINI / MICRO MODE (Height < 210px) */
+    @media (max-height: 210px) {
+      .float-tag,
+      .float-sub-gauges,
+      .float-dial-svg,
+      .btn-lbl {
+        display: none !important;
+      }
+      .float-dial-wrapper {
+        width: 100%;
+        height: auto;
+        margin: 0;
+      }
+      .float-clock {
+        font-size: 21px;
+      }
+      .float-clock small {
+        font-size: 13px;
+      }
+      .float-body {
+        padding: 2px 8px 4px;
+        justify-content: center;
+        gap: 4px;
+      }
+      .float-controls {
+        margin-top: 0;
+      }
+      .float-ctrl-btn {
+        padding: 3px 6px;
+        font-size: 9px;
+      }
+    }
+    .float-position-row {
       display: flex;
-      flex-direction: column;
       align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(8, 10, 22, 0.72);
+      color: var(--text-secondary);
+      font-size: 10px;
     }
-
-    .float-sub-val {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
+    .float-position-row select {
+      min-width: 98px;
+      padding: 4px 6px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      background: #101326;
       color: var(--text-primary);
+      font: inherit;
     }
-
-    .float-sub-lbl {
-      font-size: 7px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+    #float-position-note {
+      margin-left: auto;
       color: var(--text-muted);
+      font-size: 9px;
+      text-align: right;
     }
-
-    /* ==========================================================================
-       MODE C: OPTIONAL EXPANDED MODE (Height >= 320px)
-       ========================================================================== */
-    .float-expanded-laps {
+    .float-mini-view {
       display: none;
       width: 100%;
-      flex: 1;
-      min-height: 90px;
-      max-height: 180px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: #080a12;
+      border: 1px solid var(--border-active);
       border-radius: 12px;
-      padding: 8px 10px;
-      margin-top: 4px;
-      flex-direction: column;
-      gap: 6px;
-      overflow: hidden;
+      box-shadow: 0 0 18px rgba(0, 242, 254, 0.14);
     }
-
-    .expanded-laps-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 10px;
+    .mini-clock {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 30px;
       font-weight: 800;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      padding-bottom: 4px;
-      border-bottom: 1px solid var(--border-subtle);
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
     }
-
-    .lap-count-pill {
-      background: var(--accent-blue);
-      color: #FFFFFF;
-      font-size: 9px;
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-family: var(--font-mono);
-    }
-
-    .expanded-laps-list {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding-right: 2px;
-    }
-
-    .expanded-lap-row {
-      display: flex;
+    .mini-status {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      font-size: 10px;
-      padding: 4px 8px;
-      background: var(--bg-secondary);
-      border-radius: 6px;
-      font-family: var(--font-mono);
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+    #float-mini-dot { width: 6px; height: 6px; border-radius: 50%; background: #64748b; }
+    body[data-view-mode="mini"] #float-mini-view { display: flex; }
+    body[data-view-mode="mini"] .float-header,
+    body[data-view-mode="mini"] .float-position-row,
+    body[data-view-mode="mini"] .float-body,
+    body[data-view-mode="mini"] .horizon-flare { display: none !important; }
+    body[data-view-mode="mini"] #float-widget { padding: 5px; }
+    @media (max-width: 360px) {
+      .float-position-row { gap: 4px; padding: 4px 6px; }
+      #float-position-note { max-width: 120px; }
+      .float-btn { padding: 3px 4px; }
+    }
+
+    :root,
+    [data-theme="sunset"] {
+      color-scheme: dark;
+      --bg-deep: #17131b;
+      --bg-nebula: none;
+      --bg-surface: #241b26;
+      --bg-surface-elevated: #2e222e;
+      --border-subtle: #48313f;
+      --border-active: #fb795f;
+      --accent-cyan: #fb795f;
+      --accent-purple: #fb795f;
+      --accent-magenta: #e85c83;
+      --accent-lavender: #c084fc;
+      --hero-btn: #fb795f;
+      --hero-text: #241313;
+      --hero-shadow: 0 4px 11px rgba(251, 121, 95, 0.22);
+      --kbd-border: #fb795f;
+      --kbd-color: #fb795f;
+      --alert-text: #ffd6dc;
+      --alert-bg: #3a1c24;
+      --alert-border: #70404b;
+      --text-primary: #f9edf0;
+      --text-secondary: #c8a9b5;
+      --text-muted: #9e8290;
+      --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    [data-theme="warm"] {
+      color-scheme: light;
+      --bg-deep: #f4f0e9;
+      --bg-surface: #fffdf9;
+      --bg-surface-elevated: #f7f1e9;
+      --border-subtle: #e8ded3;
+      --border-active: #f3a46e;
+      --accent-cyan: #e86825;
+      --accent-purple: #e86825;
+      --accent-magenta: #c65337;
+      --accent-lavender: #f97316;
+      --hero-btn: #e86825;
+      --hero-text: #2d1b0e;
+      --hero-shadow: 0 4px 11px rgba(232, 104, 37, 0.2);
+      --kbd-border: #e86825;
+      --kbd-color: #e86825;
+      --alert-text: #8f2938;
+      --alert-bg: #fff0f1;
+      --alert-border: #f3c9ce;
+      --text-primary: #3e332a;
+      --text-secondary: #75685d;
+      --text-muted: #887b70;
+    }
+
+    [data-theme="aurora"] {
+      color-scheme: light;
+      --bg-deep: #eef0fb;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f6f6ff;
+      --border-subtle: #dce0f2;
+      --border-active: #aaa5ed;
+      --accent-cyan: #6758d8;
+      --accent-purple: #6758d8;
+      --accent-magenta: #e55c7c;
+      --accent-lavender: #8b5cf6;
+      --hero-btn: #6758d8;
+      --hero-text: #ffffff;
+      --hero-shadow: 0 4px 11px rgba(103, 88, 216, 0.2);
+      --kbd-border: #6758d8;
+      --kbd-color: #6758d8;
+      --alert-text: #8f2938;
+      --alert-bg: #fff0f1;
+      --alert-border: #f3c9ce;
+      --text-primary: #24294e;
+      --text-secondary: #59617e;
+      --text-muted: #747c98;
+    }
+
+    [data-theme="graphite"] {
+      color-scheme: dark;
+      --bg-deep: #19181e;
+      --bg-surface: #24232b;
+      --bg-surface-elevated: #2d2b35;
+      --border-subtle: #393741;
+      --border-active: #b59aff;
+      --accent-cyan: #c0a3ff;
+      --accent-purple: #9d7de8;
+      --accent-magenta: #f2c65d;
+      --accent-lavender: #c0a3ff;
+      --hero-btn: #8b6ee8;
+      --hero-text: #17121f;
+      --hero-shadow: 0 4px 11px rgba(139, 110, 232, 0.25);
+      --kbd-border: #c0a3ff;
+      --kbd-color: #c0a3ff;
+      --alert-text: #ffd6dc;
+      --alert-bg: #3a1c24;
+      --alert-border: #70404b;
+      --text-primary: #f0eef6;
+      --text-secondary: #b8b3c5;
+      --text-muted: #8b8798;
+    }
+
+    [data-theme="black"] {
+      color-scheme: dark;
+      --bg-deep: #000000;
+      --bg-surface: #080808;
+      --bg-surface-elevated: #111111;
+      --border-subtle: #292929;
+      --border-active: #f5cc55;
+      --accent-cyan: #f5cc55;
+      --accent-purple: #d7ae3e;
+      --accent-magenta: #8eeaff;
+      --accent-lavender: #c4a8ff;
+      --hero-btn: #f5cc55;
+      --hero-text: #17140b;
+      --hero-shadow: 0 4px 14px rgba(245, 204, 85, 0.24);
+      --kbd-border: #f5cc55;
+      --kbd-color: #f5cc55;
+      --alert-text: #ffb4be;
+      --alert-bg: #2b1115;
+      --alert-border: #6a2931;
+      --text-primary: #f5f5f5;
+      --text-secondary: #c8c8c8;
+      --text-muted: #a5a5a5;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+    }
+
+    .horizon-flare { display: none; }
+
+    .float-header {
+      background: var(--bg-surface);
+      border-bottom-color: var(--border-subtle);
+    }
+
+    .float-title { color: var(--accent-cyan); }
+
+    .float-icon {
+      background: var(--accent-cyan);
+      box-shadow: none;
+    }
+
+    .float-btn {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 7px;
+    }
+
+    .float-btn:hover {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-active);
+      transform: none;
+    }
+
+    .float-btn.active {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 16%, var(--bg-surface));
+      border-color: var(--border-active);
+      box-shadow: none;
+    }
+
+    .pin-control[aria-pressed="true"] {
+      color: var(--accent-cyan);
+      background: color-mix(in srgb, var(--accent-cyan) 16%, var(--bg-surface));
+      border-color: var(--border-active);
+    }
+
+    .float-body { padding: 8px 14px 12px; }
+
+    .float-tag {
+      color: var(--text-secondary);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    .float-dial-ticks { stroke: var(--border-subtle); }
+    .float-dial-track { stroke: var(--bg-surface-elevated); }
+
+    .float-mode-badge {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
+    }
+
+    .float-clock {
+      color: var(--text-primary);
+      text-shadow: none;
       font-variant-numeric: tabular-nums;
     }
 
-    .expanded-lap-num { color: var(--accent-blue); font-weight: 700; }
-    .expanded-lap-split { color: var(--text-secondary); }
-    .expanded-lap-total { color: #FFFFFF; font-weight: 700; }
+    .float-clock small { color: var(--text-secondary); }
 
-    .expanded-lap-empty {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-align: center;
-      padding: 12px 0;
+    .float-sub-gauge {
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
     }
 
-    .expanded-lap-row.new-lap {
-      animation: lapSlideIn 200ms var(--morph-easing) forwards;
+    .float-sub-val { color: var(--text-primary); }
+
+    .float-dual-box {
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
     }
 
-    @keyframes lapSlideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(-6px) scale(0.98);
-        background: rgba(40, 123, 255, 0.25);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        background: var(--bg-secondary);
-      }
+    .float-dual-label { color: var(--text-secondary); }
+
+    .float-dual-digits {
+      color: var(--text-primary);
+      text-shadow: none;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* ==========================================================================
-       MAGIC MORPH VIEW SWITCHES
-       ========================================================================== */
-    body.mode-mini #mini-pill-view {
-      opacity: 1;
-      transform: scale(1);
-      visibility: visible;
-      pointer-events: auto;
+    .float-ctrl-btn {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 9px;
     }
 
-    body.mode-mini #normal-widget-view {
-      opacity: 0;
-      transform: scale(0.96);
-      visibility: hidden;
-      pointer-events: none;
+    .float-ctrl-btn:hover {
+      color: var(--accent-cyan);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-active);
+      transform: none;
     }
 
-    body.mode-normal #mini-pill-view {
-      opacity: 0;
-      transform: scale(0.96);
-      visibility: hidden;
-      pointer-events: none;
+    .float-ctrl-primary,
+    .float-ctrl-primary.running {
+      color: var(--hero-text);
+      background: var(--hero-btn);
+      border-color: var(--hero-btn);
+      box-shadow: var(--hero-shadow);
     }
 
-    body.mode-normal #normal-widget-view {
-      opacity: 1;
-      transform: scale(1);
-      visibility: visible;
-      pointer-events: auto;
+    .float-ctrl-primary:hover {
+      color: var(--hero-text);
+      background: color-mix(in srgb, var(--hero-btn) 88%, black);
+      box-shadow: var(--hero-shadow);
     }
 
-    body.mode-normal .float-header,
-    body.mode-normal .float-tag,
-    body.mode-normal .float-controls,
-    body.mode-normal .float-sub-gauges {
-      opacity: 1;
-      transform: translateY(0);
+    .float-position-row {
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-bottom-color: var(--border-subtle);
     }
 
-    /* When expanded (height >= 320px), show laps list */
-    body.mode-normal.is-expanded .float-expanded-laps {
-      display: flex;
+    .float-position-row select {
+      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border-subtle);
     }
 
-    body.mode-normal.is-expanded .float-sub-gauges {
-      display: none;
+    #float-position-note { color: var(--text-secondary); }
+
+    .float-mini-view {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--bg-deep) 35%, transparent);
     }
 
-    /* Reduced Motion */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-      }
+    .mini-clock {
+      color: var(--text-primary);
+      text-shadow: none;
+      font-variant-numeric: tabular-nums;
     }
+
+    .mini-status { color: var(--text-secondary); }
+
+    .runtime-alert {
+      padding: 8px 12px;
+      color: var(--alert-text);
+      background: var(--alert-bg);
+      border-bottom: 1px solid var(--alert-border);
+      font: 11px/1.45 var(--font-sans);
+    }
+
+    .runtime-alert[hidden] { display: none; }
   </style>
 </head>
-<body class="mode-normal">
+<body data-size="normal" data-view-mode="expanded">
   <div id="float-widget">
+    <div class="runtime-alert" id="float-runtime-error" role="alert" hidden></div>
+    <div id="float-mini-view" class="float-mini-view" role="button" tabindex="0" aria-label="Expand AlgoTimer">
+      <span class="mini-clock" id="float-mini-clock">00:00</span>
+      <span class="mini-status"><span id="float-mini-dot" aria-hidden="true"></span><span id="float-mini-status">READY</span></span>
+    </div>
+    <!-- Ambient Horizon Light Flare -->
+    <div class="horizon-flare" aria-hidden="true"></div>
 
-    <!-- ================= MODE A: MINI TIMER PILL ================= -->
-    <div id="mini-pill-view" class="mini-pill-card" title="Click to expand floating stopwatch">
-      <div class="mini-pill-inner" id="mini-pill-inner">
-        <span class="mini-status-dot" id="mini-status-dot"></span>
-        <span class="mini-timer-digits" id="mini-timer-digits">00:00:00<small id="mini-timer-millis">.00</small></span>
+    <!-- Header -->
+    <div class="float-header">
+      <div class="float-title"><span class="float-icon"></span><span>AlgoTimer</span></div>
+      <div class="float-actions">
+        <button class="float-btn" id="btn-float-theme" title="Change color theme">Theme <span class="btn-lbl" id="float-theme-label">Cosmic</span></button>
+        <button class="float-btn" id="btn-pip-always-ontop" title="Open browser-managed picture-in-picture; the browser controls its position">PiP <span class="btn-lbl" id="btn-pip-text">Topmost</span></button>
+        <button class="float-btn" id="btn-size-cycle" title="Minimize to mini timer"><span id="size-label">Mini</span></button>
+        <button class="float-btn" id="btn-close-float" title="Close floating timer" aria-label="Close floating timer">x</button>
       </div>
     </div>
+    <div class="float-position-row" id="float-position-row">
+      <label for="float-corner-select">Position</label>
+      <select id="float-corner-select" aria-label="Floating timer corner">
+        <option value="top-left">Top left</option>
+        <option value="top-right">Top right</option>
+        <option value="bottom-left">Bottom left</option>
+        <option value="bottom-right">Bottom right</option>
+      </select>
+      <button class="float-btn pin-control" id="btn-pin-corner" aria-pressed="false" aria-keyshortcuts="P" title="Pin the timer to the selected screen corner; press P while this window is focused">Pin to corner</button>
+      <span id="float-position-note">Unpinned · drag the header to move. Pinning anchors this window, not above other apps. Press P when focused.</span>
+    </div>
 
-    <!-- ================= MODE B & C: NORMAL / EXPANDED WIDGET ================= -->
-    <div id="normal-widget-view">
-      <!-- Minimalist Header -->
-      <div class="float-header">
-        <div class="float-title">
-          <span class="float-icon"></span>
-          <span>AlgoTimer</span>
-        </div>
-        <div class="float-actions">
-          <!-- Minimize to Mini Pill Button -->
-          <button class="float-btn float-btn-minimize" id="btn-minimize-to-mini" title="Minimize to Mini Timer Pill">
-            🗕 <span class="btn-lbl">Mini</span>
-          </button>
+    <!-- Body -->
+    <div class="float-body">
+      <div class="float-tag" id="float-problem-title">Problem Solving Session</div>
 
-          <!-- Always on Top PiP -->
-          <button class="float-btn" id="btn-pip-always-ontop" title="Always on Top (Floats over all apps)">
-            📌 <span class="btn-lbl" id="btn-pip-text">Pin</span>
-          </button>
+      <!-- Single Clock Dial View (Stopwatch or Target Timer) -->
+      <div id="float-single-view">
+        <div class="float-dial-wrapper">
+          <svg class="float-dial-svg" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f2fe" id="grad-stop-1" />
+                <stop offset="50%" stop-color="#8b5cf6" id="grad-stop-2" />
+                <stop offset="100%" stop-color="#ec4899" id="grad-stop-3" />
+              </linearGradient>
+              <filter id="timerGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Outer Precision Ticks -->
+            <circle class="float-dial-ticks" cx="80" cy="80" r="74" stroke="rgba(255, 255, 255, 0.16)" stroke-dasharray="2 5" stroke-width="2" fill="none" />
+            <!-- Base Track -->
+            <circle class="float-dial-track" cx="80" cy="80" r="70" stroke="rgba(255, 255, 255, 0.06)" stroke-width="6" fill="none"></circle>
+            <!-- Active Progress Arc -->
+            <circle class="float-dial-progress" id="float-dial-progress" cx="80" cy="80" r="70" stroke="url(#timerGrad)" filter="url(#timerGlow)" stroke-width="6" stroke-linecap="round" fill="none"></circle>
+          </svg>
 
-          <!-- Corner cycler -->
-          <button class="float-btn" id="btn-corner-cycle" title="Dock to Screen Corners (TR, BR, BL, TL)">
-            ↗ <span id="corner-label">TR</span>
-          </button>
+          <div class="float-dial-content">
+            <div class="float-mode-badge" id="float-mode-badge">STOPWATCH</div>
+            <div class="float-clock" id="float-clock-single">00:00<small id="float-millis">.0</small></div>
+
+            <!-- 3 Mini Sub-Indicators -->
+            <div class="float-sub-gauges">
+              <div class="float-sub-gauge" title="Total Laps">
+                <span class="float-sub-val" id="float-sub-laps">0</span>
+                <span class="float-sub-lbl">LAPS</span>
+              </div>
+              <div class="float-sub-gauge" title="Current Split">
+                <span class="float-sub-val" id="float-sub-split">00:00</span>
+                <span class="float-sub-lbl">SPLIT</span>
+              </div>
+              <div class="float-sub-gauge" title="Timer Status">
+                <span class="float-sub-val" id="float-sub-state">READY</span>
+                <span class="float-sub-lbl">STATUS</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Body -->
-      <div class="float-body">
-        <div class="float-tag" id="float-problem-title">Problem Solving Session</div>
-
-        <!-- Timer Hero (With Subtle Living Glow) -->
-        <div class="float-timer-hero" id="float-timer-hero">
-          <div class="hero-glow-halo" aria-hidden="true"></div>
-
-          <div class="float-status-indicator">
-            <span class="status-pulse-dot" id="normal-status-dot"></span>
-            <span class="float-mode-badge" id="float-mode-badge">STOPWATCH</span>
-          </div>
-
-          <div class="float-clock" id="float-clock-single">
-            00:00:00<small id="float-millis">.00</small>
-          </div>
-
-          <!-- Dual Clocks View -->
-          <div class="float-dual-box" id="float-clock-dual" style="display: none;">
-            <div class="float-dual-row">
-              <span class="float-dual-label">⏱️ Elapsed</span>
-              <span class="float-dual-digits" id="float-dual-sw">00:00:00</span>
-            </div>
-            <div class="float-dual-row">
-              <span class="float-dual-label">⏳ Target</span>
-              <span class="float-dual-digits" id="float-dual-timer">30:00:00</span>
-            </div>
-          </div>
+      <!-- Dual Clocks View (Both Active) -->
+      <div class="float-dual-box" id="float-clock-dual" style="display: none;">
+        <div class="float-dual-row">
+          <span class="float-dual-label">⏱️ Elapsed</span>
+          <span class="float-dual-digits" id="float-dual-sw">00:00:00</span>
         </div>
-
-        <!-- Apple Watch Style Squircle Controls -->
-        <div class="float-controls">
-          <button class="float-ctrl-btn float-ctrl-primary" id="btn-play">
-            <span class="btn-icon-wrap" aria-hidden="true">
-              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="6 4 20 12 6 20 6 4"></polygon>
-              </svg>
-              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="5" y="4" width="4" height="16" rx="1"></rect>
-                <rect x="15" y="4" width="4" height="16" rx="1"></rect>
-              </svg>
-            </span>
-            <span id="btn-play-text">Start</span>
-            <kbd class="float-key">Space</kbd>
-          </button>
-          <button class="float-ctrl-btn" id="btn-lap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-              <line x1="4" y1="22" x2="4" y2="15"></line>
-            </svg>
-            <span>Lap</span>
-            <kbd class="float-key">L</kbd>
-          </button>
-          <button class="float-ctrl-btn" id="btn-reset">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-              <path d="M3 3v5h5"></path>
-            </svg>
-            <span>Reset</span>
-            <kbd class="float-key">R</kbd>
-          </button>
+        <div class="float-dual-row">
+          <span class="float-dual-label">⏳ Target</span>
+          <span class="float-dual-digits" id="float-dual-timer">30:00:00</span>
         </div>
+      </div>
 
-        <!-- Sub-Gauges (Normal Mode) -->
-        <div class="float-sub-gauges" id="float-sub-gauges">
-          <div class="float-sub-gauge" title="Total Laps">
-            <span class="float-sub-val" id="float-sub-laps">0</span>
-            <span class="float-sub-lbl">LAPS</span>
-          </div>
-          <div class="float-sub-gauge" title="Current Split">
-            <span class="float-sub-val" id="float-sub-split">00:00</span>
-            <span class="float-sub-lbl">SPLIT</span>
-          </div>
-          <div class="float-sub-gauge" title="Timer Status">
-            <span class="float-sub-val" id="float-sub-state">READY</span>
-            <span class="float-sub-lbl">STATUS</span>
-          </div>
-        </div>
-
-        <!-- Expanded Mode Laps History (Visible only when window is tall >= 320px) -->
-        <div class="float-expanded-laps" id="float-expanded-laps">
-          <div class="expanded-laps-header">
-            <span>Recent Laps</span>
-            <span id="expanded-lap-count" class="lap-count-pill">0</span>
-          </div>
-          <div class="expanded-laps-list" id="expanded-laps-list">
-            <div class="expanded-lap-empty">No laps recorded yet. Press L to record split.</div>
-          </div>
-        </div>
+      <!-- Controls with Shortcut Keycaps -->
+      <div class="float-controls">
+        <button class="float-ctrl-btn float-ctrl-primary" id="btn-play">
+          ▶ <span id="btn-play-text">Start</span> <kbd class="float-key">Space</kbd>
+        </button>
+        <button class="float-ctrl-btn" id="btn-lap">
+          Lap <kbd class="float-key">L</kbd>
+        </button>
+        <button class="float-ctrl-btn" id="btn-reset">
+          ↺ <kbd class="float-key">R</kbd>
+        </button>
       </div>
     </div>
   </div>

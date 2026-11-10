@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="black">
+<html lang="en" data-theme="sunset">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer - Live Interactive Demo & Testing Studio</title>
+  <title>AlgoTimer — Problem-solving workspace</title>
   <link rel="stylesheet" href="popup/popup.css">
   <link rel="stylesheet" href="content/content.css">
   <style>
@@ -16,8 +16,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background-color: #080808;
-      background-image: none;
+      background-color: #060713;
+      background-image: radial-gradient(circle at 50% 15%, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.12) 40%, rgba(6, 7, 19, 0.98) 75%);
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -350,8 +350,9 @@
       line-height: 1.4;
     }
   </style>
+  <link rel="stylesheet" href="popup/modern.css">
 </head>
-<body>
+<body class="modern-service">
   <!-- Top Demo Bar -->
   <header class="demo-topbar">
     <div class="demo-brand">
@@ -363,16 +364,16 @@
         </svg>
       </div>
       <div class="demo-title-group">
-        <h1>AlgoTimer - Problem Solving Stopwatch & Timer</h1>
-        <p>Interactive Demo: 4-Corner Dockable HUD, Free Resizing, Dual Concurrent Timers & Pop-Up Screen</p>
+        <h1>AlgoTimer — Problem-solving workspace</h1>
+        <p>A focused timer and practice companion for your next coding session.</p>
       </div>
     </div>
     <div class="demo-topbar-actions">
       <button class="demo-btn demo-btn-primary" id="btn-topbar-pip">
-        ⤢ Pop Up Float Screen
+        ⤢ Open floating timer
       </button>
       <button class="demo-btn" id="btn-topbar-window">
-        ↗ Standalone Window
+        ↗ Open timer window
       </button>
       <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="demo-btn">
         ★ GitHub Repo
@@ -385,8 +386,8 @@
     <!-- Left Column: Extension Popup Interface -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>Extension Popup Interface</span>
-        <span style="color: #38bdf8;">Default Chrome Action</span>
+        <span>Timer workspace</span>
+        <span>Focus tools</span>
       </div>
 
       <div class="browser-frame">
@@ -400,569 +401,422 @@
         </div>
 
         <div class="app-container" style="min-height: 570px;">
-    <!-- Top Header -->
-    <header class="app-header">
-      <div class="brand">
-        <div class="brand-logo" aria-label="AlgoTimer Logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="13" r="8"></circle>
-            <path d="M12 9v4l2.5 2.5"></path>
-            <path d="M10 2h4"></path>
-          </svg>
-        </div>
-        <span class="brand-name">AlgoTimer</span>
-      </div>
-
-      <div class="header-badges">
-        <!-- Compact Mini Mode Toggle -->
-        <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact Mode (Fits anywhere)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="4 14 10 14 10 20"></polyline>
-            <polyline points="20 10 14 10 14 4"></polyline>
-            <line x1="14" y1="10" x2="21" y2="3"></line>
-            <line x1="3" y1="21" x2="10" y2="14"></line>
-          </svg>
-          <span class="btn-text">Compact</span>
-        </button>
-
-        <!-- Pop Up Screen Buttons (Always-On-Top PiP & Resizable Standalone Window) -->
-        <button class="header-btn" id="btn-popout-pip" title="Pop Up Screen: Float Always-On-Top over VS Code, Discord, or any desktop app">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-            <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
-            <polyline points="15 11 18 11 18 14"></polyline>
-            <line x1="14" y1="15" x2="18" y2="11"></line>
-          </svg>
-          <span class="btn-text">Pop Up</span>
-        </button>
-
-        <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Resizable Window">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-        </button>
-        <span class="version-tag">v1.3</span>
-      </div>
-    </header>
-
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-      <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
-      <button class="nav-tab" data-tab="laps">🏁 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
-      <button class="nav-tab" data-tab="history">📊 History</button>
-      <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
-    </nav>
-
-    <!-- TAB 1: TIMER / STOPWATCH -->
-    <main class="tab-content active" id="tab-timer">
-      <!-- Mode Segmented Switcher (Stopwatch, Target Timer, Dual Both) -->
-      <div class="mode-switcher">
-        <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
-          <span>⏱️</span> Stopwatch
-        </button>
-        <button class="mode-btn" id="btn-mode-timer" data-mode="timer">
-          <span>⏳</span> Target Timer
-        </button>
-        <button class="mode-btn" id="btn-mode-dual" data-mode="dual">
-          <span>⚡</span> Dual (Both)
-        </button>
-      </div>
-
-      <!-- Concurrent Background Indicator Banners -->
-      <div class="concurrent-banner" id="concurrent-target-banner" style="display: none;">
-        <div class="concurrent-info">
-          <span class="pulse-indicator pulse-rose"></span>
-          <span class="concurrent-label">Target Timer:</span>
-          <strong class="concurrent-digits" id="concurrent-target-time">24:15</strong>
-        </div>
-        <div class="concurrent-actions">
-          <button class="concurrent-btn" id="btn-concurrent-target-pause">Pause</button>
-          <button class="concurrent-btn primary" id="btn-concurrent-target-switch">View</button>
-        </div>
-      </div>
-
-      <div class="concurrent-banner" id="concurrent-stopwatch-banner" style="display: none;">
-        <div class="concurrent-info">
-          <span class="pulse-indicator pulse-blue"></span>
-          <span class="concurrent-label">Stopwatch:</span>
-          <strong class="concurrent-digits" id="concurrent-stopwatch-time">08:42</strong>
-        </div>
-        <div class="concurrent-actions">
-          <button class="concurrent-btn" id="btn-concurrent-stopwatch-pause">Pause</button>
-          <button class="concurrent-btn primary" id="btn-concurrent-stopwatch-switch">View</button>
-        </div>
-      </div>
-
-      <!-- ================= SINGLE MODE CONTAINER ================= -->
-      <div id="single-mode-view">
-        <!-- Target Presets (Visible only in Timer Mode) -->
-        <div class="presets-container" id="presets-container" style="display: none;">
-          <span class="presets-label">Select Target Duration:</span>
-          <div class="preset-chips">
-            <button class="preset-chip" data-mins="5">5m</button>
-            <button class="preset-chip" data-mins="15">15m <small>Easy</small></button>
-            <button class="preset-chip active" data-mins="30">30m <small>Med</small></button>
-            <button class="preset-chip" data-mins="45">45m <small>Hard</small></button>
-            <button class="preset-chip" data-mins="60">60m <small>Mock</small></button>
-            <button class="preset-chip" id="btn-custom-time">Custom...</button>
-          </div>
-
-          <div class="custom-time-box" id="custom-time-box" style="display: none;">
-            <div class="time-inputs">
-              <div class="time-input-group">
-                <input type="number" id="custom-hours" min="0" max="23" value="0">
-                <label>hr</label>
-              </div>
-              <span class="colon">:</span>
-              <div class="time-input-group">
-                <input type="number" id="custom-minutes" min="0" max="59" value="25">
-                <label>min</label>
-              </div>
-              <span class="colon">:</span>
-              <div class="time-input-group">
-                <input type="number" id="custom-seconds" min="0" max="59" value="0">
-                <label>sec</label>
-              </div>
-            </div>
-            <button class="btn-sm btn-primary" id="btn-apply-custom">Set Target</button>
-          </div>
-        </div>
-
-        <!-- Apple Watch Inspired Stopwatch Card -->
-        <div class="watchface-card">
-          <!-- Digital Display at Top (Reference Image 1) -->
-          <div class="watchface-top">
-            <div class="dial-badge-pill" id="dial-status-pill">
-              <span class="status-pulse-dot"></span>
-              <span id="dial-status-label">STOPWATCH</span>
-            </div>
-            <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.00</small></div>
-            <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
-          </div>
-
-          <!-- Main Precision Dial & Rotating Needle -->
-          <div class="dial-wrapper" id="dial-wrapper">
-            <svg class="dial-svg" viewBox="0 0 200 200">
-              <defs>
-                <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#287BFF" id="grad-stop-1" />
-                  <stop offset="50%" stop-color="#995BFF" id="grad-stop-2" />
-                  <stop offset="100%" stop-color="#287BFF" id="grad-stop-3" />
-                </linearGradient>
-                <filter id="dialGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              <!-- Outer Precision Ticks -->
-              <circle class="dial-outer-ticks" cx="100" cy="100" r="92" fill="none" />
-              <!-- Base Dark Track -->
-              <circle class="dial-track" cx="100" cy="100" r="82" fill="none"></circle>
-              <!-- Precision Blue Ring -->
-              <circle class="dial-ring" cx="100" cy="100" r="82" stroke="#287BFF" stroke-width="1.8" fill="none" opacity="0.85"></circle>
-              <!-- Active Progress Arc -->
-              <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="82" stroke="url(#timerGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#dialGlow)"></circle>
-
-              <!-- Cardinal Second Ticks (60, 15, 30, 45) -->
-              <line x1="100" y1="20" x2="100" y2="28" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
-              <line x1="180" y1="100" x2="172" y2="100" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
-              <line x1="100" y1="180" x2="100" y2="172" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
-              <line x1="20" y1="100" x2="28" y2="100" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
-
-              <!-- Numeric Cardinal Markers -->
-              <text x="100" y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="700" font-family="ui-monospace, monospace">60</text>
-              <text x="162" y="104" text-anchor="middle" fill="#A5A5A5" font-size="10" font-weight="600" font-family="ui-monospace, monospace">15</text>
-              <text x="100" y="166" text-anchor="middle" fill="#A5A5A5" font-size="10" font-weight="600" font-family="ui-monospace, monospace">30</text>
-              <text x="38" y="104" text-anchor="middle" fill="#A5A5A5" font-size="10" font-weight="600" font-family="ui-monospace, monospace">45</text>
-
-              <!-- Apple Watch Rotating Needle Hand (Image 1) -->
-              <g id="dial-needle-group" style="transform-origin: 100px 100px; transform: rotate(0deg); transition: transform 0.05s linear;">
-                <line x1="100" y1="100" x2="100" y2="34" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" />
-                <circle cx="100" cy="100" r="4" fill="#080808" stroke="#FFFFFF" stroke-width="2" />
-              </g>
-            </svg>
-
-            <!-- 3 Mini Sub-Indicators (Image 1 Sub-Gauges) -->
-            <div class="dial-center-content">
-              <div class="dial-sub-gauges">
-                <div class="sub-gauge" id="sub-gauge-laps" title="Total Laps Recorded">
-                  <span class="sub-gauge-val" id="sub-laps-val">0</span>
-                  <span class="sub-gauge-lbl">LAPS</span>
-                </div>
-                <div class="sub-gauge" id="sub-gauge-split" title="Current Split Elapsed">
-                  <span class="sub-gauge-val" id="sub-split-val">00:00</span>
-                  <span class="sub-gauge-lbl">SPLIT</span>
-                </div>
-                <div class="sub-gauge" id="sub-gauge-state" title="Timer State">
-                  <span class="sub-gauge-val" id="sub-state-val">READY</span>
-                  <span class="sub-gauge-lbl">STATUS</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Apple Watch Action Controls Row (Image 1) -->
-          <div class="controls-row">
-            <button class="btn btn-secondary" id="btn-reset" title="Reset (Hotkey: R)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-              </svg>
-              <span>Reset</span>
-              <kbd class="key-badge">R</kbd>
-            </button>
-
-            <button class="btn btn-primary-hero" id="btn-toggle-run" title="Start or Pause (Hotkey: Space)">
-              <span class="btn-icon-wrap" aria-hidden="true">
-                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="6 4 20 12 6 20 6 4"></polygon>
+          <div class="horizon-flare" aria-hidden="true"></div>
+          <!-- Top Header -->
+          <header class="app-header">
+            <div class="brand">
+              <div class="brand-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l2.5 2.5"></path>
+                  <path d="M10 2h4"></path>
                 </svg>
-                <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="5" y="4" width="4" height="16" rx="1"></rect>
-                  <rect x="15" y="4" width="4" height="16" rx="1"></rect>
+              </div>
+              <span class="brand-name">AlgoTimer</span>
+            </div>
+            <div class="header-badges">
+              <button class="header-btn" id="btn-quick-theme" title="Switch Dynamic Color Combination">
+                <span class="theme-quick-dot"></span>
+                <span class="btn-text" id="header-theme-label">Cosmic</span>
+              </button>
+              <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact HUD Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="4 14 10 14 10 20"></polyline>
+                  <polyline points="20 10 14 10 14 4"></polyline>
+                  <line x1="14" y1="10" x2="21" y2="3"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
                 </svg>
-              </span>
-              <span id="btn-toggle-text">Play</span>
-              <kbd class="key-badge key-badge-hero">Space</kbd>
-            </button>
-
-            <button class="btn btn-secondary" id="btn-lap" title="Split Lap (Hotkey: L)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                <line x1="4" y1="22" x2="4" y2="15"></line>
-              </svg>
-              <span>Lap</span>
-              <kbd class="key-badge">L</kbd>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================= DUAL MODE VIEW (BOTH ACTIVE) ================= -->
-      <div id="dual-mode-view" style="display: none;">
-        <!-- Card 1: Stopwatch (Elapsed) -->
-        <div class="dual-card" id="dual-stopwatch-card">
-          <div class="dual-card-header">
-            <div class="dual-card-title">
-              <span class="dual-card-icon">⏱️</span>
-              <span>Stopwatch (Elapsed)</span>
+                <span class="btn-text">Compact</span>
+              </button>
+              <button class="header-btn" id="btn-popout-pip" title="Open persistent floating timer window">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <rect x="11" y="9" width="9" height="6" rx="1" ry="1" fill="currentColor" opacity="0.3"></rect>
+                  <polyline points="15 11 18 11 18 14"></polyline>
+                  <line x1="14" y1="15" x2="18" y2="11"></line>
+                </svg>
+                <span class="btn-text">Float</span>
+              </button>
+              <button class="header-btn icon-only" id="btn-popout-window" title="Open in Standalone Window">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+              <span class="version-tag">v1.2</span>
             </div>
-            <span class="dual-badge" id="dual-sw-badge">STOPPED</span>
-          </div>
-          <div class="dual-digits-row">
-            <div class="dual-clock-digits" id="dual-sw-digits">
-              00:00:00<small id="dual-sw-millis">.00</small>
+          </header>
+
+          <!-- Navigation Tabs -->
+          <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
+            <button class="nav-tab" data-tab="laps">🏁 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
+            <button class="nav-tab" data-tab="history">📊 History</button>
+            <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+          </nav>
+
+          <!-- TAB 1: TIMER / STOPWATCH -->
+          <main class="tab-content active" id="tab-timer">
+            <div class="workspace-heading">
+              <div>
+                <span class="eyebrow">Focus session</span>
+                <h1>Problem-solving timer</h1>
+                <p>Track time, mark progress, and keep your practice in flow.</p>
+              </div>
+              <span class="workspace-save-note">Saved automatically</span>
             </div>
-          </div>
-          <div class="dual-card-actions">
-            <button class="dual-btn dual-btn-primary" id="btn-dual-sw-toggle">
-              <span id="btn-dual-sw-text">Start</span>
-            </button>
-            <button class="dual-btn" id="btn-dual-sw-lap">Lap</button>
-            <button class="dual-btn" id="btn-dual-sw-reset">Reset</button>
-          </div>
-        </div>
-
-        <!-- Card 2: Target Countdown -->
-        <div class="dual-card" id="dual-timer-card">
-          <div class="dual-card-header">
-            <div class="dual-card-title">
-              <span class="dual-card-icon">⏳</span>
-              <span>Target Countdown</span>
+            <!-- Mode Segmented Switcher -->
+            <div class="mode-switcher">
+              <button class="mode-tab active" id="btn-mode-stopwatch" data-mode="stopwatch">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l2 2"></path>
+                  <path d="M10 2h4"></path>
+                </svg>
+                <span>Stopwatch</span>
+              </button>
+              <button class="mode-tab" id="btn-mode-timer" data-mode="timer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 22h14"></path>
+                  <path d="M5 2h14"></path>
+                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                </svg>
+                <span>Target</span>
+              </button>
+              <button class="mode-tab" id="btn-mode-dual" data-mode="dual" title="Both Stopwatch and Countdown Active Concurrently">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                </svg>
+                <span>Dual Mode</span>
+              </button>
             </div>
-            <span class="dual-badge" id="dual-timer-badge">30m Target</span>
-          </div>
-          <div class="dual-progress-track">
-            <div class="dual-progress-fill" id="dual-timer-progress"></div>
-          </div>
-          <div class="dual-digits-row">
-            <div class="dual-clock-digits" id="dual-timer-digits">
-              30:00<small id="dual-timer-millis">.00</small>
+
+            <!-- Concurrent Status Banner (When timer running in background) -->
+            <div class="concurrent-banner" id="concurrent-banner" style="display: none;">
+              <div class="concurrent-indicator-pulse"></div>
+              <div class="concurrent-text">
+                <span class="concurrent-title" id="concurrent-title">Stopwatch Running</span>
+                <span class="concurrent-time" id="concurrent-time">00:00:00</span>
+              </div>
+              <div class="concurrent-actions">
+                <button class="concurrent-btn" id="btn-concurrent-stopwatch-pause">Pause</button>
+                <button class="concurrent-btn primary" id="btn-concurrent-stopwatch-switch">View</button>
+              </div>
             </div>
-          </div>
-          <div class="dual-preset-row">
-            <button class="dual-chip" data-mins="5">5m</button>
-            <button class="dual-chip" data-mins="15">15m</button>
-            <button class="dual-chip active" data-mins="30">30m</button>
-            <button class="dual-chip" data-mins="45">45m</button>
-            <button class="dual-chip" data-mins="60">60m</button>
-          </div>
-          <div class="dual-card-actions">
-            <button class="dual-btn dual-btn-primary" id="btn-dual-timer-toggle">
-              <span id="btn-dual-timer-text">Start</span>
-            </button>
-            <button class="dual-btn" id="btn-dual-timer-reset">Reset</button>
-          </div>
-        </div>
 
-        <!-- Master Synchronization Control Bar -->
-        <div class="dual-master-bar">
-          <button class="btn btn-primary-hero dual-master-btn" id="btn-dual-master-toggle">
-            <span id="dual-master-icon">⚡</span>
-            <span id="dual-master-text">Start Both Together</span>
-          </button>
-          <button class="btn btn-secondary" id="btn-dual-master-reset" title="Reset both timers">
-            <span>Reset Both</span>
-          </button>
-        </div>
-      </div>
+            <!-- Single Mode View -->
+            <div id="single-mode-view">
+              <!-- Target Presets (Visible only in Timer Mode) -->
+              <div class="presets-container" id="presets-container" style="display: none;">
+                <span class="presets-label">Select Target:</span>
+                <div class="preset-chips">
+                  <button class="preset-chip" data-mins="5">5m</button>
+                  <button class="preset-chip" data-mins="15">15m <small>Easy</small></button>
+                  <button class="preset-chip active" data-mins="30">30m <small>Med</small></button>
+                  <button class="preset-chip" data-mins="45">45m <small>Hard</small></button>
+                  <button class="preset-chip" data-mins="60">60m <small>Mock</small></button>
+                  <button class="preset-chip" id="btn-custom-time">Custom...</button>
+                </div>
 
-      <!-- Problem Logging Quick Bar -->
-      <div class="problem-log-bar">
-        <div class="problem-meta">
-          <input type="text" id="active-problem-title" placeholder="Problem name (e.g. 3Sum, Two Sum)" spellcheck="false">
-          <div class="meta-tags">
-            <select id="active-platform" class="mini-select">
-              <option value="LeetCode">LeetCode</option>
-              <option value="Codeforces">Codeforces</option>
-              <option value="HackerRank">HackerRank</option>
-              <option value="NeetCode">NeetCode</option>
-              <option value="CodeChef">CodeChef</option>
-              <option value="Other">Other</option>
-            </select>
-            <select id="active-difficulty" class="mini-select">
-              <option value="Easy">Easy</option>
-              <option value="Medium" selected>Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
-          💾 Log Result
-        </button>
-      </div>
-    </main>
+                <div class="custom-time-box" id="custom-time-box" style="display: none;">
+                  <div class="time-inputs">
+                    <div class="time-input-group">
+                      <input type="number" id="custom-hours" min="0" max="23" value="0">
+                      <label>hr</label>
+                    </div>
+                    <span class="colon">:</span>
+                    <div class="time-input-group">
+                      <input type="number" id="custom-minutes" min="0" max="59" value="25">
+                      <label>min</label>
+                    </div>
+                    <span class="colon">:</span>
+                    <div class="time-input-group">
+                      <input type="number" id="custom-seconds" min="0" max="59" value="0">
+                      <label>sec</label>
+                    </div>
+                  </div>
+                  <button class="btn-sm btn-primary" id="btn-apply-custom">Set Target</button>
+                </div>
+              </div>
 
-    <!-- TAB 2: LAPS & MILESTONES -->
-    <section class="tab-content" id="tab-laps">
-      <div class="laps-header">
-        <h3>Problem Solving Checkpoints</h3>
-        <p class="subtitle">Track phases: Reading → Algorithm → Code → Debug</p>
-      </div>
-      <div class="laps-quick-add">
-        <button class="lap-phase-btn" data-phase="Read & Understand">📖 Understand</button>
-        <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
-        <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
-        <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
-      </div>
-      <div class="laps-list-container" id="laps-list">
-        <div class="empty-state">
-          <p>No laps recorded yet.</p>
-          <small>Click <strong>Lap</strong> while solving or select a phase above.</small>
-        </div>
-      </div>
-    </section>
+              <!-- Main Dial & Precision Ring -->
+              <div class="dial-wrapper">
+                <svg class="dial-svg" viewBox="0 0 200 200">
+                  <defs>
+                    <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#00f2fe" id="grad-stop-1" />
+                      <stop offset="50%" stop-color="#8b5cf6" id="grad-stop-2" />
+                      <stop offset="100%" stop-color="#ec4899" id="grad-stop-3" />
+                    </linearGradient>
+                    <filter id="timerGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3.5" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <!-- Outer Precision Ticks -->
+                  <circle class="dial-outer-ticks" cx="100" cy="100" r="92" stroke="rgba(255, 255, 255, 0.16)" stroke-dasharray="2 6" stroke-width="2.5" fill="none" />
+                  <!-- Base Track -->
+                  <circle class="dial-track" cx="100" cy="100" r="84" stroke="rgba(255, 255, 255, 0.06)" stroke-width="8" fill="none"></circle>
+                  <!-- Active Progress Arc -->
+                  <circle class="dial-progress" id="dial-progress" cx="100" cy="100" r="84" stroke="url(#timerGrad)" filter="url(#timerGlow)" stroke-width="8" stroke-linecap="round" fill="none"></circle>
+                </svg>
 
-    <!-- TAB 3: HISTORY & SESSIONS -->
-    <section class="tab-content" id="tab-history">
-      <div class="history-top-summary">
-        <div class="stat-card">
-          <div class="stat-num" id="stat-solved-count">0</div>
-          <div class="stat-label">Problems Logged</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-total-time">0m</div>
-          <div class="stat-label">Total Time</div>
-        </div>
-      </div>
-      <div class="history-actions-bar">
-        <button class="btn-xs" id="btn-export-csv">📥 Export CSV</button>
-        <button class="btn-xs btn-danger" id="btn-clear-history">Clear</button>
-      </div>
-      <div class="history-list" id="history-list">
-        <div class="empty-state">
-          <p>No solved problem sessions yet.</p>
-          <small>Log your completed problems to track your speed and consistency!</small>
-        </div>
-      </div>
-    </section>
+                <div class="dial-center-content">
+                  <div class="dial-badge-pill" id="dial-status-pill">
+                    <span class="status-pulse-dot"></span>
+                    <span id="dial-status-label">STOPWATCH</span>
+                  </div>
+                  <div class="dial-digits" id="dial-digits">00:00:00<small id="dial-millis">.0</small></div>
+                  <div class="dial-target-label" id="dial-target-label" style="display: none;">Target: 30:00</div>
 
-    <!-- TAB 4: SETTINGS -->
-    <section class="tab-content" id="tab-settings">
-      <div class="settings-group">
-        <h4>Functional Accent Color</h4>
-        <p class="setting-desc">Premium Black identity with your choice of functional highlight accent:</p>
-        <div class="theme-palette-row">
-          <button class="theme-pill-btn active" data-theme-choice="blue" title="Electric Blue (#287BFF) - Apple Watch Stopwatch Standard">
-            <span class="theme-dot" style="background: #287BFF;"></span>
-            <span>Electric Blue</span>
-          </button>
-          <button class="theme-pill-btn" data-theme-choice="purple" title="Royal Purple (#995BFF) - Luxury Accent">
-            <span class="theme-dot" style="background: #995BFF;"></span>
-            <span>Royal Purple</span>
-          </button>
-          <button class="theme-pill-btn" data-theme-choice="emerald" title="Emerald Green (#49C98B) - Terminal & Success">
-            <span class="theme-dot" style="background: #49C98B;"></span>
-            <span>Emerald Green</span>
-          </button>
-          <button class="theme-pill-btn" data-theme-choice="orange" title="Vibrant Orange (#FF4B24) - High Energy">
-            <span class="theme-dot" style="background: #FF4B24;"></span>
-            <span>Vibrant Orange</span>
-          </button>
-        </div>
-      </div>
+                  <!-- 3 Mini Sub-Indicators -->
+                  <div class="dial-sub-gauges">
+                    <div class="sub-gauge" id="sub-gauge-laps" title="Total Laps">
+                      <span class="sub-gauge-val" id="sub-laps-val">0</span>
+                      <span class="sub-gauge-lbl">LAPS</span>
+                    </div>
+                    <div class="sub-gauge" id="sub-gauge-split" title="Current Split">
+                      <span class="sub-gauge-val" id="sub-split-val">00:00</span>
+                      <span class="sub-gauge-lbl">SPLIT</span>
+                    </div>
+                    <div class="sub-gauge" id="sub-gauge-state" title="Timer State">
+                      <span class="sub-gauge-val" id="sub-state-val">READY</span>
+                      <span class="sub-gauge-lbl">STATUS</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      <div class="settings-group">
-        <h4>General Options</h4>
-        <label class="setting-row">
-          <div class="setting-info">
-            <span class="setting-title">Dual Active Mode</span>
-            <span class="setting-desc">Allow Stopwatch & Target Timer both active simultaneously</span>
-          </div>
-          <input type="checkbox" id="setting-dual-active" checked>
-        </label>
-        <label class="setting-row">
-          <div class="setting-info">
-            <span class="setting-title">Sound Alerts</span>
-            <span class="setting-desc">Pleasant audio chimes on completion, warnings, and laps</span>
-          </div>
-          <input type="checkbox" id="setting-sound" checked>
-        </label>
-        <label class="setting-row">
-          <div class="setting-info">
-            <span class="setting-title">Floating Overlay Widget</span>
-            <span class="setting-desc">Enable in-page floating widget & corner dock</span>
-          </div>
-          <input type="checkbox" id="setting-floating" checked>
-        </label>
-        <div class="setting-row" style="margin-top: 6px;">
-          <div class="setting-info">
-            <span class="setting-title">Widget Auto-Show Behavior</span>
-            <span class="setting-desc">Choose when the corner timer appears on web pages</span>
-          </div>
-          <select id="setting-floating-display-mode" class="mini-select">
-            <option value="coding_only" selected>Coding Sites Only</option>
-            <option value="running_only">Only When Running</option>
-            <option value="always">All Webpages</option>
-          </select>
-        </div>
-      </div>
+              <!-- Quick Action Controls -->
+              <div class="controls-row">
+                <button class="btn btn-secondary" id="btn-reset" title="Reset (R)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  <span>Reset</span>
+                  <kbd class="key-badge">R</kbd>
+                </button>
 
-      <div class="settings-group">
-        <h4>Pop Up Screen Options</h4>
-        <div class="setting-action-card">
-          <div class="setting-info">
-            <span class="setting-title">Always-On-Top Floating Screen</span>
-            <span class="setting-desc">Pops out into an OS-level window that you can resize and float over VS Code, Discord, or any desktop app!</span>
-          </div>
-          <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-            🗗 Launch Pop Up Float
-          </button>
-        </div>
-      </div>
+                <button class="btn btn-primary-hero" id="btn-toggle-run" title="Space to toggle">
+                  <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span id="btn-toggle-text">Start</span>
+                  <kbd class="key-badge key-badge-hero">Space</kbd>
+                </button>
 
-      <div class="settings-group">
-        <h4>Keyboard Shortcuts</h4>
-        <div class="shortcut-list">
-          <div class="shortcut-item">
-            <span>Play / Pause</span>
-            <kbd class="key-badge">Space</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Record Lap / Split</span>
-            <kbd class="key-badge">L</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Reset Stopwatch</span>
-            <kbd class="key-badge">R</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Toggle Mode</span>
-            <kbd class="key-badge">M</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Launch Float Pop-up</span>
-            <kbd class="key-badge">Alt + T</kbd>
-          </div>
-        </div>
-      </div>
-
-      <div class="settings-footer">
-        <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="github-link" id="ext-github-link">
-          ⭐ Star on GitHub & View Repository
-        </a>
-      </div>
-    </section>
-
-    <!-- LOG PROBLEM MODAL -->
-    <div class="modal-overlay" id="modal-log" style="display: none;">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>Log Problem Session</h3>
-          <button class="modal-close" id="btn-modal-close">✕</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Problem Title</label>
-            <input type="text" id="modal-title" placeholder="e.g. 42. Trapping Rain Water">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Platform</label>
-              <select id="modal-platform">
-                <option value="LeetCode">LeetCode</option>
-                <option value="Codeforces">Codeforces</option>
-                <option value="HackerRank">HackerRank</option>
-                <option value="NeetCode">NeetCode</option>
-                <option value="CodeChef">CodeChef</option>
-                <option value="Other">Other</option>
-              </select>
+                <button class="btn btn-secondary" id="btn-lap" title="Split Lap (L)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                    <line x1="4" y1="22" x2="4" y2="15"></line>
+                  </svg>
+                  <span>Lap</span>
+                  <kbd class="key-badge">L</kbd>
+                </button>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Difficulty</label>
-              <select id="modal-difficulty">
-                <option value="Easy">Easy</option>
-                <option value="Medium" selected>Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
+
+            <!-- Dual Mode View (Both Active) -->
+            <div id="dual-mode-view" style="display: none;">
+              <!-- Card 1: Stopwatch -->
+              <div class="dual-card" id="dual-stopwatch-card">
+                <div class="dual-card-header">
+                  <div class="dual-card-title">
+                    <span class="dual-card-icon">⏱️</span>
+                    <span>Stopwatch (Elapsed)</span>
+                  </div>
+                  <span class="dual-badge" id="dual-sw-badge">STOPPED</span>
+                </div>
+                <div class="dual-digits-row">
+                  <div class="dual-clock-digits" id="dual-sw-digits">
+                    00:00:00<small id="dual-sw-millis">.0</small>
+                  </div>
+                </div>
+                <div class="dual-card-actions">
+                  <button class="dual-btn dual-btn-primary" id="btn-dual-sw-toggle">
+                    <span id="btn-dual-sw-text">Start</span>
+                  </button>
+                  <button class="dual-btn" id="btn-dual-sw-lap">Lap</button>
+                  <button class="dual-btn" id="btn-dual-sw-reset">Reset</button>
+                </div>
+              </div>
+
+              <!-- Card 2: Target Countdown -->
+              <div class="dual-card" id="dual-timer-card">
+                <div class="dual-card-header">
+                  <div class="dual-card-title">
+                    <span class="dual-card-icon">⏳</span>
+                    <span>Target Countdown</span>
+                  </div>
+                  <span class="dual-badge" id="dual-timer-badge">30m Target</span>
+                </div>
+                <div class="dual-progress-track">
+                  <div class="dual-progress-fill" id="dual-timer-progress"></div>
+                </div>
+                <div class="dual-digits-row">
+                  <div class="dual-clock-digits" id="dual-timer-digits">
+                    30:00:00<small id="dual-timer-millis">.0</small>
+                  </div>
+                </div>
+                <div class="dual-card-actions">
+                  <button class="dual-btn dual-btn-primary" id="btn-dual-timer-toggle">
+                    <span id="btn-dual-timer-text">Start</span>
+                  </button>
+                  <button class="dual-btn" id="btn-dual-timer-preset-cycle">Preset</button>
+                  <button class="dual-btn" id="btn-dual-timer-reset">Reset</button>
+                </div>
+              </div>
+
+              <!-- Master Controls for Both -->
+              <div class="dual-master-bar">
+                <button class="btn btn-primary-hero" id="btn-dual-master-toggle" style="width: 100%;">
+                  ⚡ Start Both (Stopwatch & Countdown)
+                </button>
+                <button class="btn btn-secondary" id="btn-dual-master-reset" style="margin-top: 6px; width: 100%;">
+                  Reset Both
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Verdict / Outcome</label>
-            <div class="verdict-options">
-              <label class="verdict-chip solved">
-                <input type="radio" name="verdict" value="Solved" checked>
-                <span>✓ Solved</span>
+
+            <!-- Problem Context & Log Bar -->
+            <div class="problem-context-card">
+              <div class="problem-info">
+                <div class="problem-platform-tag" id="current-platform-tag">LeetCode</div>
+                <div class="problem-title-display" id="current-problem-title">15. 3Sum</div>
+              </div>
+              <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
+                📝 Log Result
+              </button>
+            </div>
+          </main>
+
+          <!-- TAB 2: LAPS -->
+          <section class="tab-content" id="tab-laps">
+            <div class="laps-header">
+              <h3>Problem Solving Checkpoints</h3>
+              <p class="subtitle">Track phases: Reading → Algorithm → Code → Debug</p>
+            </div>
+            <div class="laps-quick-add">
+              <button class="lap-phase-btn" data-phase="Read & Understand">📖 Understand</button>
+              <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
+              <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
+              <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
+            </div>
+            <div class="laps-list-container" id="laps-list">
+              <div class="empty-state">
+                <p>No laps recorded yet.</p>
+                <small>Click <strong>Lap</strong> while solving or select a phase above.</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- TAB 3: HISTORY -->
+          <section class="tab-content" id="tab-history">
+            <div class="history-top-summary">
+              <div class="stat-card">
+                <div class="stat-num" id="stat-solved-count">0</div>
+                <div class="stat-label">Problems Logged</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num" id="stat-total-time">0m</div>
+                <div class="stat-label">Total Time</div>
+              </div>
+            </div>
+            <div class="history-actions-bar">
+              <button class="btn-xs" id="btn-export-csv">📥 Export CSV</button>
+              <button class="btn-xs btn-danger" id="btn-clear-history">Clear</button>
+            </div>
+            <div class="history-list" id="history-list">
+              <div class="empty-state">
+                <p>No solved problem sessions yet.</p>
+                <small>Log your completed problems to track your speed and consistency!</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- TAB 4: SETTINGS -->
+          <section class="tab-content" id="tab-settings">
+                        <!-- Dynamic Theme Settings -->
+            <div class="settings-group">
+              <h4>Timer Design</h4>
+              <p class="setting-desc" style="margin-bottom: 8px;">Choose a complete timer look. Your selection syncs to the floating timer.</p>
+              <div class="theme-palette-row">
+                <button class="theme-pill-btn active" data-theme-choice="sunset" title="Sunset Glass">
+                  <span class="theme-dot dot-sunset"></span>
+                  <span>Sunset Glass</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="warm" title="Warm Minimal">
+                  <span class="theme-dot dot-warm"></span>
+                  <span>Warm Minimal</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="aurora" title="Aurora">
+                  <span class="theme-dot dot-aurora"></span>
+                  <span>Aurora</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="graphite" title="Graphite Neon">
+                  <span class="theme-dot dot-graphite"></span>
+                  <span>Graphite Neon</span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="black" title="Full Black">
+                  <span class="theme-dot dot-black"></span>
+                  <span>Full Black</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h4>General Options</h4>
+              <label class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-title">Dual Active Mode</span>
+                  <span class="setting-desc">Allow Stopwatch & Target Timer both active simultaneously</span>
+                </div>
+                <input type="checkbox" id="setting-dual-active" checked>
               </label>
-              <label class="verdict-chip upsolved">
-                <input type="radio" name="verdict" value="Upsolved">
-                <span>💡 Upsolved</span>
+              <label class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-title">Sound Alerts</span>
+                  <span class="setting-desc">Pleasant audio chimes on completion, warnings, and laps</span>
+                </div>
+                <input type="checkbox" id="setting-sound" checked>
               </label>
-              <label class="verdict-chip attempted">
-                <input type="radio" name="verdict" value="Attempted">
-                <span>⏳ Review</span>
+              <label class="setting-row">
+                <div class="setting-info">
+                  <span class="setting-title">Floating Overlay Widget</span>
+                  <span class="setting-desc">Show on LeetCode, Codeforces, HackerRank & any tab</span>
+                </div>
+                <input type="checkbox" id="setting-floating" checked>
               </label>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Time Taken</label>
-            <div class="modal-time-display" id="modal-time-display">00:00:00</div>
-          </div>
-          <div class="form-group">
-            <label>Key Takeaway / Notes</label>
-            <textarea id="modal-notes" rows="2" placeholder="e.g. Used two-pointer approach O(N), watch out for empty arrays."></textarea>
-          </div>
+
+            <div class="settings-group">
+              <h4>Floating Timer Options</h4>
+              <div class="setting-action-card">
+                <div class="setting-info">
+                  <span class="setting-title">Persistent Floating Timer Window</span>
+                  <span class="setting-desc">Opens a persistent timer window. Browser Picture-in-Picture can keep it above other windows where supported; the browser controls its position.</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
+                  ⤢ Open Floating Timer
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
-          <button class="btn btn-primary" id="btn-modal-save">Save Session</button>
-        </div>
-      </div>
-    </div>
-  </div>
       </div>
     </div>
 
     <!-- Right Column: Mock Coding Problem Page with Draggable & Resizable Floating Widget -->
     <div class="panel-container">
       <div class="panel-caption">
-        <span>💻 In-Page Floating Widget Demo (Dock to any corner, resize smaller-ly!)</span>
+        <span>Practice environment</span>
+        <span>Overlay preview</span>
       </div>
 
       <div class="browser-frame mock-webpage" id="mock-page-container">
@@ -1028,7 +882,7 @@
                   🗜️
                 </button>
                 <!-- Pop Out Window / PiP -->
-                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Always-On-Top Pop Up Screen">
+                <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Browser Picture-in-Picture window">
                   ⤢
                 </button>
                 <!-- Hide / Close -->
@@ -1109,8 +963,8 @@
     <div class="tip-item">
       <div class="tip-icon">🪟</div>
       <div class="tip-text">
-        <h4>Always-On-Top Pop Up</h4>
-        <p>Pops out an OS-level window that can be moved anywhere on any display and floats over VS Code and other desktop apps.</p>
+        <h4>Picture-in-Picture Window</h4>
+        <p>Picture-in-Picture can stay above other windows where supported. The browser controls its position; a regular extension window may be covered by other apps.</p>
       </div>
     </div>
   </footer>

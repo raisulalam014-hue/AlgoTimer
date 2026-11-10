@@ -2,6 +2,22 @@
 // Supports: Resizable Anywhere Pop-Up Screen, Compact Mode, Concurrent Dual Timers, Milestones & Safe Audio
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const runtimeAlert = document.getElementById('runtime-alert');
+  const reportRuntimeError = (message) => {
+    if (runtimeAlert) {
+      runtimeAlert.textContent = `AlgoTimer could not finish loading: ${message}. Reload the extension and reopen the timer.`;
+      runtimeAlert.hidden = false;
+    }
+  };
+  window.addEventListener('error', (event) => {
+    console.error('AlgoTimer popup runtime error:', event.error || event.message);
+    reportRuntimeError(event.message || 'unexpected UI error');
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('AlgoTimer popup operation failed:', event.reason);
+    reportRuntimeError(event.reason instanceof Error ? event.reason.message : 'timer operation failed');
+  });
+
   // DOM Elements - Navigation & Header
   const navTabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
@@ -396,11 +412,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
     const tenths = Math.floor((ms % 1000) / 100);
-    const hundredthsVal = Math.floor((ms % 1000) / 10);
-    const hundredths = hundredthsVal < 10 ? '0' + hundredthsVal : String(hundredthsVal);
 
     const base = hrs > 0 ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
-    return { base, tenths, hundredths, fullText: `${base}.${hundredths}` };
+    return { base, tenths, fullText: `${base}.${tenths}` };
   }
 
   function formatMinutesShort(ms) {
@@ -449,106 +463,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ================= POP UP SCREEN SYSTEM (PiP & RESIZABLE WINDOW) =================
-  async function triggerPopoutPiP() {
-    if ('documentPictureInPicture' in window) {
-      try {
-        if (window._pipWindow) {
-          window._pipWindow.close();
-          return;
-        }
-
-        // Request native OS Always-On-Top window
-        const pipWindow = await window.documentPictureInPicture.requestWindow({
-          width: 360,
-          height: 580
-        });
-        window._pipWindow = pipWindow;
-
-        // Copy styles
-        [...document.querySelectorAll('link[rel="stylesheet"], style')].forEach(el => {
-          pipWindow.document.head.appendChild(el.cloneNode(true));
-        });
-
-        pipWindow.document.title = 'AlgoTimer - Always-on-Top Floating Screen';
-
-        const appContainer = document.querySelector('.app-container');
-        pipWindow.document.body.appendChild(appContainer);
-        pipWindow.document.body.classList.add('is-pip');
-        document.body.classList.add('is-pip');
-
-        pipWindow.addEventListener('pagehide', () => {
-          document.body.appendChild(appContainer);
-          document.body.classList.remove('is-pip');
-          window._pipWindow = null;
-        });
-
-        return;
-      } catch (err) {
-        console.warn('Document Picture-in-Picture failed, falling back to standalone window:', err);
-      }
-    }
-
-    // Fallback: standalone resizable window
-    triggerPopoutWindow();
-  }
-
+  // ================= PERSISTENT FLOATING WINDOW =================
   function triggerPopoutWindow() {
-    if (typeof chrome !== 'undefined' && chrome.windows && chrome.windows.create) {
-      chrome.windows.create({
-        url: chrome.runtime.getURL("float.html"),
-        type: 'popup',
-        width: 300,
-        height: 235,
-        focused: true
-      });
+    if (isExtension && chrome.runtime && chrome.runtime.sendMessage) {
+      sendMessage({ type: 'OPEN_FLOAT_WINDOW' });
     } else {
-      window.open("float.html", "AlgoTimerFloat", "width=300,height=235,resizable=yes");
+      window.open('float.html', 'AlgoTimerFloat', 'width=380,height=470,resizable=yes');
     }
   }
 
-  if (btnPopoutPip) btnPopoutPip.addEventListener("click", triggerPopoutWindow);
-  if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener("click", triggerPopoutWindow);
+  if (btnPopoutPip) btnPopoutPip.addEventListener('click', triggerPopoutWindow);
+  if (settingBtnLaunchPip) settingBtnLaunchPip.addEventListener('click', triggerPopoutWindow);
   if (btnPopoutWindow) btnPopoutWindow.addEventListener('click', triggerPopoutWindow);
+  const btnOpenFloatingFromTimer = document.getElementById('btn-open-floating-from-timer');
+  if (btnOpenFloatingFromTimer) btnOpenFloatingFromTimer.addEventListener('click', triggerPopoutWindow);
+  const btnOpenShortcutsFromTimer = document.getElementById('btn-open-shortcuts-from-timer');
+  if (btnOpenShortcutsFromTimer) {
+    btnOpenShortcutsFromTimer.addEventListener('click', () => {
+      document.querySelector('.nav-tab[data-tab="settings"]')?.click();
+      document.getElementById('windows-companion-settings')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
-  
-  // ================= DYNAMIC THEME & ACCENT ENGINE =================
-  const THEMES = ['blue', 'purple', 'emerald', 'orange', 'cosmic', 'cyan', 'violet'];
-  const THEME_ACCENTS = {
-    blue: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
-    purple: { color: '#995BFF', grad: { stop1: '#995BFF', stop2: '#287BFF', stop3: '#995BFF' } },
-    emerald: { color: '#49C98B', grad: { stop1: '#49C98B', stop2: '#287BFF', stop3: '#49C98B' } },
-    orange: { color: '#FF4B24', grad: { stop1: '#FF4B24', stop2: '#FFD329', stop3: '#FF4B24' } },
-    cosmic: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
-    cyan: { color: '#287BFF', grad: { stop1: '#287BFF', stop2: '#995BFF', stop3: '#287BFF' } },
-    violet: { color: '#995BFF', grad: { stop1: '#995BFF', stop2: '#287BFF', stop3: '#995BFF' } }
+    // ================= DYNAMIC THEME ENGINE =================
+  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const THEME_LABELS = {
+    sunset: 'Sunset Glass',
+    warm: 'Warm Minimal',
+    aurora: 'Aurora',
+    graphite: 'Graphite Neon',
+    black: 'Full Black'
+  };
+  const LEGACY_THEMES = { cosmic: 'sunset', cyan: 'warm', violet: 'aurora', emerald: 'graphite' };
+  const THEME_GRADIENTS = {
+    sunset: { stop1: '#ff9a62', stop2: '#fb7185', stop3: '#c084fc' },
+    warm: { stop1: '#f97316', stop2: '#ea580c', stop3: '#fdba74' },
+    aurora: { stop1: '#5b7cfa', stop2: '#8b5cf6', stop3: '#fb7185' },
+    graphite: { stop1: '#b59aff', stop2: '#8b6ee8', stop3: '#f2c65d' },
+    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' }
   };
 
-  let currentTheme = 'blue';
+  let currentTheme = 'sunset';
 
-  function applyTheme(themeName) {
-    if (!THEMES.includes(themeName)) themeName = 'blue';
-    currentTheme = themeName;
-    document.documentElement.setAttribute('data-theme', 'black');
-
-    const config = THEME_ACCENTS[themeName] || THEME_ACCENTS.blue;
-    document.documentElement.style.setProperty('--accent-blue', config.color);
-
+  function updateDialThemeGradient(themeName) {
+    const grad = THEME_GRADIENTS[themeName] || THEME_GRADIENTS.sunset;
     const s1 = document.getElementById('grad-stop-1');
     const s2 = document.getElementById('grad-stop-2');
     const s3 = document.getElementById('grad-stop-3');
-    if (s1) s1.setAttribute('stop-color', config.grad.stop1);
-    if (s2) s2.setAttribute('stop-color', config.grad.stop2);
-    if (s3) s3.setAttribute('stop-color', config.grad.stop3);
+    if (s1) s1.setAttribute('stop-color', grad.stop1);
+    if (s2) s2.setAttribute('stop-color', grad.stop2);
+    if (s3) s3.setAttribute('stop-color', grad.stop3);
+  }
+
+  function applyTheme(themeName) {
+    themeName = LEGACY_THEMES[themeName] || themeName;
+    if (!THEMES.includes(themeName)) themeName = 'sunset';
+    currentTheme = themeName;
+    document.documentElement.setAttribute('data-theme', themeName);
 
     const themeLabel = document.getElementById('header-theme-label');
     if (themeLabel) {
-      themeLabel.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
+      themeLabel.textContent = THEME_LABELS[themeName];
     }
 
     document.querySelectorAll('.theme-pill-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.themeChoice === themeName);
     });
+
+    updateDialThemeGradient(themeName);
 
     try {
       if (isExtension && chrome.storage && chrome.storage.local) {
@@ -581,14 +563,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isExtension && chrome.storage && chrome.storage.local) {
       chrome.storage.local.get(['activeTheme'], (res) => {
         if (res && res.activeTheme) applyTheme(res.activeTheme);
-        else applyTheme('blue');
+        else applyTheme('sunset');
       });
     } else {
       const savedTheme = localStorage.getItem('algotimer_theme');
-      applyTheme(savedTheme || 'blue');
+      applyTheme(savedTheme || 'sunset');
     }
   } catch (e) {
-    applyTheme('blue');
+    applyTheme('sunset');
   }
 
   // ================= MAIN RENDER LOOP =================
@@ -596,6 +578,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const swElapsed = getStopwatchElapsed();
     const targetRemaining = getTargetRemaining();
     const targetElapsed = getTargetElapsed();
+    const activeStatus = state.mode === 'dual'
+      ? (state.stopwatch.status === 'running' || state.targetTimer.status === 'running'
+        ? 'running'
+        : state.stopwatch.status === 'paused' || state.targetTimer.status === 'paused' ? 'paused' : 'stopped')
+      : state.mode === 'timer' ? state.targetTimer.status : state.stopwatch.status;
+    const timerRunningState = document.getElementById('timer-running-state');
+    if (timerRunningState) {
+      const stateLabel = activeStatus === 'running' ? 'RUNNING'
+        : activeStatus === 'paused' ? 'PAUSED'
+          : activeStatus === 'finished' ? 'FINISHED' : 'READY';
+      timerRunningState.textContent = stateLabel;
+      timerRunningState.dataset.state = activeStatus;
+    }
 
     // 1. Dual Mode Rendering
     if (state.mode === 'dual') {
@@ -758,58 +753,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         // Stopwatch Mode
         const parts = formatTimeParts(swElapsed);
-        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.hundredths}</small>`;
-        if (dialStatusLabel) dialStatusLabel.textContent = state.stopwatch.status.toUpperCase();
+        if (dialDigits) dialDigits.innerHTML = `${parts.base}<small id="dial-millis">.${parts.tenths}</small>`;
+        if (dialStatusLabel) dialStatusLabel.textContent = 'STOPWATCH';
         if (dialTargetLabel) dialTargetLabel.style.display = 'none';
         if (dialDigits) dialDigits.classList.remove('warning');
         if (dialProgress) dialProgress.classList.remove('warning');
 
-        // Continuous 60s rotating ring & Apple Watch Needle Hand (Image 1)
+        // Continuous 60s rotating ring
+        
+    // Sub-Gauges (Laps, Split, Status)
+    const subLapsVal = document.getElementById('sub-laps-val');
+    if (subLapsVal) subLapsVal.textContent = state.laps ? state.laps.length : 0;
+
+    const subSplitVal = document.getElementById('sub-split-val');
+    if (subSplitVal) {
+      if (state.laps && state.laps.length > 0) {
+        const lastLap = state.laps[0];
+        subSplitVal.textContent = formatTimeParts(lastLap.lapDuration).base;
+      } else {
+        subSplitVal.textContent = '00:00';
+      }
+    }
+
+    const subStateVal = document.getElementById('sub-state-val');
+    if (subStateVal) {
+      const curStatus = state.mode === 'stopwatch' ? state.stopwatch.status : (state.mode === 'timer' ? state.targetTimer.status : 'DUAL');
+      subStateVal.textContent = (curStatus || 'READY').toUpperCase();
+    }
+
         const secRatio = (swElapsed % 60000) / 60000;
         if (dialProgress) dialProgress.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - secRatio);
 
-        const needleGroup = document.getElementById('dial-needle-group');
-        if (needleGroup) {
-          const needleDeg = state.stopwatch.status === 'stopped' ? 0 : secRatio * 360;
-          needleGroup.style.transform = `rotate(${needleDeg}deg)`;
-        }
-
-        const dialStatusPill = document.getElementById('dial-status-pill');
-        if (dialStatusPill) {
-          dialStatusPill.className = 'dial-badge-pill ' + state.stopwatch.status;
-        }
-
-        const dialWrapper = document.getElementById('dial-wrapper');
-        if (dialWrapper) {
-          dialWrapper.className = 'dial-wrapper is-' + state.stopwatch.status;
-        }
-
-        // Sub-Gauges (Laps, Split, Status)
-        const subLapsVal = document.getElementById('sub-laps-val');
-        if (subLapsVal) subLapsVal.textContent = state.laps ? state.laps.length : 0;
-
-        const subSplitVal = document.getElementById('sub-split-val');
-        if (subSplitVal) {
-          if (state.laps && state.laps.length > 0) {
-            const lastLap = state.laps[0];
-            subSplitVal.textContent = formatTimeParts(lastLap.lapDuration).base;
-          } else {
-            subSplitVal.textContent = '00:00';
-          }
-        }
-
-        const subStateVal = document.getElementById('sub-state-val');
-        if (subStateVal) {
-          subStateVal.textContent = state.stopwatch.status.toUpperCase();
-        }
-
         // Toggle run button text
         if (state.stopwatch.status === 'running') {
-          if (btnToggleRun) btnToggleRun.classList.add('running', 'btn-running');
+          if (btnToggleRun) btnToggleRun.classList.add('running');
           if (btnToggleText) btnToggleText.textContent = 'Pause';
         } else {
-          if (btnToggleRun) btnToggleRun.classList.remove('running', 'btn-running');
-          if (btnToggleText) btnToggleText.textContent = state.stopwatch.status === 'paused' ? 'Resume' : 'Play';
+          if (btnToggleRun) btnToggleRun.classList.remove('running');
+          if (btnToggleText) btnToggleText.textContent = 'Start';
         }
 
         // Background Concurrent Target Timer Banner
@@ -1293,6 +1274,180 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  const btnOpenShortcuts = document.getElementById('btn-open-shortcuts');
+  const companionSettings = document.getElementById('windows-companion-settings');
+  const companionStatusLabel = document.getElementById('companion-status');
+  const companionHotkeys = document.getElementById('companion-hotkeys');
+  const btnShowCompanion = document.getElementById('btn-show-companion');
+  const btnReconnectCompanion = document.getElementById('btn-reconnect-companion');
+  const companionCornerSelect = document.getElementById('companion-corner-select');
+  const companionPinnedToggle = document.getElementById('companion-pinned');
+  const companionTopmostNote = document.getElementById('companion-topmost-note');
+  const btnSaveCompanionPosition = document.getElementById('btn-save-companion-position');
+  const btnSaveCompanionHotkeys = document.getElementById('btn-save-companion-shortcuts');
+  const btnResetCompanionHotkeys = document.getElementById('btn-reset-companion-shortcuts');
+  const defaultCompanionHotkeys = {
+    'start-timer': 'Ctrl+Alt+1',
+    'pause-timer': 'Ctrl+Alt+2',
+    'record-lap': 'Ctrl+Alt+3',
+    'reset-timer': 'Ctrl+Alt+4',
+    'toggle-window': 'Ctrl+Alt+5'
+  };
+  const companionCommandLabels = {
+    'start-timer': 'Start / Resume',
+    'pause-timer': 'Pause',
+    'record-lap': 'Lap',
+    'reset-timer': 'Reset',
+    'toggle-window': 'Show / Hide'
+  };
+
+  function renderCompanionStatus(companion) {
+    if (!companionSettings || !companion) return;
+    companionStatusLabel.textContent = companion.message || companion.status || 'Companion status unavailable';
+    companionStatusLabel.dataset.status = companion.status || 'unknown';
+    if (companionCornerSelect) companionCornerSelect.value = companion.corner || 'top-right';
+    if (companionPinnedToggle) companionPinnedToggle.checked = Boolean(companion.pinned);
+    if (companionTopmostNote) {
+      companionTopmostNote.textContent = companion.status === 'connected'
+        ? 'Always-on-top is active while the Windows companion is running.'
+        : 'Always-on-top requires the connected Windows companion.';
+    }
+    companionHotkeys.replaceChildren();
+    Object.entries(companionCommandLabels).forEach(([command, label]) => {
+      const row = document.createElement('div');
+      row.className = 'companion-hotkey-row';
+      row.dataset.command = command;
+      const name = document.createElement('span');
+      name.className = 'companion-hotkey-name';
+      name.textContent = label;
+      const binding = document.createElement('input');
+      binding.type = 'text';
+      binding.className = 'companion-hotkey-binding';
+      binding.setAttribute('aria-label', `${label} global shortcut`);
+      binding.placeholder = 'Ctrl+Alt+key';
+      binding.value = companion.hotkeys?.[command] ?? defaultCompanionHotkeys[command];
+      const enabledLabel = document.createElement('label');
+      enabledLabel.className = 'hotkey-enabled';
+      const enabled = document.createElement('input');
+      enabled.type = 'checkbox';
+      enabled.className = 'companion-hotkey-enabled';
+      enabled.checked = binding.value.length > 0;
+      binding.disabled = !enabled.checked;
+      enabled.addEventListener('change', () => {
+        binding.disabled = !enabled.checked;
+        if (!enabled.checked) binding.value = '';
+        else if (!binding.value.trim()) binding.value = defaultCompanionHotkeys[command];
+      });
+      enabledLabel.append(enabled, document.createTextNode('On'));
+      const availability = document.createElement('span');
+      availability.className = 'companion-hotkey-state';
+      availability.textContent = companion.status !== 'connected'
+        ? 'Offline'
+        : (!binding.value ? 'Off' : (companion.registered?.[command] === false ? 'Conflict' : 'Ready'));
+      availability.dataset.state = availability.textContent.toLowerCase();
+      row.append(name, binding, enabledLabel, availability);
+      companionHotkeys.append(row);
+    });
+  }
+
+  if (!isExtension && companionSettings) companionSettings.hidden = true;
+  if (btnShowCompanion) {
+    btnShowCompanion.addEventListener('click', async () => {
+      const response = await sendMessage({ type: 'SHOW_COMPANION_WINDOW' });
+      if (!response.success && companionStatusLabel) {
+        companionStatusLabel.textContent = response.error || 'Connect the Windows companion first.';
+      }
+      if (btnSaveCompanionPosition) {
+        btnSaveCompanionPosition.addEventListener('click', async () => {
+          const response = await sendMessage({
+            type: 'SET_COMPANION_WINDOW_SETTINGS',
+            corner: companionCornerSelect?.value || 'top-right',
+            pinned: Boolean(companionPinnedToggle?.checked)
+          });
+          companionStatusLabel.textContent = response.success
+            ? 'Sending placement to the Windows companion…'
+            : response.error || 'Could not save native timer placement.';
+          if (!response.success) companionStatusLabel.dataset.status = 'unavailable';
+        });
+      }
+    });
+  }
+  if (btnReconnectCompanion) {
+    btnReconnectCompanion.addEventListener('click', async () => {
+      const response = await sendMessage({ type: 'RECONNECT_COMPANION' });
+      if (response.companion) renderCompanionStatus(response.companion);
+      else if (companionStatusLabel) companionStatusLabel.textContent = 'Could not reconnect to the Windows companion.';
+    });
+  }
+  if (btnResetCompanionHotkeys) {
+    btnResetCompanionHotkeys.addEventListener('click', () => {
+      Object.entries(defaultCompanionHotkeys).forEach(([command, shortcut]) => {
+        const row = companionHotkeys.querySelector(`[data-command="${command}"]`);
+        const binding = row?.querySelector('.companion-hotkey-binding');
+        const enabled = row?.querySelector('.companion-hotkey-enabled');
+        if (binding) {
+          binding.value = shortcut;
+          binding.disabled = false;
+        }
+        if (enabled) enabled.checked = true;
+      });
+      companionStatusLabel.textContent = 'Defaults loaded. Save to apply them.';
+    });
+  }
+  if (btnSaveCompanionHotkeys) {
+    btnSaveCompanionHotkeys.addEventListener('click', async () => {
+      const hotkeys = {};
+      for (const [command, label] of Object.entries(companionCommandLabels)) {
+        const row = companionHotkeys.querySelector(`[data-command="${command}"]`);
+        const enabled = row?.querySelector('.companion-hotkey-enabled')?.checked;
+        const binding = row?.querySelector('.companion-hotkey-binding')?.value.trim() || '';
+        if (enabled && (!binding.includes('+') || !/(ctrl|control|alt|shift|win|windows)/i.test(binding))) {
+          companionStatusLabel.textContent = `Add a modifier and key for ${label}, or switch it off.`;
+          companionStatusLabel.dataset.status = 'unavailable';
+          row?.querySelector('.companion-hotkey-binding')?.focus();
+          return;
+        }
+        hotkeys[command] = enabled ? binding : '';
+      }
+      const response = await sendMessage({ type: 'SET_COMPANION_HOTKEYS', hotkeys });
+      if (!response.success) {
+        companionStatusLabel.textContent = response.error || 'Could not save global shortcuts.';
+        companionStatusLabel.dataset.status = 'unavailable';
+      } else {
+        companionStatusLabel.textContent = 'Sending shortcut changes to Windows…';
+      }
+    });
+  }
+  if (isExtension && companionSettings) {
+    sendMessage({ type: 'GET_COMPANION_STATUS' }).then((response) => renderCompanionStatus(response.companion));
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.algoTimerCompanionStatus) {
+        renderCompanionStatus(changes.algoTimerCompanionStatus.newValue);
+      }
+    });
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.commands && chrome.commands.getAll) {
+    chrome.commands.getAll((commands) => {
+      if (chrome.runtime.lastError) {
+        console.warn('Could not read keyboard shortcuts:', chrome.runtime.lastError.message);
+        return;
+      }
+      commands.forEach((command) => {
+        const label = document.getElementById(`shortcut-${command.name}`);
+        if (label) label.textContent = command.shortcut || 'Not set';
+      });
+    });
+  }
+
+  if (btnOpenShortcuts && typeof chrome !== 'undefined' && chrome.tabs) {
+    btnOpenShortcuts.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }, () => {
+        if (chrome.runtime.lastError) console.warn('Could not open shortcut settings:', chrome.runtime.lastError.message);
+      });
+    });
+  }
+
   // Tab Navigation
   navTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1311,7 +1466,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
-    if (['input', 'textarea', 'select'].includes(document.activeElement?.tagName?.toLowerCase())) {
+    const activeElement = document.activeElement;
+    if (activeElement?.isContentEditable || ['input', 'textarea', 'select'].includes(activeElement?.tagName?.toLowerCase())) {
       return;
     }
 

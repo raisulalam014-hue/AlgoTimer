@@ -100,6 +100,231 @@ function syncLegacyProperties(state) {
   state.targetDurationMs = state.targetTimer.targetDurationMs;
 }
 
+const FLOAT_WINDOW_ID_KEY = 'algoTimerFloatWindowId';
+const FLOAT_WINDOW_PREFS_KEY = 'algoTimerFloatWindowPrefs';
+const FLOAT_WINDOW_DEFAULTS = {
+  corner: 'top-right',
+  pinned: false,
+  left: null,
+  top: null,
+  width: 380,
+  height: 470,
+  viewMode: 'expanded'
+};
+
+let floatWindowOperation = null;
+const COMPANION_HOST_NAME = 'com.algotimer.companion';
+let companionPort = null;
+let companionStatus = { status: 'not-connected', message: 'Windows companion is not installed or connected.' };
+
+function saveCompanionStatus(status, details = {}) {
+  companionStatus = Object.assign({}, companionStatus, details, { status, updatedAt: Date.now() });
+  chrome.storage.local.set({ algoTimerCompanionStatus: companionStatus });
+}
+
+function postCompanionMessage(message) {
+  if (!companionPort) return false;
+  try {
+    companionPort.postMessage(message);
+    return true;
+  } catch (error) {
+    console.warn('Could not send to AlgoTimer companion:', error);
+    return false;
+  }
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+  if (changes.algoTimerState && changes.algoTimerState.newValue) {
+    postCompanionMessage({ type: 'state', state: normalizeState(changes.algoTimerState.newValue) });
+  }
+  if (changes.activeTheme && changes.activeTheme.newValue) {
+    postCompanionMessage({ type: 'theme', theme: changes.activeTheme.newValue });
+  }
+});
+
+function connectCompanion() {
+  if (companionPort) return true;
+  saveCompanionStatus('connecting', { message: 'Connecting to the Windows companion…' });
+  try {
+    const port = chrome.runtime.connectNative(COMPANION_HOST_NAME);
+    companionPort = port;
+    port.onMessage.addListener((message) => {
+      if (message.type === 'status') {
+        saveCompanionStatus(message.status || 'connected', {
+          message: message.message || (message.status === 'connected' ? 'Windows companion connected.' : 'Windows companion status updated.'),
+          version: message.version,
+          hotkeys: message.hotkeys || {},
+          registered: message.registered || {},
+          enabled: message.enabled || {},
+          corner: message.corner || 'top-right',
+          pinned: Boolean(message.pinned)
+        });
+      } else if (message.type === 'hotkey-status') {
+        const hotkeys = Object.assign({}, companionStatus.hotkeys || {});
+        hotkeys[message.command] = message.binding;
+        const registered = Object.assign({}, companionStatus.registered || {});
+        registered[message.command] = Boolean(message.registered);
+        saveCompanionStatus('connected', {
+          message: message.registered ? 'Windows companion connected.' : `Shortcut unavailable: ${message.binding}`,
+          hotkeys,
+          registered,
+          lastError: message.registered ? null : message.error
+        });
+      } else if (message.type === 'command') {
+        runGlobalCommand(message.command).catch((error) => {
+          console.error('Windows companion command failed:', error);
+        });
+      }
+    });
+    port.onDisconnect.addListener(() => {
+      const error = chrome.runtime.lastError;
+      companionPort = null;
+      const message = error && error.message
+        ? `Windows companion unavailable: ${error.message}`
+        : 'Windows companion disconnected. Reconnect it to restore system-wide hotkeys.';
+      saveCompanionStatus(error ? 'unavailable' : 'disconnected', { message });
+      if (error) console.warn('AlgoTimer native companion disconnected:', error.message);
+    });
+    port.postMessage({ type: 'hello', protocolVersion: 1 });
+    chrome.storage.local.get(['algoTimerState', 'activeTheme'], (result) => {
+      if (!chrome.runtime.lastError) {
+        postCompanionMessage({ type: 'state', state: normalizeState(result.algoTimerState) });
+        if (result.activeTheme) postCompanionMessage({ type: 'theme', theme: result.activeTheme });
+      }
+    });
+    return true;
+  } catch (error) {
+    companionPort = null;
+    saveCompanionStatus('unavailable', {
+      message: `Windows companion unavailable: ${error.message || 'native host could not start'}`
+    });
+    console.warn('Could not connect to AlgoTimer native companion:', error);
+    return false;
+  }
+}
+
+async function openFloatWindow(toggleVisibility = false) {
+  if (floatWindowOperation) return floatWindowOperation;
+  floatWindowOperation = (async () => {
+  const saved = await chrome.storage.local.get([FLOAT_WINDOW_ID_KEY, FLOAT_WINDOW_PREFS_KEY]);
+  const prefs = Object.assign({}, FLOAT_WINDOW_DEFAULTS, saved[FLOAT_WINDOW_PREFS_KEY] || {});
+  const windowId = saved[FLOAT_WINDOW_ID_KEY];
+
+  if (windowId !== undefined) {
+    let existing = null;
+    try {
+      existing = await chrome.windows.get(windowId);
+    } catch (error) {
+      await chrome.storage.local.remove(FLOAT_WINDOW_ID_KEY);
+    }
+    if (existing) {
+      if (toggleVisibility && existing.state !== 'minimized') {
+        await chrome.windows.update(windowId, { state: 'minimized' });
+      } else {
+        await chrome.windows.update(windowId, {
+          focused: true,
+          state: existing.state === 'minimized' ? 'normal' : existing.state
+        });
+      }
+      return;
+    }
+  }
+
+  const options = {
+    url: chrome.runtime.getURL('float.html'),
+    type: 'popup',
+    width: Math.max(220, Number(prefs.width) || FLOAT_WINDOW_DEFAULTS.width),
+    height: Math.max(112, Number(prefs.height) || FLOAT_WINDOW_DEFAULTS.height),
+    focused: true
+  };
+  if (Number.isFinite(prefs.left)) options.left = prefs.left;
+  if (Number.isFinite(prefs.top)) options.top = prefs.top;
+  const created = await chrome.windows.create(options);
+  if (created && Number.isInteger(created.id)) {
+    await chrome.storage.local.set({ [FLOAT_WINDOW_ID_KEY]: created.id });
+  }
+  })();
+  try {
+    await floatWindowOperation;
+  } finally {
+    floatWindowOperation = null;
+  }
+}
+
+async function runGlobalCommand(command) {
+  if (command === 'toggle-floating-window') {
+    await openFloatWindow(true);
+    return;
+  }
+
+  const data = await chrome.storage.local.get(['algoTimerState']);
+  const state = normalizeState(data.algoTimerState);
+  const target = state.mode === 'dual' ? 'both' : (state.mode === 'timer' ? 'timer' : 'stopwatch');
+
+  if (command === 'toggle-timer' || command === 'start-timer' || command === 'pause-timer') {
+    const isRunning = target === 'both'
+      ? state.stopwatch.status === 'running' && state.targetTimer.status === 'running'
+      : (target === 'timer' ? state.targetTimer.status === 'running' : state.stopwatch.status === 'running');
+    const shouldPause = command === 'pause-timer' || (command === 'toggle-timer' && isRunning);
+    const now = Date.now();
+    const timers = target === 'both' ? ['stopwatch', 'timer'] : [target === 'timer' ? 'targetTimer' : 'stopwatch'];
+    for (const key of timers) {
+      const timer = key === 'timer' ? state.targetTimer : state[key];
+      if (shouldPause && timer.status === 'running') {
+        timer.elapsedBeforePause += now - timer.startTime;
+        timer.startTime = null;
+        timer.status = 'paused';
+      } else if (!shouldPause && timer.status !== 'running') {
+        if (timer.status === 'finished') timer.elapsedBeforePause = 0;
+        timer.startTime = now;
+        timer.status = 'running';
+      }
+    }
+  } else if (command === 'reset-timer') {
+    const timers = target === 'both' ? [state.stopwatch, state.targetTimer] : [target === 'timer' ? state.targetTimer : state.stopwatch];
+    for (const timer of timers) {
+      timer.status = 'stopped';
+      timer.startTime = null;
+      timer.elapsedBeforePause = 0;
+    }
+    if (target !== 'timer') state.laps = [];
+  } else if (command === 'record-lap') {
+    const elapsed = state.stopwatch.elapsedBeforePause +
+      (state.stopwatch.status === 'running' && state.stopwatch.startTime ? Date.now() - state.stopwatch.startTime : 0);
+    if (elapsed === 0) return;
+    const previous = state.laps.length ? state.laps[0].totalMs : 0;
+    state.laps.unshift({
+      id: state.laps.length + 1,
+      label: 'Phase ' + (state.laps.length + 1),
+      totalMs: elapsed,
+      splitMs: Math.max(0, elapsed - previous),
+      timestamp: Date.now()
+    });
+  } else {
+    return;
+  }
+
+  syncLegacyProperties(state);
+  await chrome.storage.local.set({ algoTimerState: state });
+  updateBadge(state);
+  broadcastState(state);
+}
+
+chrome.commands.onCommand.addListener((command) => {
+  runGlobalCommand(command).catch((error) => {
+    console.error('Global timer command failed:', error);
+  });
+});
+
+chrome.windows.onRemoved.addListener((windowId) => {
+  chrome.storage.local.get([FLOAT_WINDOW_ID_KEY], (data) => {
+    if (data[FLOAT_WINDOW_ID_KEY] === windowId) {
+      chrome.storage.local.remove(FLOAT_WINDOW_ID_KEY);
+    }
+  });
+});
+
 // Initialize default state
 chrome.runtime.onInstalled.addListener(async () => {
   try {
@@ -251,6 +476,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       switch (message.type) {
         case 'GET_STATE': {
           sendResponse({ success: true, state });
+          break;
+        }
+
+        case 'GET_COMPANION_STATUS': {
+          const stored = await chrome.storage.local.get(['algoTimerCompanionStatus']);
+          sendResponse({ success: true, companion: stored.algoTimerCompanionStatus || companionStatus });
+          break;
+        }
+
+        case 'RECONNECT_COMPANION': {
+          const connected = connectCompanion();
+          sendResponse({ success: connected, companion: companionStatus });
+          break;
+        }
+
+        case 'SHOW_COMPANION_WINDOW': {
+          if (!companionPort) connectCompanion();
+          const shown = postCompanionMessage({ type: 'show-window' });
+          sendResponse({ success: shown, error: shown ? undefined : 'Windows companion is not connected.' });
+          break;
+        }
+
+        case 'SET_COMPANION_HOTKEYS': {
+          if (!companionPort) connectCompanion();
+          const saved = postCompanionMessage({ type: 'set-hotkeys', hotkeys: message.hotkeys || {} });
+          sendResponse({
+            success: saved,
+            error: saved ? undefined : 'Connect the Windows companion before saving system-wide shortcuts.'
+          });
+          break;
+        }
+
+        case 'SET_COMPANION_WINDOW_SETTINGS': {
+          if (!companionPort) connectCompanion();
+          const updated = postCompanionMessage({
+            type: 'set-window-settings',
+            corner: message.corner,
+            pinned: Boolean(message.pinned)
+          });
+          sendResponse({
+            success: updated,
+            error: updated ? undefined : 'Connect the Windows companion before saving native window placement.'
+          });
           break;
         }
 
@@ -434,17 +702,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'OPEN_FLOAT_WINDOW':
         case 'OPEN_POPUP_WINDOW': {
-          if (chrome.windows && chrome.windows.create) {
-            chrome.windows.create({
-              url: chrome.runtime.getURL('float.html'),
-              type: 'popup',
-              width: 300,
-              height: 230,
-              top: 40,
-              left: 100,
-              focused: true
-            });
-          }
+          await openFloatWindow(false);
           sendResponse({ success: true });
           break;
         }
@@ -460,3 +718,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return true;
 });
+
+connectCompanion();
