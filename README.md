@@ -28,15 +28,20 @@ To uninstall, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninsta
 
 ## 🚀 Key Highlights & Features
 
-### 1. 🎨 Five Complete Timer Designs
+### 1. 🎨 Ten Coordinated Timer Themes
 - **Sunset Glass**: dark plum surfaces with warm orange, coral, and pink accents.
 - **Warm Minimal**: soft neutral surfaces with crisp orange controls.
 - **Aurora**: cool blue-violet cards with coral highlights.
 - **Graphite Neon**: charcoal surfaces with violet and warm-yellow details.
 - **Full Black**: pure-black surfaces with high-contrast white text and warm yellow controls.
+- **Minimal Black**: quiet near-black surfaces, thin borders, and clear blue controls.
+- **Quiet Dashboard**: dark slate surfaces with restrained teal accents.
+- **Deep Purple**: deep violet surfaces with readable lilac controls.
+- **Soft Glass**: pale layered surfaces with subtle blur and muted rose accents.
+- **Navy & Cyan**: deep navy surfaces, a cyan timer ring, and restrained pink status accents.
 - Choose a design in **Settings → Timer Design**. It is saved and synchronized across the popup, browser floating timer, and Windows companion.
-- **Precision HUD Dial & Sub-Gauges**: Outer dotted perimeter tick track, glowing SVG progress ring, and 3 mini precision sub-gauges (`LAPS`, `SPLIT`, `STATUS`).
-- **Luminous Horizon Flare**: Neon crescent horizon flare across the bottom edge inspired by futuristic cockpit displays.
+- The same ten themes are available from the floating timer's theme control; readable system fonts and vector/text controls avoid emoji-font dependencies.
+- **Focused timer display**: a restrained progress ring, clear elapsed/remaining time, and compact lap/split context without decorative gauges or ambient flares.
 
 ### 2. Persistent Floating Timer
 - **Persistent Extension Window**: The timer stays open when focus changes or browser tabs switch. Other applications can cover it unless Picture-in-Picture is available and enabled.
