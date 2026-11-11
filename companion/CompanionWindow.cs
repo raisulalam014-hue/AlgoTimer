@@ -15,6 +15,8 @@ internal sealed class CompanionWindow : Form
     private readonly Label _shortcutSummary = new();
     private readonly Font _singleClockFont = new("Consolas", 35F, FontStyle.Bold);
     private readonly Font _dualClockFont = new("Consolas", 24F, FontStyle.Bold);
+    private readonly Font _compactSingleClockFont = new("Consolas", 31F, FontStyle.Bold);
+    private readonly Font _compactDualClockFont = new("Consolas", 21F, FontStyle.Bold);
     private Panel? _header;
     private Panel? _content;
     private Panel? _themeBar;
@@ -263,6 +265,24 @@ internal sealed class CompanionWindow : Form
         _status.ForeColor = IsAnyTimerRunning() ? _statusAccentColor : _mutedColor;
         _connection.ForeColor = _mutedColor;
         _shortcutSummary.ForeColor = _mutedColor;
+        var compactLayout = _theme is "minimal" or "black" or "dashboard";
+        if (_timerCard is not null)
+        {
+            _timerCard.Radius = _theme switch
+            {
+                "minimal" => 6,
+                "black" => 12,
+                "dashboard" => 8,
+                "purple" or "glass" or "sunset" => 16,
+                _ => 10
+            };
+        }
+        _clock.Location = compactLayout ? new Point(24, 27) : new Point(15, 27);
+        _clock.Size = compactLayout ? new Size(330, 58) : new Size(340, 62);
+        _clock.TextAlign = compactLayout ? ContentAlignment.MiddleLeft : ContentAlignment.MiddleCenter;
+        _secondaryClock.Location = compactLayout ? new Point(24, 87) : new Point(15, 91);
+        _secondaryClock.Size = compactLayout ? new Size(330, 20) : new Size(340, 20);
+        _secondaryClock.TextAlign = compactLayout ? ContentAlignment.MiddleLeft : ContentAlignment.MiddleCenter;
         _runButton.BackColor = _accentColor;
         _runButton.ForeColor = _accentInkColor;
         _runButton.FlatAppearance.BorderColor = _accentColor;
@@ -667,23 +687,25 @@ internal sealed class CompanionWindow : Form
 
         if (mode == "dual")
         {
-            _clock.Font = _dualClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactDualClockFont : _dualClockFont;
             _clock.Text = FormatDuration(swElapsed);
             _secondaryClock.Text = $"STOPWATCH ELAPSED  |  TARGET {FormatDuration(remaining)} REMAINING";
         }
         else if (mode == "timer")
         {
-            _clock.Font = _singleClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactSingleClockFont : _singleClockFont;
             _clock.Text = FormatDuration(remaining);
             _secondaryClock.Text = $"TARGET COUNTDOWN  |  {FormatDuration(duration)} TOTAL";
         }
         else
         {
-            _clock.Font = _singleClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactSingleClockFont : _singleClockFont;
             _clock.Text = FormatDuration(swElapsed);
             _secondaryClock.Text = $"STOPWATCH  |  {GetNumber(state, "laps", 0)} LAPS";
         }
     }
+
+    private bool UsesCompactClockLayout() => _theme is "minimal" or "black" or "dashboard";
 
     private bool IsAnyTimerRunning()
     {

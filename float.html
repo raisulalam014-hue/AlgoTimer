@@ -1131,6 +1131,180 @@
       outline-offset: 2px;
     }
 
+    html[data-theme="minimal"] #float-widget,
+    html[data-theme="black"] #float-widget {
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      box-shadow: none;
+    }
+
+    html[data-theme="minimal"] .float-header,
+    html[data-theme="black"] .float-header {
+      border-radius: 6px 6px 0 0;
+    }
+
+    html[data-theme="minimal"] .float-dial-ticks {
+      display: none;
+    }
+
+    html[data-theme="minimal"] .float-dial-track,
+    html[data-theme="minimal"] .float-dial-progress {
+      stroke-width: 4px;
+      filter: none;
+    }
+
+    html[data-theme="black"] .float-dial-ticks {
+      display: block;
+      stroke: #4a4020;
+    }
+
+    html[data-theme="black"] .float-dial-progress {
+      stroke: var(--accent-cyan);
+      stroke-width: 6px;
+      filter: none;
+    }
+
+    html[data-theme="warm"] .float-dial-wrapper,
+    html[data-theme="warm"] .float-mini-view {
+      background: var(--bg-surface);
+      box-shadow: none;
+    }
+
+    html[data-theme="aurora"] .float-widget {
+      border-radius: 18px;
+    }
+
+    html[data-theme="aurora"] .float-dual-box {
+      border-top: 2px solid var(--accent-cyan);
+      border-radius: 8px;
+    }
+
+    html[data-theme="graphite"] .float-dial-content,
+    html[data-theme="graphite"] .float-mode-badge,
+    html[data-theme="graphite"] .float-sub-gauge {
+      border-radius: 999px;
+    }
+
+    html[data-theme="graphite"] .float-clock {
+      font-family: Consolas, "Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    html[data-theme="dashboard"] .float-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      gap: 8px;
+    }
+
+    html[data-theme="dashboard"] #float-single-view {
+      width: 100%;
+    }
+
+    html[data-theme="dashboard"] .float-dial-wrapper {
+      width: 100%;
+      height: 104px;
+      justify-content: flex-start;
+    }
+
+    html[data-theme="dashboard"] .float-dial-svg {
+      right: auto;
+      left: 0;
+      width: 104px;
+      height: 104px;
+    }
+
+    html[data-theme="dashboard"] .float-dial-content {
+      align-items: flex-start;
+      margin-left: 112px;
+    }
+
+    html[data-theme="dashboard"] .float-clock {
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    html[data-theme="dashboard"] .float-sub-gauges {
+      gap: 8px;
+    }
+
+    html[data-theme="dashboard"] .float-sub-gauge {
+      align-items: flex-start;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    html[data-theme="dashboard"] .float-sub-gauge:last-child {
+      display: none;
+    }
+
+    html[data-theme="dashboard"] .float-dual-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 0;
+    }
+
+    html[data-theme="dashboard"] .float-dual-row {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 7px 9px;
+    }
+
+    html[data-theme="dashboard"] .float-dual-row + .float-dual-row {
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    html[data-theme="dashboard"] .float-dual-digits {
+      font-size: 15px;
+    }
+
+    html[data-theme="purple"] .float-widget {
+      border-radius: 20px;
+    }
+
+    html[data-theme="purple"] .float-dial-wrapper {
+      width: min(162px, 38vh, 58vw);
+      height: min(162px, 38vh, 58vw);
+    }
+
+    html[data-theme="purple"] .float-controls {
+      gap: 5px;
+    }
+
+    html[data-theme="purple"] .float-ctrl-btn {
+      border-radius: 999px;
+    }
+
+    html[data-theme="glass"] .float-widget,
+    html[data-theme="glass"] .float-dual-box,
+    html[data-theme="glass"] .float-mini-view {
+      background: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+      border-color: color-mix(in srgb, var(--border-subtle) 80%, white);
+      box-shadow: 0 12px 30px rgba(43, 57, 82, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    html[data-theme="sunset"] .float-widget {
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(12, 6, 14, 0.26);
+    }
+
+    html[data-theme="navy"] .float-dial-wrapper {
+      width: min(174px, 40vh, 60vw);
+      height: min(174px, 40vh, 60vw);
+    }
+
+    html[data-theme="navy"] .float-dial-progress {
+      stroke-width: 7px;
+    }
+
+    html[data-theme="navy"] .float-mode-badge,
+    html[data-theme="navy"] .float-dual-row:nth-child(2) .float-dual-label {
+      color: var(--accent-magenta);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
