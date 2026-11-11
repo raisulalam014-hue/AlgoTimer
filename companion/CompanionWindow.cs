@@ -13,8 +13,10 @@ internal sealed class CompanionWindow : Form
     private readonly Label _status = new();
     private readonly Label _connection = new();
     private readonly Label _shortcutSummary = new();
-    private readonly Font _singleClockFont = new("Segoe UI", 35F, FontStyle.Bold);
-    private readonly Font _dualClockFont = new("Segoe UI", 24F, FontStyle.Bold);
+    private readonly Font _singleClockFont = new("Consolas", 35F, FontStyle.Bold);
+    private readonly Font _dualClockFont = new("Consolas", 24F, FontStyle.Bold);
+    private readonly Font _compactSingleClockFont = new("Consolas", 31F, FontStyle.Bold);
+    private readonly Font _compactDualClockFont = new("Consolas", 21F, FontStyle.Bold);
     private Panel? _header;
     private Panel? _content;
     private Panel? _themeBar;
@@ -37,6 +39,9 @@ internal sealed class CompanionWindow : Form
     private Color _mutedColor = Color.FromArgb(146, 162, 183);
     private Color _borderColor = Color.FromArgb(39, 53, 72);
     private Color _accentColor = Color.FromArgb(65, 205, 225);
+    private Color _statusAccentColor = Color.FromArgb(65, 205, 225);
+    private Color _accentInkColor = Color.FromArgb(7, 22, 29);
+    private Color _accentSoftColor = Color.FromArgb(31, 55, 69);
     private Dictionary<string, bool> _registeredHotkeys = new(StringComparer.OrdinalIgnoreCase);
 
     public event Action<string>? CommandRequested;
@@ -132,32 +137,123 @@ internal sealed class CompanionWindow : Form
             (!_registeredHotkeys.TryGetValue(pair.Key, out var isRegistered) || !isRegistered));
         _shortcutSummary.Text = unavailableCount == 0
             ? $"{activeCount} shortcuts active"
-            : $"{activeCount} active · {unavailableCount} unavailable";
+            : $"{activeCount} active | {unavailableCount} unavailable";
     }
 
     public void SetTheme(string theme)
     {
         _theme = theme switch
         {
-            "warm" or "aurora" or "graphite" or "black" => theme,
+            "warm" or "aurora" or "graphite" or "black" or "minimal" or "dashboard" or "purple" or "glass" or "navy" => theme,
             "cyan" => "warm",
             "violet" => "aurora",
             "emerald" => "graphite",
             _ => "sunset"
         };
-        _accentColor = _theme switch
+        var palette = _theme switch
         {
-            "warm" => ColorTranslator.FromHtml("#48C6DF"),
-            "aurora" => ColorTranslator.FromHtml("#72A9FF"),
-            "graphite" => ColorTranslator.FromHtml("#B29AFF"),
-            "black" => ColorTranslator.FromHtml("#62D7E9"),
-            _ => ColorTranslator.FromHtml("#4AD0E5")
+            "warm" => (
+                Surface: ColorTranslator.FromHtml("#FFFDF9"),
+                Canvas: ColorTranslator.FromHtml("#F4F0E9"),
+                Ink: ColorTranslator.FromHtml("#3E332A"),
+                Muted: ColorTranslator.FromHtml("#706253"),
+                Border: ColorTranslator.FromHtml("#E2D9CE"),
+                Accent: ColorTranslator.FromHtml("#B84D1C"),
+                AccentInk: Color.White,
+                AccentSoft: ColorTranslator.FromHtml("#FFF0E4")),
+            "aurora" => (
+                Surface: Color.White,
+                Canvas: ColorTranslator.FromHtml("#EEF0FB"),
+                Ink: ColorTranslator.FromHtml("#24294E"),
+                Muted: ColorTranslator.FromHtml("#626A88"),
+                Border: ColorTranslator.FromHtml("#DCE0F2"),
+                Accent: ColorTranslator.FromHtml("#6758D8"),
+                AccentInk: Color.White,
+                AccentSoft: ColorTranslator.FromHtml("#F0EDFF")),
+            "graphite" => (
+                Surface: ColorTranslator.FromHtml("#24232B"),
+                Canvas: ColorTranslator.FromHtml("#19181E"),
+                Ink: ColorTranslator.FromHtml("#F0EEF6"),
+                Muted: ColorTranslator.FromHtml("#B8B3C5"),
+                Border: ColorTranslator.FromHtml("#393741"),
+                Accent: ColorTranslator.FromHtml("#C0A3FF"),
+                AccentInk: ColorTranslator.FromHtml("#17121F"),
+                AccentSoft: ColorTranslator.FromHtml("#342D42")),
+            "black" => (
+                Surface: ColorTranslator.FromHtml("#080808"),
+                Canvas: Color.Black,
+                Ink: ColorTranslator.FromHtml("#F5F5F5"),
+                Muted: ColorTranslator.FromHtml("#B7B7B7"),
+                Border: ColorTranslator.FromHtml("#292929"),
+                Accent: ColorTranslator.FromHtml("#F5CC55"),
+                AccentInk: ColorTranslator.FromHtml("#17140B"),
+                AccentSoft: ColorTranslator.FromHtml("#211D10")),
+            "minimal" => (
+                Surface: ColorTranslator.FromHtml("#12171D"),
+                Canvas: ColorTranslator.FromHtml("#0B0E12"),
+                Ink: ColorTranslator.FromHtml("#EDF2F8"),
+                Muted: ColorTranslator.FromHtml("#A4AFBD"),
+                Border: ColorTranslator.FromHtml("#29323D"),
+                Accent: ColorTranslator.FromHtml("#65A9FF"),
+                AccentInk: ColorTranslator.FromHtml("#071626"),
+                AccentSoft: ColorTranslator.FromHtml("#17283B")),
+            "dashboard" => (
+                Surface: ColorTranslator.FromHtml("#18252E"),
+                Canvas: ColorTranslator.FromHtml("#10191F"),
+                Ink: ColorTranslator.FromHtml("#E8F1F5"),
+                Muted: ColorTranslator.FromHtml("#AEC0CA"),
+                Border: ColorTranslator.FromHtml("#30414C"),
+                Accent: ColorTranslator.FromHtml("#54CBBD"),
+                AccentInk: ColorTranslator.FromHtml("#082522"),
+                AccentSoft: ColorTranslator.FromHtml("#1A3736")),
+            "purple" => (
+                Surface: ColorTranslator.FromHtml("#1C1730"),
+                Canvas: ColorTranslator.FromHtml("#100D1C"),
+                Ink: ColorTranslator.FromHtml("#F3EFFC"),
+                Muted: ColorTranslator.FromHtml("#BBB2CF"),
+                Border: ColorTranslator.FromHtml("#3A3150"),
+                Accent: ColorTranslator.FromHtml("#B8A0FF"),
+                AccentInk: ColorTranslator.FromHtml("#201738"),
+                AccentSoft: ColorTranslator.FromHtml("#302748")),
+            "glass" => (
+                Surface: ColorTranslator.FromHtml("#FBFCFF"),
+                Canvas: ColorTranslator.FromHtml("#EDF1F8"),
+                Ink: ColorTranslator.FromHtml("#293247"),
+                Muted: ColorTranslator.FromHtml("#5D677D"),
+                Border: ColorTranslator.FromHtml("#D7DEEA"),
+                Accent: ColorTranslator.FromHtml("#A74668"),
+                AccentInk: Color.White,
+                AccentSoft: ColorTranslator.FromHtml("#F8EAF0")),
+            "navy" => (
+                Surface: ColorTranslator.FromHtml("#0E2232"),
+                Canvas: ColorTranslator.FromHtml("#071421"),
+                Ink: ColorTranslator.FromHtml("#EDF7FB"),
+                Muted: ColorTranslator.FromHtml("#A7C0CF"),
+                Border: ColorTranslator.FromHtml("#244254"),
+                Accent: ColorTranslator.FromHtml("#43D1E4"),
+                AccentInk: ColorTranslator.FromHtml("#06242A"),
+                AccentSoft: ColorTranslator.FromHtml("#12323D")),
+            _ => (
+                Surface: ColorTranslator.FromHtml("#141D2B"),
+                Canvas: ColorTranslator.FromHtml("#0B111C"),
+                Ink: ColorTranslator.FromHtml("#EFF6FF"),
+                Muted: ColorTranslator.FromHtml("#A0AEC0"),
+                Border: ColorTranslator.FromHtml("#273548"),
+                Accent: ColorTranslator.FromHtml("#FB795F"),
+                AccentInk: ColorTranslator.FromHtml("#241313"),
+                AccentSoft: ColorTranslator.FromHtml("#39232C"))
         };
-        _surfaceColor = Color.FromArgb(20, 29, 43);
-        _canvasColor = Color.FromArgb(11, 17, 28);
-        _inkColor = Color.FromArgb(239, 246, 255);
-        _mutedColor = Color.FromArgb(146, 162, 183);
-        _borderColor = Color.FromArgb(39, 53, 72);
+        _surfaceColor = palette.Surface;
+        _canvasColor = palette.Canvas;
+        _inkColor = palette.Ink;
+        _mutedColor = palette.Muted;
+        _borderColor = palette.Border;
+        _accentColor = palette.Accent;
+        _accentInkColor = palette.AccentInk;
+        _accentSoftColor = palette.AccentSoft;
+        _statusAccentColor = _theme == "navy"
+            ? ColorTranslator.FromHtml("#ED78AD")
+            : _accentColor;
         BackColor = _canvasColor;
         if (_header is not null) _header.BackColor = _canvasColor;
         if (_content is not null) _content.BackColor = _canvasColor;
@@ -166,14 +262,32 @@ internal sealed class CompanionWindow : Form
         if (_shortcutCard is not null) _shortcutCard.SetColors(_surfaceColor, _borderColor);
         _clock.ForeColor = _inkColor;
         _secondaryClock.ForeColor = _mutedColor;
-        _status.ForeColor = IsAnyTimerRunning() ? _accentColor : _mutedColor;
+        _status.ForeColor = IsAnyTimerRunning() ? _statusAccentColor : _mutedColor;
         _connection.ForeColor = _mutedColor;
         _shortcutSummary.ForeColor = _mutedColor;
+        var compactLayout = _theme is "minimal" or "black" or "dashboard";
+        if (_timerCard is not null)
+        {
+            _timerCard.Radius = _theme switch
+            {
+                "minimal" => 6,
+                "black" => 12,
+                "dashboard" => 8,
+                "purple" or "glass" or "sunset" => 16,
+                _ => 10
+            };
+        }
+        _clock.Location = compactLayout ? new Point(24, 27) : new Point(15, 27);
+        _clock.Size = compactLayout ? new Size(330, 58) : new Size(340, 62);
+        _clock.TextAlign = compactLayout ? ContentAlignment.MiddleLeft : ContentAlignment.MiddleCenter;
+        _secondaryClock.Location = compactLayout ? new Point(24, 87) : new Point(15, 91);
+        _secondaryClock.Size = compactLayout ? new Size(330, 20) : new Size(340, 20);
+        _secondaryClock.TextAlign = compactLayout ? ContentAlignment.MiddleLeft : ContentAlignment.MiddleCenter;
         _runButton.BackColor = _accentColor;
-        _runButton.ForeColor = Color.FromArgb(7, 22, 29);
+        _runButton.ForeColor = _accentInkColor;
         _runButton.FlatAppearance.BorderColor = _accentColor;
         _runButton.FlatAppearance.MouseOverBackColor = ControlPaint.Light(_accentColor, 0.12F);
-        if (_themeBar is not null) _themeBar.BackColor = _accentColor;
+        if (_themeBar is not null) _themeBar.BackColor = _borderColor;
         _cornerPicker.BackColor = _surfaceColor;
         _cornerPicker.ForeColor = _inkColor;
         _screenPicker.BackColor = _surfaceColor;
@@ -183,7 +297,7 @@ internal sealed class CompanionWindow : Form
             button.BackColor = _surfaceColor;
             button.ForeColor = _inkColor;
             button.FlatAppearance.BorderColor = _borderColor;
-            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(31, 44, 63);
+            button.FlatAppearance.MouseOverBackColor = ControlPaint.Light(_surfaceColor, 0.08F);
         }
         foreach (var label in FindLabels(this))
         {
@@ -196,17 +310,15 @@ internal sealed class CompanionWindow : Form
         }
         _clock.ForeColor = _inkColor;
         _secondaryClock.ForeColor = _mutedColor;
-        _status.ForeColor = IsAnyTimerRunning() ? _accentColor : _mutedColor;
+        _status.ForeColor = IsAnyTimerRunning() ? _statusAccentColor : _mutedColor;
         _connection.ForeColor = _mutedColor;
         _shortcutSummary.ForeColor = _mutedColor;
         if (_brandMark is not null)
         {
             _brandMark.BackColor = _accentColor;
-            _brandMark.ForeColor = Color.FromArgb(8, 20, 29);
+            _brandMark.ForeColor = _accentInkColor;
         }
-        _pinButton.BackColor = _settings.Pinned
-            ? Color.FromArgb(31, 55, 69)
-            : _surfaceColor;
+        _pinButton.BackColor = _settings.Pinned ? _accentSoftColor : _surfaceColor;
         _pinButton.ForeColor = _settings.Pinned ? _accentColor : _inkColor;
         _pinButton.FlatAppearance.BorderColor = _settings.Pinned ? _accentColor : _borderColor;
     }
@@ -291,7 +403,7 @@ internal sealed class CompanionWindow : Form
         };
         subtitle.Tag = "muted";
         brand.Controls.AddRange([title, subtitle]);
-        var hideButton = MakeButton("×", false, 30);
+        var hideButton = MakeButton("X", false, 30);
         hideButton.Dock = DockStyle.Right;
         hideButton.Height = 28;
         hideButton.Click += (_, _) => HideTimer();
@@ -308,7 +420,7 @@ internal sealed class CompanionWindow : Form
         var content = new Panel { Dock = DockStyle.Fill, Padding = new Padding(14, 0, 14, 0) };
         _content = content;
         _status.Text = "WAITING FOR CHROME";
-        _status.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+        _status.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         _status.Location = new Point(22, 8);
         _status.Size = new Size(350, 16);
 
@@ -320,7 +432,7 @@ internal sealed class CompanionWindow : Form
         _clock.TextAlign = ContentAlignment.MiddleCenter;
 
         _secondaryClock.Text = "SYNCING TIMER STATE";
-        _secondaryClock.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+        _secondaryClock.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         _secondaryClock.Location = new Point(15, 91);
         _secondaryClock.Size = new Size(340, 20);
         _secondaryClock.TextAlign = ContentAlignment.MiddleCenter;
@@ -405,7 +517,7 @@ internal sealed class CompanionWindow : Form
         content.Controls.AddRange([_timerCard, controls, _placementCard, _shortcutCard, _connection]);
         Controls.Add(content);
 
-        var border = new Panel { Dock = DockStyle.Top, Height = 2, BackColor = _accentColor };
+        var border = new Panel { Dock = DockStyle.Top, Height = 1, BackColor = _borderColor };
         _themeBar = border;
         Controls.Add(border);
         border.BringToFront();
@@ -569,29 +681,31 @@ internal sealed class CompanionWindow : Form
         var remaining = Math.Max(0, duration - targetElapsed);
         var anyRunning = IsRunning(stopwatch) || IsRunning(target);
         var status = mode == "timer" ? GetString(target, "status", "stopped") : GetString(stopwatch, "status", "stopped");
-        _status.Text = $"{(anyRunning ? "●  Running" : $"●  {status}")}   ·   {mode switch { "dual" => "Dual timers", "timer" => "Target timer", _ => "Stopwatch" }}";
-        _status.ForeColor = anyRunning ? _accentColor : _mutedColor;
+        _status.Text = $"{(anyRunning ? "Running" : status)} | {mode switch { "dual" => "Dual timers", "timer" => "Target timer", _ => "Stopwatch" }}";
+        _status.ForeColor = anyRunning ? _statusAccentColor : _mutedColor;
         _runButton.Text = anyRunning ? "Pause" : "Start / Resume";
 
         if (mode == "dual")
         {
-            _clock.Font = _dualClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactDualClockFont : _dualClockFont;
             _clock.Text = FormatDuration(swElapsed);
-            _secondaryClock.Text = $"STOPWATCH ELAPSED     ·     TARGET {FormatDuration(remaining)} REMAINING";
+            _secondaryClock.Text = $"STOPWATCH ELAPSED  |  TARGET {FormatDuration(remaining)} REMAINING";
         }
         else if (mode == "timer")
         {
-            _clock.Font = _singleClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactSingleClockFont : _singleClockFont;
             _clock.Text = FormatDuration(remaining);
-            _secondaryClock.Text = $"TARGET COUNTDOWN  ·  {FormatDuration(duration)} TOTAL";
+            _secondaryClock.Text = $"TARGET COUNTDOWN  |  {FormatDuration(duration)} TOTAL";
         }
         else
         {
-            _clock.Font = _singleClockFont;
+            _clock.Font = UsesCompactClockLayout() ? _compactSingleClockFont : _singleClockFont;
             _clock.Text = FormatDuration(swElapsed);
-            _secondaryClock.Text = $"STOPWATCH  ·  {GetNumber(state, "laps", 0)} LAPS";
+            _secondaryClock.Text = $"STOPWATCH  |  {GetNumber(state, "laps", 0)} LAPS";
         }
     }
+
+    private bool UsesCompactClockLayout() => _theme is "minimal" or "black" or "dashboard";
 
     private bool IsAnyTimerRunning()
     {
@@ -607,15 +721,15 @@ internal sealed class CompanionWindow : Form
         if (_settings.Pinned) ApplyCornerPosition();
         else SaveCurrentSettings();
         _connection.Text = _settings.Pinned
-            ? "Always on top · pinned to the selected display corner"
-            : "Always on top · drag to move, release near a corner to snap";
+            ? "Always on top | pinned to the selected display corner"
+            : "Always on top | drag to move, release near a corner to snap";
         SettingsChanged?.Invoke();
     }
 
     private void UpdatePinLabel()
     {
         _pinButton.Text = _settings.Pinned ? "Pinned" : "Pin corner";
-        _pinButton.BackColor = _settings.Pinned ? Color.FromArgb(31, 55, 69) : _surfaceColor;
+        _pinButton.BackColor = _settings.Pinned ? _accentSoftColor : _surfaceColor;
         _pinButton.ForeColor = _settings.Pinned ? _accentColor : _inkColor;
         _pinButton.FlatAppearance.BorderColor = _settings.Pinned ? _accentColor : _borderColor;
     }

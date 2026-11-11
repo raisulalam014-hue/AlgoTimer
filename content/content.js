@@ -211,7 +211,7 @@
   const root = document.createElement('div');
   root.id = 'algotimer-floating-root';
   root.dataset.theme = 'sunset';
-  const widgetThemes = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const widgetThemes = ['sunset', 'warm', 'aurora', 'graphite', 'black', 'minimal', 'dashboard', 'purple', 'glass', 'navy'];
   const applyWidgetTheme = (theme) => {
     root.dataset.theme = widgetThemes.includes(theme) ? theme : 'sunset';
   };
@@ -230,24 +230,23 @@
         <span id="algotimer-brand-text">AlgoTimer</span>
       </div>
       <div class="algotimer-header-actions">
-        <!-- Corner Dock Cycler (↗, ↘, ↙, ↖) -->
         <button class="algotimer-btn-icon" id="algotimer-btn-corner" title="Dock to next corner (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
-          <span class="algotimer-corner-badge" id="algotimer-corner-indicator">↗</span>
+          <span class="algotimer-corner-badge" id="algotimer-corner-indicator">TR</span>
         </button>
 
         <!-- Size Toggle (Normal -> Compact -> Mini) -->
         <button class="algotimer-btn-icon" id="algotimer-btn-size" title="Toggle Size (Normal, Compact, Mini)">
-          🗜️
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" /></svg>
         </button>
 
         <!-- Pop Out Window / PiP -->
         <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Open persistent floating timer window">
-          ⤢
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="13" rx="2" /><rect x="12" y="10" width="7" height="5" rx="1" /><path d="M8 20h8" /></svg>
         </button>
 
         <!-- Hide / Close -->
         <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide timer">
-          ✕
+          X
         </button>
       </div>
     </div>
@@ -269,24 +268,24 @@
       <!-- Dual clocks view (Stopwatch + Countdown Active) -->
       <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
         <div class="algotimer-dual-row">
-          <span class="algotimer-subtag">⏱️ Elapsed</span>
+          <span class="algotimer-subtag">Elapsed</span>
           <span class="algotimer-dual-time" id="algotimer-dual-sw-time">00:00</span>
         </div>
         <div class="algotimer-dual-row">
-          <span class="algotimer-subtag">⏳ Target</span>
+          <span class="algotimer-subtag">Target</span>
           <span class="algotimer-dual-time" id="algotimer-dual-timer-time">30:00</span>
         </div>
       </div>
 
       <div class="algotimer-controls">
         <button class="algotimer-btn algotimer-btn-primary" id="algotimer-btn-play">
-          ▶ Start
+          Start
         </button>
         <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
           Lap
         </button>
         <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
-          ↺
+          Reset
         </button>
       </div>
     </div>
@@ -315,10 +314,10 @@
   const resizeGrip = document.getElementById('algotimer-resize-grip');
 
   const cornerSymbols = {
-    'top-right': '↗ TR',
-    'bottom-right': '↘ BR',
-    'bottom-left': '↙ BL',
-    'top-left': '↖ TL'
+    'top-right': 'TR',
+    'bottom-right': 'BR',
+    'bottom-left': 'BL',
+    'top-left': 'TL'
   };
 
   // Apply Position & Size to Elements
@@ -328,7 +327,7 @@
     root.classList.add(`corner-${currentCorner}`);
 
     if (cornerIndicator) {
-      cornerIndicator.textContent = cornerSymbols[currentCorner] || '↗';
+      cornerIndicator.textContent = cornerSymbols[currentCorner] || 'TR';
     }
 
     // Apply size attribute
@@ -490,7 +489,7 @@
             else if (!isRight && !isBottom) currentCorner = 'top-left';
             else if (isRight && isBottom) currentCorner = 'bottom-right';
             else currentCorner = 'bottom-left';
-            if (cornerIndicator) cornerIndicator.textContent = cornerSymbols[currentCorner] || '↗';
+            if (cornerIndicator) cornerIndicator.textContent = cornerSymbols[currentCorner] || 'TR';
           }
           savePreferences();
         }
@@ -504,7 +503,7 @@
   // V1.3.0 Dynamic Edge Pill Trigger
   const pillTrigger = document.createElement('div');
   pillTrigger.id = 'algotimer-pill-trigger';
-  pillTrigger.innerHTML = '<span>⏱️</span><span id="algotimer-pill-digits">00:00</span>';
+  pillTrigger.innerHTML = '<span class="algotimer-pill-label">TIMER</span><span id="algotimer-pill-digits">00:00</span>';
   pillTrigger.title = 'AlgoTimer (Click to expand widget)';
   document.body.appendChild(pillTrigger);
 
@@ -585,7 +584,7 @@
     const targetRemaining = getTargetRemaining();
 
     if (state.mode === 'dual') {
-      modeTag.textContent = '⚡ DUAL (BOTH ACTIVE)';
+      modeTag.textContent = 'DUAL MODE';
       clockDisplay.style.display = 'none';
       dualClocksDisplay.style.display = 'flex';
 
@@ -604,9 +603,9 @@
 
       const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
       if (bothRunning) {
-        playBtn.textContent = '⏸ Pause Both';
+        playBtn.textContent = 'Pause Both';
       } else {
-        playBtn.textContent = '▶ Start Both';
+        playBtn.textContent = 'Start Both';
       }
 
     } else if (state.mode === 'timer') {
@@ -625,9 +624,9 @@
       }
 
       if (state.targetTimer.status === 'running') {
-        playBtn.textContent = '⏸ Pause';
+        playBtn.textContent = 'Pause';
       } else {
-        playBtn.textContent = '▶ Start';
+        playBtn.textContent = 'Start';
       }
 
     } else {
@@ -642,9 +641,9 @@
       if (pillDigits) pillDigits.textContent = formatted;
 
       if (state.stopwatch.status === 'running') {
-        playBtn.textContent = '⏸ Pause';
+        playBtn.textContent = 'Pause';
       } else {
-        playBtn.textContent = '▶ Start';
+        playBtn.textContent = 'Start';
       }
     }
 

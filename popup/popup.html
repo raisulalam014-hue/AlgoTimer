@@ -27,9 +27,9 @@
       </div>
       <div class="header-badges">
         <!-- Quick Dynamic Theme Cycler Button -->
-        <button class="header-btn" id="btn-quick-theme" title="Cycle timer designs: Sunset Glass, Warm Minimal, Aurora, Graphite Neon, Full Black">
+        <button class="header-btn" id="btn-quick-theme" title="Cycle through 10 coordinated timer themes">
           <span class="theme-quick-dot"></span>
-          <span class="btn-text" id="header-theme-label">Cosmic</span>
+          <span class="btn-text" id="header-theme-label">Sunset Glass</span>
         </button>
 
         <!-- Compact Mini Mode Toggle -->
@@ -66,10 +66,10 @@
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
-      <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
-      <button class="nav-tab" data-tab="laps">🏁 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
-      <button class="nav-tab" data-tab="history">📊 History</button>
-      <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+      <button class="nav-tab active" data-tab="timer">Timer</button>
+      <button class="nav-tab" data-tab="laps">Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
+      <button class="nav-tab" data-tab="history">History</button>
+      <button class="nav-tab" data-tab="settings">Settings</button>
     </nav>
 
     <!-- TAB 1: TIMER / STOPWATCH -->
@@ -85,13 +85,13 @@
       <!-- Mode Segmented Switcher (Stopwatch, Target Timer, Dual Both) -->
       <div class="mode-switcher">
         <button class="mode-btn active" id="btn-mode-stopwatch" data-mode="stopwatch">
-          <span>⏱️</span> Stopwatch
+          Stopwatch
         </button>
         <button class="mode-btn" id="btn-mode-timer" data-mode="timer">
-          <span>⏳</span> Target Timer
+          Target Timer
         </button>
         <button class="mode-btn" id="btn-mode-dual" data-mode="dual">
-          <span>⚡</span> Dual (Both)
+          Dual (Both)
         </button>
       </div>
 
@@ -249,14 +249,14 @@
 
       <div class="timer-quick-actions" aria-label="Timer quick actions">
         <button class="quick-action-card" id="btn-open-floating-from-timer">
-          <span class="quick-action-icon" aria-hidden="true">↗</span>
+          <span class="quick-action-icon" aria-hidden="true">OPEN</span>
           <span><strong>Floating timer</strong><small>Keep it beside your editor</small></span>
-          <span class="quick-action-arrow" aria-hidden="true">›</span>
+          <span class="quick-action-arrow" aria-hidden="true"></span>
         </button>
         <button class="quick-action-card" id="btn-open-shortcuts-from-timer">
-          <span class="quick-action-icon" aria-hidden="true">⌘</span>
+          <span class="quick-action-icon" aria-hidden="true">KEYS</span>
           <span><strong>Keyboard shortcuts</strong><small>Manage browser and global keys</small></span>
-          <span class="quick-action-arrow" aria-hidden="true">›</span>
+          <span class="quick-action-arrow" aria-hidden="true"></span>
         </button>
       </div>
       </div>
@@ -267,7 +267,7 @@
         <div class="dual-card" id="dual-stopwatch-card">
           <div class="dual-card-header">
             <div class="dual-card-title">
-              <span class="dual-card-icon">⏱️</span>
+              <span class="dual-card-icon" aria-hidden="true">SW</span>
               <span>Stopwatch (Elapsed)</span>
             </div>
             <span class="dual-badge" id="dual-sw-badge">STOPPED</span>
@@ -290,7 +290,7 @@
         <div class="dual-card" id="dual-timer-card">
           <div class="dual-card-header">
             <div class="dual-card-title">
-              <span class="dual-card-icon">⏳</span>
+              <span class="dual-card-icon" aria-hidden="true">T</span>
               <span>Target Countdown</span>
             </div>
             <span class="dual-badge" id="dual-timer-badge">30m Target</span>
@@ -321,7 +321,6 @@
         <!-- Master Synchronization Control Bar -->
         <div class="dual-master-bar">
           <button class="btn btn-primary-hero dual-master-btn" id="btn-dual-master-toggle">
-            <span id="dual-master-icon">⚡</span>
             <span id="dual-master-text">Start Both Together</span>
           </button>
           <button class="btn btn-secondary" id="btn-dual-master-reset" title="Reset both timers">
@@ -351,7 +350,7 @@
           </div>
         </div>
         <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
-          💾 Log Result
+          Log Result
         </button>
       </div>
     </main>
@@ -360,13 +359,13 @@
     <section class="tab-content" id="tab-laps">
       <div class="laps-header">
         <h3>Problem Solving Checkpoints</h3>
-        <p class="subtitle">Track phases: Reading → Algorithm → Code → Debug</p>
+        <p class="subtitle">Track phases from understanding through debugging.</p>
       </div>
       <div class="laps-quick-add">
-        <button class="lap-phase-btn" data-phase="Read & Understand">📖 Understand</button>
-        <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
-        <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
-        <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
+        <button class="lap-phase-btn" data-phase="Read & Understand">Understand</button>
+        <button class="lap-phase-btn" data-phase="Design Algorithm">Approach</button>
+        <button class="lap-phase-btn" data-phase="Implementation">Code</button>
+        <button class="lap-phase-btn" data-phase="Test & Debug">Debug</button>
       </div>
       <div class="laps-list-container" id="laps-list">
         <div class="empty-state">
@@ -389,7 +388,7 @@
         </div>
       </div>
       <div class="history-actions-bar">
-        <button class="btn-xs" id="btn-export-csv">📥 Export CSV</button>
+        <button class="btn-xs" id="btn-export-csv">Export CSV</button>
         <button class="btn-xs btn-danger" id="btn-clear-history">Clear</button>
       </div>
       <div class="history-list" id="history-list">
@@ -405,27 +404,47 @@
       <!-- Dynamic Theme & Accent Combinations -->
       <div class="settings-group">
         <h4>Timer Design</h4>
-        <p class="setting-desc" style="margin-bottom: 8px;">Choose a complete timer look. Your selection syncs to the floating timer.</p>
-        <div class="theme-palette-row">
-          <button class="theme-pill-btn active" data-theme-choice="sunset" title="Sunset Glass: dark plum with warm orange and pink accents">
+        <p class="setting-desc" style="margin-bottom: 8px;">Choose one of ten themes. Your selection syncs with the floating timer and Windows companion.</p>
+        <div class="theme-palette-row" role="group" aria-label="Timer themes">
+          <button class="theme-pill-btn active" data-theme-choice="sunset" aria-pressed="true" title="Sunset Glass: dark plum with warm coral accents">
             <span class="theme-dot dot-sunset"></span>
-            <span>Sunset Glass</span>
+            <span class="theme-choice-copy"><strong>Sunset Glass</strong><small>Plum and coral</small></span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="warm" title="Warm Minimal: soft neutral surfaces with vivid orange accents">
+          <button class="theme-pill-btn" data-theme-choice="warm" aria-pressed="false" title="Warm Minimal: soft neutral surfaces with orange accents">
             <span class="theme-dot dot-warm"></span>
-            <span>Warm Minimal</span>
+            <span class="theme-choice-copy"><strong>Warm Minimal</strong><small>Sand and orange</small></span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="aurora" title="Aurora: cool blue and violet surfaces with coral highlights">
+          <button class="theme-pill-btn" data-theme-choice="aurora" aria-pressed="false" title="Aurora: cool blue and violet surfaces with coral highlights">
             <span class="theme-dot dot-aurora"></span>
-            <span>Aurora</span>
+            <span class="theme-choice-copy"><strong>Aurora</strong><small>Blue and violet</small></span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="graphite" title="Graphite Neon: charcoal surfaces with violet and warm yellow details">
+          <button class="theme-pill-btn" data-theme-choice="graphite" aria-pressed="false" title="Graphite Neon: charcoal surfaces with violet details">
             <span class="theme-dot dot-graphite"></span>
-            <span>Graphite Neon</span>
+            <span class="theme-choice-copy"><strong>Graphite Neon</strong><small>Charcoal and violet</small></span>
           </button>
-          <button class="theme-pill-btn" data-theme-choice="black" title="Full Black: pure black surfaces with high-contrast timer controls">
+          <button class="theme-pill-btn" data-theme-choice="black" aria-pressed="false" title="Full Black: pure black surfaces with high-contrast timer controls">
             <span class="theme-dot dot-black"></span>
-            <span>Full Black</span>
+            <span class="theme-choice-copy"><strong>Full Black</strong><small>Black and gold</small></span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="minimal" aria-pressed="false" title="Minimal Black: quiet near-black surfaces with clear blue controls">
+            <span class="theme-dot dot-minimal"></span>
+            <span class="theme-choice-copy"><strong>Minimal Black</strong><small>Black and blue</small></span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="dashboard" aria-pressed="false" title="Quiet Dashboard: dark slate surfaces with restrained teal accents">
+            <span class="theme-dot dot-dashboard"></span>
+            <span class="theme-choice-copy"><strong>Quiet Dashboard</strong><small>Slate and teal</small></span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="purple" aria-pressed="false" title="Deep Purple: focused dark violet surfaces with lilac controls">
+            <span class="theme-dot dot-purple"></span>
+            <span class="theme-choice-copy"><strong>Deep Purple</strong><small>Violet and lilac</small></span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="glass" aria-pressed="false" title="Soft Glass: pale layered surfaces with muted rose accents">
+            <span class="theme-dot dot-glass"></span>
+            <span class="theme-choice-copy"><strong>Soft Glass</strong><small>Soft layers and rose</small></span>
+          </button>
+          <button class="theme-pill-btn" data-theme-choice="navy" aria-pressed="false" title="Navy and Cyan: deep navy surfaces with cyan controls and pink status accents">
+            <span class="theme-dot dot-navy"></span>
+            <span class="theme-choice-copy"><strong>Navy &amp; Cyan</strong><small>Navy, cyan, and pink</small></span>
           </button>
         </div>
       </div>
@@ -474,7 +493,7 @@
             <span class="setting-desc">Opens a persistent timer window. Use Picture-in-Picture inside it for browser-managed always-on-top behavior where available.</span>
           </div>
           <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-            🗗 Open Floating Timer
+            Open Floating Timer
           </button>
         </div>
       </div>
@@ -485,7 +504,7 @@
             <span class="timer-card-kicker">WINDOWS COMPANION</span>
             <h4>System-wide shortcuts</h4>
           </div>
-          <span class="shortcut-status-pill" id="companion-status" data-status="unknown">Checking companion…</span>
+          <span class="shortcut-status-pill" id="companion-status" data-status="unknown">Checking companion...</span>
         </div>
         <div class="setting-action-card">
           <div class="setting-info">
@@ -538,7 +557,7 @@
 
       <div class="settings-footer">
         <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="github-link" id="ext-github-link">
-          ⭐ Star on GitHub & View Repository
+          GitHub repository
         </a>
       </div>
     </section>
@@ -548,7 +567,7 @@
       <div class="modal-card">
         <div class="modal-header">
           <h3>Log Problem Session</h3>
-          <button class="modal-close" id="btn-modal-close">✕</button>
+          <button class="modal-close" id="btn-modal-close" aria-label="Close dialog">X</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -581,15 +600,15 @@
             <div class="verdict-options">
               <label class="verdict-chip solved">
                 <input type="radio" name="verdict" value="Solved" checked>
-                <span>✓ Solved</span>
+                <span>Solved</span>
               </label>
               <label class="verdict-chip upsolved">
                 <input type="radio" name="verdict" value="Upsolved">
-                <span>💡 Upsolved</span>
+                <span>Upsolved</span>
               </label>
               <label class="verdict-chip attempted">
                 <input type="radio" name="verdict" value="Attempted">
-                <span>⏳ Need Review</span>
+                <span>Need Review</span>
               </label>
             </div>
           </div>

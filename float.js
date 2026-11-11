@@ -195,7 +195,7 @@
     if (positionNote) {
       positionNote.textContent = floatPrefs.pinned
         ? `Pinned to ${floatPrefs.corner.replace('-', ' ')}. The browser may still cover this window.`
-        : 'Unpinned · drag the header to move. Pinning anchors this window, not above other apps.';
+        : 'Unpinned | drag the header to move. Pinning anchors this window, not above other apps.';
     }
   }
 
@@ -293,13 +293,18 @@
   if (dialProgress) dialProgress.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
 
   // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black', 'minimal', 'dashboard', 'purple', 'glass', 'navy'];
   const THEME_LABELS = {
     sunset: 'Sunset Glass',
     warm: 'Warm Minimal',
     aurora: 'Aurora',
     graphite: 'Graphite Neon',
-    black: 'Full Black'
+    black: 'Full Black',
+    minimal: 'Minimal Black',
+    dashboard: 'Quiet Dashboard',
+    purple: 'Deep Purple',
+    glass: 'Soft Glass',
+    navy: 'Navy & Cyan'
   };
   const LEGACY_THEMES = { cosmic: 'sunset', cyan: 'warm', violet: 'aurora', emerald: 'graphite' };
   const THEME_GRADIENTS = {
@@ -307,7 +312,12 @@
     warm: { stop1: '#f97316', stop2: '#ea580c', stop3: '#fdba74' },
     aurora: { stop1: '#5b7cfa', stop2: '#8b5cf6', stop3: '#fb7185' },
     graphite: { stop1: '#b59aff', stop2: '#8b6ee8', stop3: '#f2c65d' },
-    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' }
+    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' },
+    minimal: { stop1: '#72b7ff', stop2: '#438ce5', stop3: '#b5d7ff' },
+    dashboard: { stop1: '#54d6c4', stop2: '#31a8d1', stop3: '#a5e8ff' },
+    purple: { stop1: '#b79bff', stop2: '#8e72e8', stop3: '#e0b6ff' },
+    glass: { stop1: '#df6f91', stop2: '#9b7de4', stop3: '#6ccbd1' },
+    navy: { stop1: '#50d9e8', stop2: '#338bc1', stop3: '#ed78ad' }
   };
 
   let currentTheme = 'sunset';
@@ -479,7 +489,7 @@
     const tgtElapsed = getTargetElapsed();
 
     if (state.mode === 'dual') {
-      if (modeBadge) modeBadge.textContent = '⚡ DUAL MODE';
+      if (modeBadge) modeBadge.textContent = 'DUAL MODE';
       if (singleView) singleView.style.display = 'none';
       if (clockDual) clockDual.style.display = 'flex';
 

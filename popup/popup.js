@@ -86,7 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnDualTimerReset = document.getElementById('btn-dual-timer-reset');
 
   const btnDualMasterToggle = document.getElementById('btn-dual-master-toggle');
-  const dualMasterIcon = document.getElementById('dual-master-icon');
   const dualMasterText = document.getElementById('dual-master-text');
   const btnDualMasterReset = document.getElementById('btn-dual-master-reset');
 
@@ -486,13 +485,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
     // ================= DYNAMIC THEME ENGINE =================
-  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black'];
+  const THEMES = ['sunset', 'warm', 'aurora', 'graphite', 'black', 'minimal', 'dashboard', 'purple', 'glass', 'navy'];
   const THEME_LABELS = {
     sunset: 'Sunset Glass',
     warm: 'Warm Minimal',
     aurora: 'Aurora',
     graphite: 'Graphite Neon',
-    black: 'Full Black'
+    black: 'Full Black',
+    minimal: 'Minimal Black',
+    dashboard: 'Quiet Dashboard',
+    purple: 'Deep Purple',
+    glass: 'Soft Glass',
+    navy: 'Navy & Cyan'
   };
   const LEGACY_THEMES = { cosmic: 'sunset', cyan: 'warm', violet: 'aurora', emerald: 'graphite' };
   const THEME_GRADIENTS = {
@@ -500,7 +504,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     warm: { stop1: '#f97316', stop2: '#ea580c', stop3: '#fdba74' },
     aurora: { stop1: '#5b7cfa', stop2: '#8b5cf6', stop3: '#fb7185' },
     graphite: { stop1: '#b59aff', stop2: '#8b6ee8', stop3: '#f2c65d' },
-    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' }
+    black: { stop1: '#f5cc55', stop2: '#8eeaff', stop3: '#c4a8ff' },
+    minimal: { stop1: '#72b7ff', stop2: '#438ce5', stop3: '#b5d7ff' },
+    dashboard: { stop1: '#54d6c4', stop2: '#31a8d1', stop3: '#a5e8ff' },
+    purple: { stop1: '#b79bff', stop2: '#8e72e8', stop3: '#e0b6ff' },
+    glass: { stop1: '#df6f91', stop2: '#9b7de4', stop3: '#6ccbd1' },
+    navy: { stop1: '#50d9e8', stop2: '#338bc1', stop3: '#ed78ad' }
   };
 
   let currentTheme = 'sunset';
@@ -527,7 +536,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     document.querySelectorAll('.theme-pill-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.themeChoice === themeName);
+      const selected = b.dataset.themeChoice === themeName;
+      b.classList.toggle('active', selected);
+      b.setAttribute('aria-pressed', String(selected));
     });
 
     updateDialThemeGradient(themeName);
@@ -680,11 +691,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Master Synchronization Button
       const bothRunning = state.stopwatch.status === 'running' && state.targetTimer.status === 'running';
       if (bothRunning) {
-        if (dualMasterIcon) dualMasterIcon.textContent = '⏸';
         if (dualMasterText) dualMasterText.textContent = 'Pause Both';
         if (btnDualMasterToggle) btnDualMasterToggle.classList.add('running');
       } else {
-        if (dualMasterIcon) dualMasterIcon.textContent = '⚡';
         if (dualMasterText) dualMasterText.textContent = 'Start Both Together';
         if (btnDualMasterToggle) btnDualMasterToggle.classList.remove('running');
       }
@@ -1365,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinned: Boolean(companionPinnedToggle?.checked)
           });
           companionStatusLabel.textContent = response.success
-            ? 'Sending placement to the Windows companion…'
+            ? 'Sending placement to the Windows companion...'
             : response.error || 'Could not save native timer placement.';
           if (!response.success) companionStatusLabel.dataset.status = 'unavailable';
         });
@@ -1414,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         companionStatusLabel.textContent = response.error || 'Could not save global shortcuts.';
         companionStatusLabel.dataset.status = 'unavailable';
       } else {
-        companionStatusLabel.textContent = 'Sending shortcut changes to Windows…';
+        companionStatusLabel.textContent = 'Sending shortcut changes to Windows...';
       }
     });
   }

@@ -28,15 +28,20 @@ To uninstall, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\uninsta
 
 ## 🚀 Key Highlights & Features
 
-### 1. 🎨 Five Complete Timer Designs
+### 1. 🎨 Ten Coordinated Timer Themes
 - **Sunset Glass**: dark plum surfaces with warm orange, coral, and pink accents.
 - **Warm Minimal**: soft neutral surfaces with crisp orange controls.
 - **Aurora**: cool blue-violet cards with coral highlights.
 - **Graphite Neon**: charcoal surfaces with violet and warm-yellow details.
 - **Full Black**: pure-black surfaces with high-contrast white text and warm yellow controls.
+- **Minimal Black**: a thin-border, grid-like workspace with a quiet blue progress ring.
+- **Quiet Dashboard**: a compact side-by-side timer, progress ring, and real lap/split data on slate panels.
+- **Deep Purple**: a focused, rounded productivity card with a smaller lilac timer.
+- **Soft Glass**: translucent, softly blurred timer panels with muted rose accents.
+- **Navy & Cyan**: a prominent circular clock on deep navy, with cyan progress and restrained pink status accents.
 - Choose a design in **Settings → Timer Design**. It is saved and synchronized across the popup, browser floating timer, and Windows companion.
-- **Precision HUD Dial & Sub-Gauges**: Outer dotted perimeter tick track, glowing SVG progress ring, and 3 mini precision sub-gauges (`LAPS`, `SPLIT`, `STATUS`).
-- **Luminous Horizon Flare**: Neon crescent horizon flare across the bottom edge inspired by futuristic cockpit displays.
+- The same ten themes are available from the floating timer's theme control; readable system fonts and vector/text controls avoid emoji-font dependencies.
+- Each design changes the timer layout and surface treatment as well as color; all keep the same timer controls and use only live timer, lap, and split data.
 
 ### 2. Persistent Floating Timer
 - **Persistent Extension Window**: The timer stays open when focus changes or browser tabs switch. Other applications can cover it unless Picture-in-Picture is available and enabled.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoTimer — Problem-solving workspace</title>
+  <title>AlgoTimer - Problem-solving workspace</title>
   <link rel="stylesheet" href="popup/popup.css">
   <link rel="stylesheet" href="content/content.css">
   <style>
@@ -16,8 +16,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background-color: #060713;
-      background-image: radial-gradient(circle at 50% 15%, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.12) 40%, rgba(6, 7, 19, 0.98) 75%);
+      background-color: #0b111c;
+      background-image: none;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -49,11 +49,11 @@
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      background: #287bff;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+      box-shadow: none;
     }
 
     .demo-logo-icon svg {
@@ -67,9 +67,7 @@
       font-weight: 700;
       margin: 0;
       letter-spacing: 0.5px;
-      background: linear-gradient(to right, #ffffff, #93c5fd);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #f8fafc;
     }
 
     .demo-title-group p {
@@ -351,6 +349,44 @@
     }
   </style>
   <link rel="stylesheet" href="popup/modern.css">
+  <style>
+    body.modern-service .demo-topbar {
+      padding-bottom: 14px;
+      border-bottom-color: #263345;
+    }
+
+    body.modern-service .demo-logo-icon {
+      border-radius: 10px;
+      box-shadow: none;
+    }
+
+    body.modern-service .demo-title-group h1 {
+      color: #f8fafc;
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+
+    body.modern-service .tip-item {
+      color: #f8fafc;
+      background: #111b29;
+      border-color: #263345;
+      border-radius: 10px;
+    }
+
+    body.modern-service .tip-icon {
+      min-width: 46px;
+      color: #73b5ff;
+      font: 700 9px/1.2 "Segoe UI", Arial, sans-serif;
+    }
+
+    body.modern-service .app-container.modern-popup {
+      min-height: 600px;
+      padding: 18px 18px 22px;
+      gap: 14px;
+      overflow: visible;
+      background: var(--service-canvas);
+    }
+  </style>
 </head>
 <body class="modern-service">
   <!-- Top Demo Bar -->
@@ -364,19 +400,19 @@
         </svg>
       </div>
       <div class="demo-title-group">
-        <h1>AlgoTimer — Problem-solving workspace</h1>
+        <h1>AlgoTimer - Problem-solving workspace</h1>
         <p>A focused timer and practice companion for your next coding session.</p>
       </div>
     </div>
     <div class="demo-topbar-actions">
       <button class="demo-btn demo-btn-primary" id="btn-topbar-pip">
-        ⤢ Open floating timer
+        Open floating timer
       </button>
       <button class="demo-btn" id="btn-topbar-window">
-        ↗ Open timer window
+        Open timer window
       </button>
       <a href="https://github.com/raisulalam014-hue/AlgoTimer" target="_blank" class="demo-btn">
-        ★ GitHub Repo
+        GitHub repository
       </a>
     </div>
   </header>
@@ -400,7 +436,7 @@
           </div>
         </div>
 
-        <div class="app-container" style="min-height: 570px;">
+        <div class="app-container modern-popup">
           <div class="horizon-flare" aria-hidden="true"></div>
           <!-- Top Header -->
           <header class="app-header">
@@ -415,9 +451,9 @@
               <span class="brand-name">AlgoTimer</span>
             </div>
             <div class="header-badges">
-              <button class="header-btn" id="btn-quick-theme" title="Switch Dynamic Color Combination">
+              <button class="header-btn" id="btn-quick-theme" title="Cycle through 10 coordinated timer themes">
                 <span class="theme-quick-dot"></span>
-                <span class="btn-text" id="header-theme-label">Cosmic</span>
+                <span class="btn-text" id="header-theme-label">Sunset Glass</span>
               </button>
               <button class="header-btn" id="btn-toggle-compact" title="Toggle Compact HUD Mode">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -450,10 +486,10 @@
 
           <!-- Navigation Tabs -->
           <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="timer">⏱️ Timer</button>
-            <button class="nav-tab" data-tab="laps">🏁 Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
-            <button class="nav-tab" data-tab="history">📊 History</button>
-            <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+            <button class="nav-tab active" data-tab="timer">Timer</button>
+            <button class="nav-tab" data-tab="laps">Laps <span class="lap-count-badge" id="lap-badge" style="display: none;">0</span></button>
+            <button class="nav-tab" data-tab="history">History</button>
+            <button class="nav-tab" data-tab="settings">Settings</button>
           </nav>
 
           <!-- TAB 1: TIMER / STOPWATCH -->
@@ -628,7 +664,7 @@
               <div class="dual-card" id="dual-stopwatch-card">
                 <div class="dual-card-header">
                   <div class="dual-card-title">
-                    <span class="dual-card-icon">⏱️</span>
+                    <span class="dual-card-icon" aria-hidden="true">SW</span>
                     <span>Stopwatch (Elapsed)</span>
                   </div>
                   <span class="dual-badge" id="dual-sw-badge">STOPPED</span>
@@ -651,7 +687,7 @@
               <div class="dual-card" id="dual-timer-card">
                 <div class="dual-card-header">
                   <div class="dual-card-title">
-                    <span class="dual-card-icon">⏳</span>
+                    <span class="dual-card-icon" aria-hidden="true">T</span>
                     <span>Target Countdown</span>
                   </div>
                   <span class="dual-badge" id="dual-timer-badge">30m Target</span>
@@ -676,7 +712,7 @@
               <!-- Master Controls for Both -->
               <div class="dual-master-bar">
                 <button class="btn btn-primary-hero" id="btn-dual-master-toggle" style="width: 100%;">
-                  ⚡ Start Both (Stopwatch & Countdown)
+                  Start Both (Stopwatch & Countdown)
                 </button>
                 <button class="btn btn-secondary" id="btn-dual-master-reset" style="margin-top: 6px; width: 100%;">
                   Reset Both
@@ -691,7 +727,7 @@
                 <div class="problem-title-display" id="current-problem-title">15. 3Sum</div>
               </div>
               <button class="btn-log-session" id="btn-log-modal-open" title="Save session to history">
-                📝 Log Result
+                Log Result
               </button>
             </div>
           </main>
@@ -700,13 +736,13 @@
           <section class="tab-content" id="tab-laps">
             <div class="laps-header">
               <h3>Problem Solving Checkpoints</h3>
-              <p class="subtitle">Track phases: Reading → Algorithm → Code → Debug</p>
+              <p class="subtitle">Track phases from understanding through debugging.</p>
             </div>
             <div class="laps-quick-add">
-              <button class="lap-phase-btn" data-phase="Read & Understand">📖 Understand</button>
-              <button class="lap-phase-btn" data-phase="Design Algorithm">💡 Approach</button>
-              <button class="lap-phase-btn" data-phase="Implementation">💻 Code</button>
-              <button class="lap-phase-btn" data-phase="Test & Debug">🧪 Debug</button>
+              <button class="lap-phase-btn" data-phase="Read & Understand">Understand</button>
+              <button class="lap-phase-btn" data-phase="Design Algorithm">Approach</button>
+              <button class="lap-phase-btn" data-phase="Implementation">Code</button>
+              <button class="lap-phase-btn" data-phase="Test & Debug">Debug</button>
             </div>
             <div class="laps-list-container" id="laps-list">
               <div class="empty-state">
@@ -729,7 +765,7 @@
               </div>
             </div>
             <div class="history-actions-bar">
-              <button class="btn-xs" id="btn-export-csv">📥 Export CSV</button>
+              <button class="btn-xs" id="btn-export-csv">Export CSV</button>
               <button class="btn-xs btn-danger" id="btn-clear-history">Clear</button>
             </div>
             <div class="history-list" id="history-list">
@@ -745,27 +781,47 @@
                         <!-- Dynamic Theme Settings -->
             <div class="settings-group">
               <h4>Timer Design</h4>
-              <p class="setting-desc" style="margin-bottom: 8px;">Choose a complete timer look. Your selection syncs to the floating timer.</p>
-              <div class="theme-palette-row">
-                <button class="theme-pill-btn active" data-theme-choice="sunset" title="Sunset Glass">
+              <p class="setting-desc" style="margin-bottom: 8px;">Choose one of ten coordinated looks for the popup and floating timer.</p>
+              <div class="theme-palette-row" role="group" aria-label="Timer themes">
+                <button class="theme-pill-btn active" data-theme-choice="sunset" aria-pressed="true" title="Sunset Glass: plum and coral">
                   <span class="theme-dot dot-sunset"></span>
-                  <span>Sunset Glass</span>
+                  <span class="theme-choice-copy"><strong>Sunset Glass</strong><small>Plum and coral</small></span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="warm" title="Warm Minimal">
+                <button class="theme-pill-btn" data-theme-choice="warm" aria-pressed="false" title="Warm Minimal: sand and orange">
                   <span class="theme-dot dot-warm"></span>
-                  <span>Warm Minimal</span>
+                  <span class="theme-choice-copy"><strong>Warm Minimal</strong><small>Sand and orange</small></span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="aurora" title="Aurora">
+                <button class="theme-pill-btn" data-theme-choice="aurora" aria-pressed="false" title="Aurora: blue and violet">
                   <span class="theme-dot dot-aurora"></span>
-                  <span>Aurora</span>
+                  <span class="theme-choice-copy"><strong>Aurora</strong><small>Blue and violet</small></span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="graphite" title="Graphite Neon">
+                <button class="theme-pill-btn" data-theme-choice="graphite" aria-pressed="false" title="Graphite Neon: charcoal and violet">
                   <span class="theme-dot dot-graphite"></span>
-                  <span>Graphite Neon</span>
+                  <span class="theme-choice-copy"><strong>Graphite Neon</strong><small>Charcoal and violet</small></span>
                 </button>
-                <button class="theme-pill-btn" data-theme-choice="black" title="Full Black">
+                <button class="theme-pill-btn" data-theme-choice="black" aria-pressed="false" title="Full Black: black and gold">
                   <span class="theme-dot dot-black"></span>
-                  <span>Full Black</span>
+                  <span class="theme-choice-copy"><strong>Full Black</strong><small>Black and gold</small></span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="minimal" aria-pressed="false" title="Minimal Black: quiet near-black surfaces with clear blue controls">
+                  <span class="theme-dot dot-minimal"></span>
+                  <span class="theme-choice-copy"><strong>Minimal Black</strong><small>Black and blue</small></span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="dashboard" aria-pressed="false" title="Quiet Dashboard: dark slate surfaces with restrained teal accents">
+                  <span class="theme-dot dot-dashboard"></span>
+                  <span class="theme-choice-copy"><strong>Quiet Dashboard</strong><small>Slate and teal</small></span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="purple" aria-pressed="false" title="Deep Purple: dark violet surfaces with lilac controls">
+                  <span class="theme-dot dot-purple"></span>
+                  <span class="theme-choice-copy"><strong>Deep Purple</strong><small>Violet and lilac</small></span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="glass" aria-pressed="false" title="Soft Glass: pale layers with muted rose accents">
+                  <span class="theme-dot dot-glass"></span>
+                  <span class="theme-choice-copy"><strong>Soft Glass</strong><small>Soft layers and rose</small></span>
+                </button>
+                <button class="theme-pill-btn" data-theme-choice="navy" aria-pressed="false" title="Navy and Cyan: deep navy, cyan controls, and pink status accents">
+                  <span class="theme-dot dot-navy"></span>
+                  <span class="theme-choice-copy"><strong>Navy &amp; Cyan</strong><small>Navy, cyan, and pink</small></span>
                 </button>
               </div>
             </div>
@@ -803,7 +859,7 @@
                   <span class="setting-desc">Opens a persistent timer window. Browser Picture-in-Picture can keep it above other windows where supported; the browser controls its position.</span>
                 </div>
                 <button class="btn btn-secondary btn-sm" id="setting-btn-launch-pip" style="margin-top: 8px;">
-                  ⤢ Open Floating Timer
+                  Open Floating Timer
                 </button>
               </div>
             </div>
@@ -823,7 +879,7 @@
         <!-- Mock LeetCode Top Navigation -->
         <div class="mock-leetcode-nav">
           <div class="mock-brand">
-            <span>⚡</span>
+            <span aria-hidden="true"></span>
             <span>LeetCode</span>
           </div>
           <div class="mock-tabs">
@@ -873,21 +929,20 @@
                 <span>AlgoTimer Overlay</span>
               </div>
               <div class="algotimer-header-actions">
-                <!-- Corner Dock Cycler (↗, ↘, ↙, ↖) -->
                 <button class="algotimer-btn-icon" id="algotimer-btn-corner" title="Dock to next corner (Top-Right, Bottom-Right, Bottom-Left, Top-Left)">
-                  <span class="algotimer-corner-badge" id="algotimer-corner-indicator">↗ TR</span>
+                  <span class="algotimer-corner-badge" id="algotimer-corner-indicator">TR</span>
                 </button>
                 <!-- Size Toggle (Normal -> Compact -> Mini) -->
                 <button class="algotimer-btn-icon" id="algotimer-btn-size" title="Toggle Size (Normal, Compact, Mini)">
-                  🗜️
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" /></svg>
                 </button>
                 <!-- Pop Out Window / PiP -->
                 <button class="algotimer-btn-icon pip-btn" id="algotimer-btn-pip" title="Browser Picture-in-Picture window">
-                  ⤢
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="13" rx="2" /><rect x="12" y="10" width="7" height="5" rx="1" /><path d="M8 20h8" /></svg>
                 </button>
                 <!-- Hide / Close -->
                 <button class="algotimer-btn-icon" id="algotimer-btn-close" title="Hide">
-                  ✕
+                  X
                 </button>
               </div>
             </div>
@@ -907,24 +962,24 @@
               <!-- Dual clocks view in widget (Stopwatch + Countdown Active) -->
               <div class="algotimer-dual-clocks" id="algotimer-dual-clocks-display" style="display: none;">
                 <div class="algotimer-dual-row">
-                  <span class="algotimer-subtag">⏱️ Elapsed</span>
+                  <span class="algotimer-subtag">Elapsed</span>
                   <span class="algotimer-dual-time" id="algotimer-dual-sw-time">00:00</span>
                 </div>
                 <div class="algotimer-dual-row">
-                  <span class="algotimer-subtag">⏳ Target</span>
+                  <span class="algotimer-subtag">Target</span>
                   <span class="algotimer-dual-time" id="algotimer-dual-timer-time">30:00</span>
                 </div>
               </div>
 
               <div class="algotimer-controls">
                 <button class="algotimer-btn algotimer-btn-primary" id="algotimer-btn-play">
-                  ▶ Start
+                  Start
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-lap" title="Split / Lap">
                   Lap
                 </button>
                 <button class="algotimer-btn" id="algotimer-btn-reset" title="Reset">
-                  ↺
+                  Reset
                 </button>
               </div>
             </div>
@@ -940,28 +995,28 @@
   <!-- Helpful Demo Tips -->
   <footer class="demo-tips">
     <div class="tip-item">
-      <div class="tip-icon">⤢</div>
+      <div class="tip-icon">FLOAT</div>
       <div class="tip-text">
         <h4>4-Corner Dock & Resize Smaller-ly</h4>
-        <p>Click <strong>↗ TR</strong> to jump between all 4 corners of any tab! Use <strong>🗜️</strong> or drag the bottom-right corner grip to resize smaller-ly down to a sleek mini HUD.</p>
+        <p>Use the corner control to cycle through all four corners. Select <strong>Size</strong> or drag the resize grip to make a compact timer.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">⚡</div>
+      <div class="tip-icon">DUAL</div>
       <div class="tip-text">
         <h4>Dual Timers (Both Active)</h4>
         <p>Run both Stopwatch (count-up) and Target Countdown concurrently! When resized smaller, both times are clearly visible.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">🗜️</div>
+      <div class="tip-icon">SIZE</div>
       <div class="tip-text">
         <h4>Compact Floating Mode</h4>
         <p>Switch between Normal, Compact, and Mini corner modes without losing access to Start, Pause, or Countdown.</p>
       </div>
     </div>
     <div class="tip-item">
-      <div class="tip-icon">🪟</div>
+      <div class="tip-icon">HOTKEY</div>
       <div class="tip-text">
         <h4>Picture-in-Picture Window</h4>
         <p>Picture-in-Picture can stay above other windows where supported. The browser controls its position; a regular extension window may be covered by other apps.</p>
@@ -998,10 +1053,10 @@
       let currentSize = 'normal';
 
       const cornerLabels = {
-        'top-right': '↗ TR',
-        'bottom-right': '↘ BR',
-        'bottom-left': '↙ BL',
-        'top-left': '↖ TL'
+        'top-right': 'TR',
+        'bottom-right': 'BR',
+        'bottom-left': 'BL',
+        'top-left': 'TL'
       };
 
       // Topbar buttons
@@ -1022,7 +1077,7 @@
         root.style.top = '';
         root.style.right = '';
         root.style.bottom = '';
-        if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || '↗';
+        if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || 'TR';
       });
 
       // Size Mode Toggle (Normal -> Compact -> Mini)
@@ -1149,7 +1204,7 @@
                 root.style.left = ''; root.style.top = '';
                 root.classList.add('corner-bottom-left');
               }
-              if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || '↗';
+              if (cornerIndicator) cornerIndicator.textContent = cornerLabels[currentCorner] || 'TR';
             }
           };
 
@@ -1178,7 +1233,7 @@
         const isTimer = document.getElementById('btn-mode-timer')?.classList.contains('active');
 
         if (isDual) {
-          modeTag.textContent = '⚡ DUAL (BOTH ACTIVE)';
+          modeTag.textContent = 'DUAL MODE';
           clockDisplay.style.display = 'none';
           dualClocksDisplay.style.display = 'flex';
 
@@ -1188,7 +1243,7 @@
           dualTimerTime.textContent = tgt;
 
           const isRunning = document.getElementById('btn-dual-master-toggle')?.classList.contains('running');
-          playBtn.textContent = isRunning ? '⏸ Pause Both' : '▶ Start Both';
+          playBtn.textContent = isRunning ? 'Pause Both' : 'Start Both';
 
         } else if (isTimer) {
           modeTag.textContent = 'TARGET COUNTDOWN';
@@ -1199,7 +1254,7 @@
           clockDisplay.textContent = timeText;
 
           const isRunning = document.getElementById('btn-toggle-run')?.classList.contains('running');
-          playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
+          playBtn.textContent = isRunning ? 'Pause' : 'Start';
 
         } else {
           modeTag.textContent = 'STOPWATCH MODE';
@@ -1210,7 +1265,7 @@
           clockDisplay.textContent = timeText;
 
           const isRunning = document.getElementById('btn-toggle-run')?.classList.contains('running');
-          playBtn.textContent = isRunning ? '⏸ Pause' : '▶ Start';
+          playBtn.textContent = isRunning ? 'Pause' : 'Start';
         }
 
         requestAnimationFrame(syncLoop);
